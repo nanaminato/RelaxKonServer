@@ -1,0 +1,68 @@
+[
+  {
+    "category": "Product",
+    "order": 1,
+    "question": "Is RelaxKonOS a remote desktop product?",
+    "answer": "No. RelaxKonOS is a remote workspace operating environment. The client renders its own interface locally with Avalonia, while the server manages workspace state, storage, runtime and remote services. It does not encode or transmit a desktop image."
+  },
+  {
+    "category": "Product",
+    "order": 2,
+    "question": "How is it different from RDP, VNC or pixel streaming?",
+    "answer": "Remote desktop protocols transfer pixels. RelaxKonOS transfers intent and state: the client asks the server to perform an operation, the server operates on the workspace, and the client renders the result natively. That keeps interaction latency local and text, tables and images crisp at any resolution."
+  },
+  {
+    "category": "Product",
+    "order": 3,
+    "question": "Which platforms are supported?",
+    "answer": "The desktop client is cross-platform and built on Avalonia. The server runs on Ubuntu (Linux) and Windows Server. Available artifacts for each platform and architecture are published on the Downloads page as they are released."
+  },
+  {
+    "category": "Product",
+    "order": 4,
+    "question": "What built-in applications ship with RelaxKonOS?",
+    "answer": "The shell includes Welcome, Notepad, Code Editor, Image Viewer, Settings, Terminal, File Manager, Browser, Port Forwarding, Task Manager, Docker Manager, Process Guardian, Firewall, Certificate Manager, Web Server Manager, Git Client, Tunnel Manager, Registry and App Installer. Each application has a guide in the Documentation section."
+  },
+  {
+    "category": "Architecture",
+    "order": 5,
+    "question": "What are Workspaces and Sessions?",
+    "answer": "A workspace is the durable container for a user's preferences, applications, files and remote services. A session is a live connection between one client device and that workspace. Multiple devices can attach to the same workspace, and a workspace outlives any single session."
+  },
+  {
+    "category": "Architecture",
+    "order": 6,
+    "question": "Can I reconnect after losing connection?",
+    "answer": "Yes. Long-running capabilities such as terminal sessions and guarded workloads continue on the server. When a client reconnects it re-attaches to the existing workspace state rather than starting from scratch."
+  },
+  {
+    "category": "Architecture",
+    "order": 7,
+    "question": "How does RelaxKonOS talk to the server?",
+    "answer": "Through an explicit protocol layer of REST endpoints and SignalR hubs defined in a shared contracts assembly. Application code never issues raw HTTP or WebSocket calls; every exchange goes through the protocol contract."
+  },
+  {
+    "category": "Security",
+    "order": 8,
+    "question": "How is authentication handled?",
+    "answer": "Identity is delegated to the host operating system. Windows logons are validated with the native LogonUser API; Linux logons use PAM with NSS. RelaxKonOS issues its own tokens after the host OS confirms the credentials, and it never stores user passwords."
+  },
+  {
+    "category": "Security",
+    "order": 9,
+    "question": "Are privileged operations safe?",
+    "answer": "Elevated work is isolated. Privileged operations run through a dedicated helper process with an audited, narrow contract, and destructive actions require explicit confirmation. Where the host OS already provides a mechanism such as sudo, UFW or systemd, RelaxKonOS defers to it instead of reinventing it."
+  },
+  {
+    "category": "Extensibility",
+    "order": 10,
+    "question": "Can I build my own applications?",
+    "answer": "Yes. Applications implement the IRemoteApplication interface or derive from RemoteApplicationBase and are packaged as .roapp bundles with the developer CLI. They receive the same window management, lifecycle and capability APIs as the built-in applications."
+  },
+  {
+    "category": "Extensibility",
+    "order": 11,
+    "question": "Is the source available?",
+    "answer": "RelaxKonOS is published under the RelaxKonOS Non-Commercial Source-Available License. You may use, modify and study it for non-commercial purposes. Commercial resale, redistribution or hosted service offerings require a commercial license."
+  }
+]

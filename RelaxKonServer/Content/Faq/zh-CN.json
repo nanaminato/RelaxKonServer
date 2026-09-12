@@ -1,0 +1,68 @@
+[
+  {
+    "category": "产品",
+    "order": 1,
+    "question": "RelaxKonOS 是远程桌面软件吗？",
+    "answer": "不是。RelaxKonOS 是远程工作空间操作系统环境。客户端基于 Avalonia 在本地渲染界面，服务端负责管理工作空间状态、存储、运行时与远程服务，不会编码或传输桌面图像。"
+  },
+  {
+    "category": "产品",
+    "order": 2,
+    "question": "它与 RDP、VNC 或像素流有什么区别？",
+    "answer": "远程桌面协议传输像素，RelaxKonOS 传输意图与状态：客户端请求在服务端执行操作，服务端作用于工作空间，客户端以原生方式渲染结果。交互延迟因此留在本地，文字、表格与图片在任何分辨率下都保持清晰。"
+  },
+  {
+    "category": "产品",
+    "order": 3,
+    "question": "支持哪些平台？",
+    "answer": "桌面客户端跨平台，基于 Avalonia 构建；服务端可运行于 Ubuntu（Linux）与 Windows Server。各平台与架构的安装包在发布后会在下载页面列出。"
+  },
+  {
+    "category": "产品",
+    "order": 4,
+    "question": "RelaxKonOS 内置了哪些应用？",
+    "answer": "桌面 Shell 内置 Welcome、记事本、代码编辑器、图片查看器、设置中心、终端、文件管理器、浏览器、端口转发、任务管理器、Docker 管理器、进程守护、防火墙、证书管理器、Web Server 管理器、Git 客户端、隧道管理器、配置注册表与应用安装器。每个应用在文档中心都有对应指南。"
+  },
+  {
+    "category": "架构",
+    "order": 5,
+    "question": "Workspace 与 Session 分别是什么？",
+    "answer": "Workspace 是用户偏好、应用、文件与远程服务的持久化容器；Session 是单个客户端设备与该工作空间之间的实时连接。多个设备可以连接到同一个 Workspace，而 Workspace 的生命周期长于任何一次 Session。"
+  },
+  {
+    "category": "架构",
+    "order": 6,
+    "question": "断线后可以重连吗？",
+    "answer": "可以。终端会话、被守护的工作负载等长时能力持续运行在服务端；客户端重连后会重新附加到已有的工作空间状态，而不是从头开始。"
+  },
+  {
+    "category": "架构",
+    "order": 7,
+    "question": "RelaxKonOS 如何与服务端通信？",
+    "answer": "通过共享契约程序集中定义的、明确的协议层：REST 端点与 SignalR Hub。应用代码不会直接发起原始 HTTP 或 WebSocket 调用，所有交互都经过协议契约。"
+  },
+  {
+    "category": "安全",
+    "order": 8,
+    "question": "身份认证是如何实现的？",
+    "answer": "身份委托给宿主操作系统。Windows 使用原生 LogonUser API 校验登录，Linux 使用 PAM 与 NSS。只有在宿主 OS 确认凭据之后，RelaxKonOS 才会签发自己的令牌，并且从不保存用户密码。"
+  },
+  {
+    "category": "安全",
+    "order": 9,
+    "question": "特权操作是否安全？",
+    "answer": "提权操作被隔离执行。特权操作通过专用 Helper 进程、以经过审计的窄接口进行，危险操作需要显式确认。当宿主 OS 已提供 sudo、UFW、systemd 等机制时，RelaxKonOS 会复用这些机制而不是重复实现。"
+  },
+  {
+    "category": "扩展",
+    "order": 10,
+    "question": "可以开发自己的应用吗？",
+    "answer": "可以。应用实现 IRemoteApplication 接口或继承 RemoteApplicationBase，并通过开发者 CLI 打包为 .roapp 应用包。它们与内置应用享有相同的窗口管理、生命周期与能力 API。"
+  },
+  {
+    "category": "扩展",
+    "order": 11,
+    "question": "源代码开放吗？",
+    "answer": "RelaxKonOS 采用 RelaxKonOS Non-Commercial Source-Available License 发布。你可以出于非商业目的使用、修改与研究它。商业转售、再分发或托管服务需要商业许可。"
+  }
+]
