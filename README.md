@@ -91,6 +91,7 @@ order: 14
 | GET | `/api/releases/{version}` | 单条发布说明，含 Markdown 正文 |
 | GET | `/api/faq?language=` | 指定语言的 FAQ 条目（默认 `en-US`） |
 | GET/HEAD | `/relaxkonos/{artifact}` | RelaxKonOS ZIP、校验和、描述和引导安装器；支持 HTTP Range 续传 |
+| GET/HEAD | `/apt/{artifact}` | 已签名的 APT 元数据与 RelaxKonOS Client Debian 包；支持 HTTP Range 续传 |
 
 搜索细节：`q` 少于 2 个字符返回 400；正文命中时返回的 `snippet` 是剥离 Markdown 语法后的纯文本摘要，最多 20 条结果，标题命中的排在前面。
 
@@ -106,7 +107,9 @@ order: 14
 
 它会验证 ZIP 的 SHA-256，将文件放到 `stable/{version}/{runtime}/`，生成 `latest/{runtime}.json`，并同步更新现有 `/api/downloads` 清单，所以官网的离线包卡片无需人工维护。`-PublicBaseUri https://relaxkon.com` 可让主站成为规范 URL；默认 URL 是 `https://downloads.relaxkon.com`。两者由同一个网站部署提供服务。
 
-部署 `deployment/nginx/relaxkon.com.conf` 后，让 `relaxkon.com`、`www.relaxkon.com`、`downloads.relaxkon.com` 指向同一台服务器，并配置覆盖全部名称的证书。`/api/`、`/relaxkonos/` 反向代理到本 API，其余请求继续由现有 Angular 构建产物处理。
+部署 `deployment/nginx/relaxkon.com.conf` 后，让 `relaxkon.com`、`www.relaxkon.com`、`downloads.relaxkon.com` 指向同一台服务器，并配置覆盖全部名称的证书。`/api/`、`/relaxkonos/`、`/apt/` 反向代理到本 API，其余请求继续由现有 Angular 构建产物处理。
+
+客户端 APT 仓库置于 `Content/ReleaseDelivery/apt/`。用 [`../RelaxKonOS/deployment/packaging/publish-relaxkonos-apt-repository.sh`](../RelaxKonOS/deployment/packaging/publish-relaxkonos-apt-repository.sh) 以受保护的发布密钥生成或更新该目录；该脚本会重建索引、`Release`、`InRelease` 和签名。客户端构建及用户安装说明见 [`../RelaxKonOS/deployment/ClientDistribution.md`](../RelaxKonOS/deployment/ClientDistribution.md)。
 
 用户可任选其中一个域名，安装器会下载稳定版描述并验证 ZIP SHA-256：
 

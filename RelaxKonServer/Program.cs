@@ -128,6 +128,14 @@ app.MapMethods("/relaxkonos/{**artifactPath}", [HttpMethods.Get, HttpMethods.Hea
     return Results.File(artifact.Stream, artifact.ContentType, artifact.DownloadName, enableRangeProcessing: true);
 });
 
+app.MapMethods("/apt/{**artifactPath}", [HttpMethods.Get, HttpMethods.Head], (HttpContext context, string artifactPath, IReleaseDeliveryService delivery) =>
+{
+    if (!delivery.TryOpen($"apt/{artifactPath}", out var artifact)) return Results.NotFound();
+
+    context.Response.Headers.CacheControl = artifact.IsVersioned ? "public, max-age=31536000, immutable" : "no-cache";
+    return Results.File(artifact.Stream, artifact.ContentType, artifact.DownloadName, enableRangeProcessing: true);
+});
+
 app.MapGet("/api/health", () => Results.Ok(new { status = "healthy", service = "RelaxKon Website API", utc = DateTimeOffset.UtcNow }));
 
 app.MapGet("/swagger/v1/swagger.json", () => Results.Json(new
@@ -152,6 +160,7 @@ app.MapGet("/swagger/v1/swagger.json", () => Results.Json(new
         ["/relaxkonos/stable/latest/install.ps1"] = new { get = new { summary = "Windows bootstrap loader", tags = new[] { "Release delivery" } } },
         ["/relaxkonos/stable/latest/uninstall.ps1"] = new { get = new { summary = "Windows uninstaller loader", tags = new[] { "Release delivery" } } },
         ["/relaxkonos/stable/{version}/{runtime}/{file}"] = new { get = new { summary = "Download a versioned RelaxKonOS artifact", tags = new[] { "Release delivery" } } },
+        ["/apt/{artifactPath}"] = new { get = new { summary = "Download signed APT repository metadata and Debian packages", tags = new[] { "Release delivery" } } },
         ["/api/releases"] = new { get = new { summary = "List releases", tags = new[] { "Content" } } },
         ["/api/releases/{version}"] = new { get = new { summary = "Get a single release note", tags = new[] { "Content" } } },
         ["/api/faq"] = new { get = new { summary = "List FAQ entries for a language", tags = new[] { "Content" } } }
