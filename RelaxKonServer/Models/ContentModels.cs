@@ -9,7 +9,8 @@ public sealed record DownloadInfo(
     string Checksum,
     DateOnly ReleaseDate,
     bool IsAvailable,
-    string? FileName);
+    string? FileName,
+    string? PackageKind);
 
 public sealed record ReleaseSummary(
     string Version,

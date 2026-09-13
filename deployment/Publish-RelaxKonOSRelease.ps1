@@ -48,7 +48,7 @@ $downloadEntries = [System.Collections.Generic.List[object]]::new()
 Get-ChildItem -LiteralPath $source -File -Filter '*.json' | ForEach-Object {
     $descriptorFile = $_
     $descriptor = Get-Content -LiteralPath $descriptorFile.FullName -Raw | ConvertFrom-Json
-    if ($descriptor.schemaVersion -ne 1 -or $descriptor.version -notmatch '^[0-9A-Za-z][0-9A-Za-z._-]{0,63}$' -or
+    if ($descriptor.schemaVersion -ne 2 -or $descriptor.packageKind -notin @('client', 'server') -or $descriptor.version -notmatch '^[0-9A-Za-z][0-9A-Za-z._-]{0,63}$' -or
         $descriptor.runtime -notin @('win-x64', 'win-arm64', 'linux-x64', 'linux-arm64') -or
         $descriptor.sha256 -notmatch '^[A-Fa-f0-9]{64}$' -or $descriptor.url -notmatch '^https://') {
         throw "Invalid release descriptor: $($descriptorFile.FullName)"
@@ -61,7 +61,7 @@ Get-ChildItem -LiteralPath $source -File -Filter '*.json' | ForEach-Object {
     $actualHash = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
     if (-not $actualHash.Equals($descriptor.sha256, [StringComparison]::OrdinalIgnoreCase)) { throw "Release ZIP checksum does not match: $archive" }
 
-    $target = Join-Path $delivery ("relaxkonos\stable\{0}\{1}" -f $descriptor.version, $descriptor.runtime)
+    $target = Join-Path $delivery ("relaxkonos\stable\{0}\{1}\{2}" -f $descriptor.version, $descriptor.runtime, $descriptor.packageKind)
     New-Item -ItemType Directory -Path $target -Force | Out-Null
     $targetArchive = Join-Path $target $archiveName
     if (Test-Path -LiteralPath $targetArchive) {
@@ -79,12 +79,14 @@ Get-ChildItem -LiteralPath $source -File -Filter '*.json' | ForEach-Object {
         schemaVersion = 1
         version = [string] $descriptor.version
         runtime = [string] $descriptor.runtime
-        url = "$publicBase/relaxkonos/stable/$($descriptor.version)/$($descriptor.runtime)/$archiveName"
+        url = "$publicBase/relaxkonos/stable/$($descriptor.version)/$($descriptor.runtime)/$($descriptor.packageKind)/$archiveName"
         sha256 = $actualHash
     }
-    $latest = Join-Path $delivery 'relaxkonos\stable\latest'
-    New-Item -ItemType Directory -Path $latest -Force | Out-Null
-    Write-Utf8Atomically (Join-Path $latest ($descriptor.runtime + '.json')) ($publicDescriptor | ConvertTo-Json)
+    if ($descriptor.packageKind -eq 'server') {
+        $latest = Join-Path $delivery 'relaxkonos\stable\latest'
+        New-Item -ItemType Directory -Path $latest -Force | Out-Null
+        Write-Utf8Atomically (Join-Path $latest ($descriptor.runtime + '.json')) ($publicDescriptor | ConvertTo-Json)
+    }
     $platform, $architecture = $descriptor.runtime.Split('-', 2)
     $downloadEntries.Add([ordered]@{
         platform = if ($platform -eq 'win') { 'windows' } else { $platform }
@@ -93,12 +95,13 @@ Get-ChildItem -LiteralPath $source -File -Filter '*.json' | ForEach-Object {
         # Browser download cards stay on the current website hostname. The
         # installer descriptor above remains absolute because command-line
         # installers cannot resolve a relative URL outside a browser context.
-        url = "/relaxkonos/stable/$($descriptor.version)/$($descriptor.runtime)/$archiveName"
+        url = "/relaxkonos/stable/$($descriptor.version)/$($descriptor.runtime)/$($descriptor.packageKind)/$archiveName"
         size = ('{0:0.0} MB' -f ((Get-Item -LiteralPath $archive).Length / 1MB))
         checksum = $actualHash
         releaseDate = [DateTime]::UtcNow.ToString('yyyy-MM-dd')
         isAvailable = $true
         fileName = $archiveName
+        packageKind = [string] $descriptor.packageKind
     })
     $published++
 }
@@ -110,7 +113,7 @@ $existingEntries = if (Test-Path -LiteralPath $websiteDownloads -PathType Leaf) 
 $updatedEntries = @($existingEntries)
 foreach ($entry in $downloadEntries) {
     $updatedEntries = @($updatedEntries | Where-Object {
-        $_.platform -ne $entry.platform -or $_.architecture -ne $entry.architecture -or $_.version -ne $entry.version
+        $_.platform -ne $entry.platform -or $_.architecture -ne $entry.architecture -or $_.version -ne $entry.version -or $_.packageKind -ne $entry.packageKind
     })
     $updatedEntries += $entry
 }

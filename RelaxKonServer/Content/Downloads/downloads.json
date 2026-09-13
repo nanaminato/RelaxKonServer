@@ -86,5 +86,29 @@
     "releaseDate": "2026-09-13",
     "isAvailable": true,
     "fileName": "RelaxKonOS-0.1.0-service-fix-test-win-x64.zip"
+  },
+  {
+    "platform": "windows",
+    "architecture": "x64",
+    "version": "0.1.0-split-test",
+    "url": "/relaxkonos/stable/0.1.0-split-test/win-x64/client/RelaxKonOS-0.1.0-split-test-win-x64-client.zip",
+    "size": "82.9 MB",
+    "checksum": "dac5580d6c4eb904984de36167342ddea6b180343b44a8b384096e565459367b",
+    "releaseDate": "2026-09-13",
+    "isAvailable": true,
+    "fileName": "RelaxKonOS-0.1.0-split-test-win-x64-client.zip",
+    "packageKind": "client"
+  },
+  {
+    "platform": "windows",
+    "architecture": "x64",
+    "version": "0.1.0-split-test",
+    "url": "/relaxkonos/stable/0.1.0-split-test/win-x64/server/RelaxKonOS-0.1.0-split-test-win-x64-server.zip",
+    "size": "146.8 MB",
+    "checksum": "ec0804d07c7c2662b07d86e87e914720316b313fd7f239e930395df3214546c4",
+    "releaseDate": "2026-09-13",
+    "isAvailable": true,
+    "fileName": "RelaxKonOS-0.1.0-split-test-win-x64-server.zip",
+    "packageKind": "server"
   }
 ]
