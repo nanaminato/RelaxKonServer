@@ -2,7 +2,7 @@
 
 [中文](./README.md) · [日本語](./README.ja.md)
 
-`RelaxKonServer/RelaxKonServer` is a pure **ASP.NET Core 10** REST API for the RelaxKon website. It does not host Razor pages, MVC views, static website files or the Angular client: it is the single source of truth for documentation and website content.
+`RelaxKonServer/RelaxKonServer` is a pure **ASP.NET Core 10** REST API for the RelaxKon website. It does not host Razor pages, MVC views, static website files or the Angular client: it is the single source of truth for documentation and website content. Controlled API endpoints also stream RelaxKonOS releases, so a separate download project is unnecessary.
 
 ## Run locally
 
@@ -24,7 +24,8 @@ Content/
 ├── Docs/{language}/{version}/…      # Markdown documentation tree
 ├── Releases/{version}.md            # Markdown release notes (file name is the version)
 ├── Faq/{language}.json              # FAQ entries per language
-└── Downloads/downloads.json         # Download descriptor
+├── Downloads/downloads.json         # Download descriptor
+└── ReleaseDelivery/…                # Deployed RelaxKonOS ZIPs, checksums, descriptors and bootstrap scripts
 ```
 
 ### Documentation
@@ -89,8 +90,39 @@ Strongly typed options are bound from configuration; controllers never read raw 
 | GET | `/api/releases` | Release summaries |
 | GET | `/api/releases/{version}` | Release detail with Markdown body |
 | GET | `/api/faq?language=` | FAQ entries for a language (`en-US` by default) |
+| GET/HEAD | `/relaxkonos/{artifact}` | RelaxKonOS ZIPs, checksums, descriptors and bootstrap scripts; supports HTTP Range |
 
 Search details: a `q` shorter than two characters returns 400; content matches return a `snippet` that is plain text with the Markdown syntax stripped; at most 20 results are returned, with title matches first.
+
+## RelaxKonOS delivery and one-command installation
+
+`Content/ReleaseDelivery/` is deployment data served by the existing API, not a new web project. Versioned ZIPs are immutable-cached for one year; `latest` descriptors and installers use `no-cache`; GET, HEAD and Range resumption are supported. A release maintainer first runs:
+
+```powershell
+./deployment/Publish-RelaxKonOSRelease.ps1 `
+  -SourceDirectory 'D:\artifacts\relaxkonos' `
+  -BootstrapDirectory '..\RelaxKonOS\deployment\bootstrap'
+```
+
+It verifies ZIP SHA-256 values, places files under `stable/{version}/{runtime}/`, and produces `latest/{runtime}.json`. `-PublicBaseUri https://relaxkon.com` makes the main site canonical; the default is `https://downloads.relaxkon.com`. Both names serve one deployment.
+
+Deploy `deployment/nginx/relaxkon.com.conf`, point `relaxkon.com`, `www.relaxkon.com`, and `downloads.relaxkon.com` at one server, and configure a certificate covering every name. `/api/` and `/relaxkonos/` are proxied to this API; the existing Angular build handles all other paths.
+
+Users can use either domain; the installer fetches the stable descriptor and verifies ZIP SHA-256:
+
+```bash
+# Linux: interactive / unattended
+curl -fsSL https://downloads.relaxkon.com/relaxkonos/stable/latest/bootstrap/install-relaxkonos.sh | sudo bash
+curl -fsSL https://relaxkon.com/relaxkonos/stable/latest/bootstrap/install-relaxkonos.sh | sudo bash -s -- --non-interactive
+```
+
+```powershell
+# Windows PowerShell: interactive / unattended
+irm https://downloads.relaxkon.com/relaxkonos/stable/latest/install.ps1 | iex
+& ([scriptblock]::Create((irm 'https://relaxkon.com/relaxkonos/stable/latest/install.ps1'))) -InstallerArguments '-NonInteractive'
+```
+
+`install.ps1` stages the real Windows installer on disk first, so it can safely restart during UAC elevation. Offline ZIPs and explicitly supplied release URI + SHA-256 remain supported.
 
 ## Caching and security
 

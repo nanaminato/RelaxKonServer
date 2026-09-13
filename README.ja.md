@@ -2,7 +2,7 @@
 
 [中文](./README.md) · [English](./README.en.md)
 
-`RelaxKonServer/RelaxKonServer` は RelaxKon 公式サイト向けの純粋な **ASP.NET Core 10** REST API です。Razor ページ、MVC ビュー、静的サイトファイル、Angular クライアントのいずれもホストしません。ドキュメントとサイトコンテンツの唯一の情報源です。
+`RelaxKonServer/RelaxKonServer` は RelaxKon 公式サイト向けの純粋な **ASP.NET Core 10** REST API です。Razor ページ、MVC ビュー、静的サイトファイル、Angular クライアントのいずれもホストしません。ドキュメントとサイトコンテンツの唯一の情報源であり、管理された API エンドポイントから RelaxKonOS リリースも配信するため、別のダウンロード プロジェクトは不要です。
 
 ## ローカルでの実行
 
@@ -24,7 +24,8 @@ Content/
 ├── Docs/{language}/{version}/…      # Markdown ドキュメントツリー
 ├── Releases/{version}.md            # Markdown リリースノート（ファイル名がバージョン）
 ├── Faq/{language}.json              # 言語ごとの FAQ
-└── Downloads/downloads.json         # ダウンロード記述ファイル
+├── Downloads/downloads.json         # ダウンロード記述ファイル
+└── ReleaseDelivery/…                # 配置済み RelaxKonOS ZIP、チェックサム、記述、ブートストラップ
 ```
 
 ### ドキュメント
@@ -89,8 +90,37 @@ order: 14
 | GET | `/api/releases` | リリースノートの要約一覧 |
 | GET | `/api/releases/{version}` | Markdown 本文を含むリリースノート詳細 |
 | GET | `/api/faq?language=` | 指定言語の FAQ 項目（既定は `en-US`） |
+| GET/HEAD | `/relaxkonos/{artifact}` | RelaxKonOS ZIP、チェックサム、記述、ブートストラップ。HTTP Range 対応 |
 
 検索の詳細：`q` が 2 文字未満の場合は 400 を返します。本文が一致した場合の `snippet` は Markdown 記法を除去したプレーンテキストで、結果は最大 20 件、タイトル一致が先頭に並びます。
+
+## RelaxKonOS の配布とワンコマンド インストール
+
+`Content/ReleaseDelivery/` は既存 API が配信する配置データであり、新しい Web プロジェクトではありません。バージョン付き ZIP は 1 年 immutable キャッシュ、`latest` の記述とインストーラーは `no-cache`、GET、HEAD、Range 再開に対応します。リリース担当者は先に次を実行します。
+
+```powershell
+./deployment/Publish-RelaxKonOSRelease.ps1 `
+  -SourceDirectory 'D:\artifacts\relaxkonos' `
+  -BootstrapDirectory '..\RelaxKonOS\deployment\bootstrap'
+```
+
+ZIP の SHA-256 を検証し、`stable/{version}/{runtime}/` に置き、`latest/{runtime}.json` を作成します。`-PublicBaseUri https://relaxkon.com` でメインサイトを正規 URL にでき、既定値は `https://downloads.relaxkon.com` です。両方の名前は一つのデプロイを提供します。
+
+`deployment/nginx/relaxkon.com.conf` を配置し、`relaxkon.com`、`www.relaxkon.com`、`downloads.relaxkon.com` を同じサーバーへ向け、全名前を含む証明書を設定します。`/api/` と `/relaxkonos/` はこの API にプロキシされ、その他は既存 Angular ビルドが処理します。
+
+利用者はどちらのドメインも使用でき、インストーラーは安定版記述を取得して ZIP SHA-256 を検証します。
+
+```bash
+curl -fsSL https://downloads.relaxkon.com/relaxkonos/stable/latest/bootstrap/install-relaxkonos.sh | sudo bash
+curl -fsSL https://relaxkon.com/relaxkonos/stable/latest/bootstrap/install-relaxkonos.sh | sudo bash -s -- --non-interactive
+```
+
+```powershell
+irm https://downloads.relaxkon.com/relaxkonos/stable/latest/install.ps1 | iex
+& ([scriptblock]::Create((irm 'https://relaxkon.com/relaxkonos/stable/latest/install.ps1'))) -InstallerArguments '-NonInteractive'
+```
+
+`install.ps1` は実際の Windows インストーラーを先にディスクへ保存するため、UAC 昇格時にも安全に再起動できます。オフライン ZIP と、リリース URI + SHA-256 の明示指定も引き続き利用可能です。
 
 ## キャッシュとセキュリティ
 

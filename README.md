@@ -2,7 +2,7 @@
 
 [English](./README.en.md) · [日本語](./README.ja.md)
 
-`RelaxKonServer/RelaxKonServer` 是 RelaxKon 官方网站的纯 **ASP.NET Core 10** REST API。它不托管 Razor 页面、MVC 视图、静态网站文件，也不托管 Angular 客户端 —— 它是文档与站点内容的唯一来源。
+`RelaxKonServer/RelaxKonServer` 是 RelaxKon 官方网站的纯 **ASP.NET Core 10** REST API。它不托管 Razor 页面、MVC 视图、静态网站文件，也不托管 Angular 客户端 —— 它是文档与站点内容的唯一来源。RelaxKonOS 发布物也由受控 API 下载端点流式返回，无需新建下载项目。
 
 ## 本地运行
 
@@ -24,7 +24,8 @@ Content/
 ├── Docs/{language}/{version}/…      # Markdown 文档树
 ├── Releases/{version}.md            # Markdown 发布说明（文件名即版本号）
 ├── Faq/{language}.json              # 各语言 FAQ
-└── Downloads/downloads.json         # 下载描述文件
+├── Downloads/downloads.json         # 下载描述文件
+└── ReleaseDelivery/…                # 已发布的 RelaxKonOS ZIP、校验和、描述与安装器（部署数据）
 ```
 
 ### 文档
@@ -89,8 +90,39 @@ order: 14
 | GET | `/api/releases` | 发布说明摘要列表 |
 | GET | `/api/releases/{version}` | 单条发布说明，含 Markdown 正文 |
 | GET | `/api/faq?language=` | 指定语言的 FAQ 条目（默认 `en-US`） |
+| GET/HEAD | `/relaxkonos/{artifact}` | RelaxKonOS ZIP、校验和、描述和引导安装器；支持 HTTP Range 续传 |
 
 搜索细节：`q` 少于 2 个字符返回 400；正文命中时返回的 `snippet` 是剥离 Markdown 语法后的纯文本摘要，最多 20 条结果，标题命中的排在前面。
+
+## RelaxKonOS 下载与一键安装
+
+`Content/ReleaseDelivery/` 是现有 API 提供的部署数据，不是新的 Web 项目。版本 ZIP 缓存一年且不可变；`latest` 描述与安装器使用 `no-cache`；允许 GET、HEAD 和 Range 续传。发布维护者先执行：
+
+```powershell
+./deployment/Publish-RelaxKonOSRelease.ps1 `
+  -SourceDirectory 'D:\artifacts\relaxkonos' `
+  -BootstrapDirectory '..\RelaxKonOS\deployment\bootstrap'
+```
+
+它会验证 ZIP 的 SHA-256，将文件放到 `stable/{version}/{runtime}/`，并生成 `latest/{runtime}.json`。`-PublicBaseUri https://relaxkon.com` 可让主站成为规范 URL；默认 URL 是 `https://downloads.relaxkon.com`。两者由同一个网站部署提供服务。
+
+部署 `deployment/nginx/relaxkon.com.conf` 后，让 `relaxkon.com`、`www.relaxkon.com`、`downloads.relaxkon.com` 指向同一台服务器，并配置覆盖全部名称的证书。`/api/`、`/relaxkonos/` 反向代理到本 API，其余请求继续由现有 Angular 构建产物处理。
+
+用户可任选其中一个域名，安装器会下载稳定版描述并验证 ZIP SHA-256：
+
+```bash
+# Linux：交互式 / 无人值守
+curl -fsSL https://downloads.relaxkon.com/relaxkonos/stable/latest/bootstrap/install-relaxkonos.sh | sudo bash
+curl -fsSL https://relaxkon.com/relaxkonos/stable/latest/bootstrap/install-relaxkonos.sh | sudo bash -s -- --non-interactive
+```
+
+```powershell
+# Windows PowerShell：交互式 / 无人值守
+irm https://downloads.relaxkon.com/relaxkonos/stable/latest/install.ps1 | iex
+& ([scriptblock]::Create((irm 'https://relaxkon.com/relaxkonos/stable/latest/install.ps1'))) -InstallerArguments '-NonInteractive'
+```
+
+Windows 的 `install.ps1` 会先把真正的安装器保存到临时目录，因而 UAC 提升可以安全地重新启动它。已有安装器仍支持离线 ZIP，或手工指定发布 URI 和 SHA-256。
 
 ## 缓存与安全
 
