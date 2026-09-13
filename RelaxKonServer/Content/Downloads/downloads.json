@@ -88,5 +88,29 @@
     "isAvailable": true,
     "fileName": "RelaxKonOS-0.1.0-split-test-win-x64-server.zip",
     "packageKind": "server"
+  },
+  {
+    "platform": "linux",
+    "architecture": "x64",
+    "version": "0.1.0-linux-v1-test",
+    "url": "/relaxkonos/stable/0.1.0-linux-v1-test/linux-x64/client/RelaxKonOS-0.1.0-linux-v1-test-linux-x64-client.zip",
+    "size": "53.9 MB",
+    "checksum": "3975fd936a0de8ad8fd8d5926de33985247484338e5cb9d0722ea403cb6c8f7c",
+    "releaseDate": "2026-09-13",
+    "isAvailable": true,
+    "fileName": "RelaxKonOS-0.1.0-linux-v1-test-linux-x64-client.zip",
+    "packageKind": "client"
+  },
+  {
+    "platform": "linux",
+    "architecture": "x64",
+    "version": "0.1.0-linux-v1-test",
+    "url": "/relaxkonos/stable/0.1.0-linux-v1-test/linux-x64/server/RelaxKonOS-0.1.0-linux-v1-test-linux-x64-server.zip",
+    "size": "143.0 MB",
+    "checksum": "0af0cb1a37b0e297a9754275ce9c73370ab0447984dc77ea68c317480c8db46b",
+    "releaseDate": "2026-09-13",
+    "isAvailable": true,
+    "fileName": "RelaxKonOS-0.1.0-linux-v1-test-linux-x64-server.zip",
+    "packageKind": "server"
   }
 ]

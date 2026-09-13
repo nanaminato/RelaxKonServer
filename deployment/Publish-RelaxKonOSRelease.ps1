@@ -48,7 +48,7 @@ $downloadEntries = [System.Collections.Generic.List[object]]::new()
 Get-ChildItem -LiteralPath $source -File -Filter '*.json' | ForEach-Object {
     $descriptorFile = $_
     $descriptor = Get-Content -LiteralPath $descriptorFile.FullName -Raw | ConvertFrom-Json
-    if ($descriptor.schemaVersion -ne 2 -or $descriptor.packageKind -notin @('client', 'server') -or $descriptor.version -notmatch '^[0-9A-Za-z][0-9A-Za-z._-]{0,63}$' -or
+    if ($descriptor.schemaVersion -ne 1 -or $descriptor.packageKind -notin @('client', 'server') -or $descriptor.version -notmatch '^[0-9A-Za-z][0-9A-Za-z._-]{0,63}$' -or
         $descriptor.runtime -notin @('win-x64', 'win-arm64', 'linux-x64', 'linux-arm64') -or
         $descriptor.sha256 -notmatch '^[A-Fa-f0-9]{64}$' -or $descriptor.url -notmatch '^https://') {
         throw "Invalid release descriptor: $($descriptorFile.FullName)"
@@ -77,6 +77,7 @@ Get-ChildItem -LiteralPath $source -File -Filter '*.json' | ForEach-Object {
 
     $publicDescriptor = [ordered]@{
         schemaVersion = 1
+        packageKind = [string] $descriptor.packageKind
         version = [string] $descriptor.version
         runtime = [string] $descriptor.runtime
         url = "$publicBase/relaxkonos/stable/$($descriptor.version)/$($descriptor.runtime)/$($descriptor.packageKind)/$archiveName"

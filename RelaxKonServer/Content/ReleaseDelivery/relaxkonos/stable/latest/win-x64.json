@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "packageKind": "server",
   "version": "0.1.0-split-test",
   "runtime": "win-x64",
   "url": "https://downloads.relaxkon.com/relaxkonos/stable/0.1.0-split-test/win-x64/server/RelaxKonOS-0.1.0-split-test-win-x64-server.zip",
