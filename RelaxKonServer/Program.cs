@@ -63,11 +63,10 @@ app.Use(async (context, next) =>
 app.UseCors("development");
 app.UseAuthorization();
 
-app.MapGet("/relaxkonos/stable/latest/install.ps1", (IOptions<ReleaseDeliveryOptions> options) =>
+app.MapGet("/relaxkonos/stable/latest/install.ps1", (HttpRequest request) =>
 {
-    var baseUri = options.Value.PublicBaseUri.TrimEnd('/');
-    if (!Uri.TryCreate(baseUri, UriKind.Absolute, out var publicBaseUri) || publicBaseUri.Scheme != Uri.UriSchemeHttps)
-        return Results.Problem(statusCode: StatusCodes.Status500InternalServerError, title: "ReleaseDelivery:PublicBaseUri must be an HTTPS URL.");
+    if (!Uri.TryCreate($"{request.Scheme}://{request.Host}", UriKind.Absolute, out var publicBaseUri))
+        return Results.Problem(statusCode: StatusCodes.Status400BadRequest, title: "The request origin is invalid.");
 
     var bootstrapUri = new Uri(publicBaseUri, "/relaxkonos/stable/latest/bootstrap/Install-RelaxKonOS.ps1").AbsoluteUri;
     var loader = $$"""
@@ -82,6 +81,9 @@ app.MapGet("/relaxkonos/stable/latest/install.ps1", (IOptions<ReleaseDeliveryOpt
     $installerPath = Join-Path ([IO.Path]::GetTempPath()) ('Install-RelaxKonOS-' + [Guid]::NewGuid().ToString('N') + '.ps1')
     try {
         Invoke-WebRequest -Uri '{{bootstrapUri}}' -OutFile $installerPath
+        if ($InstallerArguments -notcontains '-ReleaseCatalogBaseUri') {
+            $InstallerArguments = @('-ReleaseCatalogBaseUri', '{{publicBaseUri.AbsoluteUri.TrimEnd('/')}}/relaxkonos/stable/latest') + $InstallerArguments
+        }
         & $installerPath @InstallerArguments
     }
     finally {
@@ -91,11 +93,10 @@ app.MapGet("/relaxkonos/stable/latest/install.ps1", (IOptions<ReleaseDeliveryOpt
     return Results.Text(loader, "text/plain; charset=utf-8");
 });
 
-app.MapGet("/relaxkonos/stable/latest/uninstall.ps1", (IOptions<ReleaseDeliveryOptions> options) =>
+app.MapGet("/relaxkonos/stable/latest/uninstall.ps1", (HttpRequest request) =>
 {
-    var baseUri = options.Value.PublicBaseUri.TrimEnd('/');
-    if (!Uri.TryCreate(baseUri, UriKind.Absolute, out var publicBaseUri) || publicBaseUri.Scheme != Uri.UriSchemeHttps)
-        return Results.Problem(statusCode: StatusCodes.Status500InternalServerError, title: "ReleaseDelivery:PublicBaseUri must be an HTTPS URL.");
+    if (!Uri.TryCreate($"{request.Scheme}://{request.Host}", UriKind.Absolute, out var publicBaseUri))
+        return Results.Problem(statusCode: StatusCodes.Status400BadRequest, title: "The request origin is invalid.");
 
     var bootstrapUri = new Uri(publicBaseUri, "/relaxkonos/stable/latest/bootstrap/Uninstall-RelaxKonOS.ps1").AbsoluteUri;
     var loader = $$"""

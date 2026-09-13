@@ -90,7 +90,10 @@ Get-ChildItem -LiteralPath $source -File -Filter '*.json' | ForEach-Object {
         platform = if ($platform -eq 'win') { 'windows' } else { $platform }
         architecture = $architecture
         version = [string] $descriptor.version
-        url = $publicDescriptor.url
+        # Browser download cards stay on the current website hostname. The
+        # installer descriptor above remains absolute because command-line
+        # installers cannot resolve a relative URL outside a browser context.
+        url = "/relaxkonos/stable/$($descriptor.version)/$($descriptor.runtime)/$archiveName"
         size = ('{0:0.0} MB' -f ((Get-Item -LiteralPath $archive).Length / 1MB))
         checksum = $actualHash
         releaseDate = [DateTime]::UtcNow.ToString('yyyy-MM-dd')
