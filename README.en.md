@@ -104,7 +104,7 @@ Search details: a `q` shorter than two characters returns 400; content matches r
   -BootstrapDirectory '..\RelaxKonOS\deployment\bootstrap'
 ```
 
-It verifies ZIP SHA-256 values, places files under `stable/{version}/{runtime}/`, and produces `latest/{runtime}.json`. `-PublicBaseUri https://relaxkon.com` makes the main site canonical; the default is `https://downloads.relaxkon.com`. Both names serve one deployment.
+It verifies ZIP SHA-256 values, places files under `stable/{version}/{runtime}/`, produces `latest/{runtime}.json`, and updates the existing `/api/downloads` list so the website's offline-package cards need no manual maintenance. `-PublicBaseUri https://relaxkon.com` makes the main site canonical; the default is `https://downloads.relaxkon.com`. Both names serve one deployment.
 
 Deploy `deployment/nginx/relaxkon.com.conf`, point `relaxkon.com`, `www.relaxkon.com`, and `downloads.relaxkon.com` at one server, and configure a certificate covering every name. `/api/` and `/relaxkonos/` are proxied to this API; the existing Angular build handles all other paths.
 

@@ -104,7 +104,7 @@ order: 14
   -BootstrapDirectory '..\RelaxKonOS\deployment\bootstrap'
 ```
 
-ZIP の SHA-256 を検証し、`stable/{version}/{runtime}/` に置き、`latest/{runtime}.json` を作成します。`-PublicBaseUri https://relaxkon.com` でメインサイトを正規 URL にでき、既定値は `https://downloads.relaxkon.com` です。両方の名前は一つのデプロイを提供します。
+ZIP の SHA-256 を検証し、`stable/{version}/{runtime}/` に置き、`latest/{runtime}.json` を作成し、既存の `/api/downloads` リストも更新します。そのため公式サイトのオフラインパッケージカードを手作業で保守する必要はありません。`-PublicBaseUri https://relaxkon.com` でメインサイトを正規 URL にでき、既定値は `https://downloads.relaxkon.com` です。両方の名前は一つのデプロイを提供します。
 
 `deployment/nginx/relaxkon.com.conf` を配置し、`relaxkon.com`、`www.relaxkon.com`、`downloads.relaxkon.com` を同じサーバーへ向け、全名前を含む証明書を設定します。`/api/` と `/relaxkonos/` はこの API にプロキシされ、その他は既存 Angular ビルドが処理します。
 

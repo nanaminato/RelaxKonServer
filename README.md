@@ -104,7 +104,7 @@ order: 14
   -BootstrapDirectory '..\RelaxKonOS\deployment\bootstrap'
 ```
 
-它会验证 ZIP 的 SHA-256，将文件放到 `stable/{version}/{runtime}/`，并生成 `latest/{runtime}.json`。`-PublicBaseUri https://relaxkon.com` 可让主站成为规范 URL；默认 URL 是 `https://downloads.relaxkon.com`。两者由同一个网站部署提供服务。
+它会验证 ZIP 的 SHA-256，将文件放到 `stable/{version}/{runtime}/`，生成 `latest/{runtime}.json`，并同步更新现有 `/api/downloads` 清单，所以官网的离线包卡片无需人工维护。`-PublicBaseUri https://relaxkon.com` 可让主站成为规范 URL；默认 URL 是 `https://downloads.relaxkon.com`。两者由同一个网站部署提供服务。
 
 部署 `deployment/nginx/relaxkon.com.conf` 后，让 `relaxkon.com`、`www.relaxkon.com`、`downloads.relaxkon.com` 指向同一台服务器，并配置覆盖全部名称的证书。`/api/`、`/relaxkonos/` 反向代理到本 API，其余请求继续由现有 Angular 构建产物处理。
 

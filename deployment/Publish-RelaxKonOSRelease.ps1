@@ -5,6 +5,7 @@ param(
     [Parameter(Mandatory)]
     [string] $BootstrapDirectory,
     [string] $DeliveryRoot = (Join-Path $PSScriptRoot '..\RelaxKonServer\Content\ReleaseDelivery'),
+    [string] $WebsiteDownloadsPath = (Join-Path $PSScriptRoot '..\RelaxKonServer\Content\Downloads\downloads.json'),
     [string] $PublicBaseUri = 'https://downloads.relaxkon.com'
 )
 
@@ -30,6 +31,7 @@ function Write-Utf8Atomically([string] $Path, [string] $Content) {
 $source = Get-FullDirectory $SourceDirectory 'SourceDirectory'
 $bootstrap = Get-FullDirectory $BootstrapDirectory 'BootstrapDirectory'
 $delivery = [IO.Path]::GetFullPath($DeliveryRoot)
+$websiteDownloads = [IO.Path]::GetFullPath($WebsiteDownloadsPath)
 $publicBase = $PublicBaseUri.TrimEnd('/')
 if ($publicBase -notmatch '^https://[^/]+$') { throw 'PublicBaseUri must be an HTTPS origin without a path.' }
 
@@ -40,6 +42,7 @@ foreach ($required in @($windowsBootstrap, $linuxBootstrap)) {
 }
 
 $published = 0
+$downloadEntries = [System.Collections.Generic.List[object]]::new()
 Get-ChildItem -LiteralPath $source -File -Filter '*.json' | ForEach-Object {
     $descriptorFile = $_
     $descriptor = Get-Content -LiteralPath $descriptorFile.FullName -Raw | ConvertFrom-Json
@@ -80,12 +83,36 @@ Get-ChildItem -LiteralPath $source -File -Filter '*.json' | ForEach-Object {
     $latest = Join-Path $delivery 'relaxkonos\stable\latest'
     New-Item -ItemType Directory -Path $latest -Force | Out-Null
     Write-Utf8Atomically (Join-Path $latest ($descriptor.runtime + '.json')) ($publicDescriptor | ConvertTo-Json)
+    $platform, $architecture = $descriptor.runtime.Split('-', 2)
+    $downloadEntries.Add([ordered]@{
+        platform = if ($platform -eq 'win') { 'windows' } else { $platform }
+        architecture = $architecture
+        version = [string] $descriptor.version
+        url = $publicDescriptor.url
+        size = ('{0:0.0} MB' -f ((Get-Item -LiteralPath $archive).Length / 1MB))
+        checksum = $actualHash
+        releaseDate = [DateTime]::UtcNow.ToString('yyyy-MM-dd')
+        isAvailable = $true
+        fileName = $archiveName
+    })
     $published++
 }
 
 if ($published -eq 0) { throw "No release descriptors were found in $source" }
+$existingEntries = if (Test-Path -LiteralPath $websiteDownloads -PathType Leaf) {
+    @(Get-Content -LiteralPath $websiteDownloads -Raw | ConvertFrom-Json)
+} else { @() }
+$updatedEntries = @($existingEntries)
+foreach ($entry in $downloadEntries) {
+    $updatedEntries = @($updatedEntries | Where-Object {
+        $_.platform -ne $entry.platform -or $_.architecture -ne $entry.architecture -or $_.version -ne $entry.version
+    })
+    $updatedEntries += $entry
+}
+New-Item -ItemType Directory -Path (Split-Path -Parent $websiteDownloads) -Force | Out-Null
+Write-Utf8Atomically $websiteDownloads (ConvertTo-Json -InputObject @($updatedEntries) -Depth 4)
 $latestBootstrap = Join-Path $delivery 'relaxkonos\stable\latest\bootstrap'
 New-Item -ItemType Directory -Path $latestBootstrap -Force | Out-Null
 Copy-Item -LiteralPath $windowsBootstrap -Destination (Join-Path $latestBootstrap 'Install-RelaxKonOS.ps1') -Force
 Copy-Item -LiteralPath $linuxBootstrap -Destination (Join-Path $latestBootstrap 'install-relaxkonos.sh') -Force
-Write-Host "Published $published runtime(s) to $delivery"
+Write-Host "Published $published runtime(s) to $delivery and updated $websiteDownloads"
