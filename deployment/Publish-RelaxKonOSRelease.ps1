@@ -37,7 +37,9 @@ if ($publicBase -notmatch '^https://[^/]+$') { throw 'PublicBaseUri must be an H
 
 $windowsBootstrap = Join-Path $bootstrap 'Install-RelaxKonOS.ps1'
 $linuxBootstrap = Join-Path $bootstrap 'install-relaxkonos.sh'
-foreach ($required in @($windowsBootstrap, $linuxBootstrap)) {
+$windowsUninstall = Join-Path $bootstrap 'Uninstall-RelaxKonOS.ps1'
+$linuxUninstall = Join-Path $bootstrap 'uninstall-relaxkonos.sh'
+foreach ($required in @($windowsBootstrap, $linuxBootstrap, $windowsUninstall, $linuxUninstall)) {
     if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw "Bootstrap directory is incomplete: $required" }
 }
 
@@ -115,4 +117,6 @@ $latestBootstrap = Join-Path $delivery 'relaxkonos\stable\latest\bootstrap'
 New-Item -ItemType Directory -Path $latestBootstrap -Force | Out-Null
 Copy-Item -LiteralPath $windowsBootstrap -Destination (Join-Path $latestBootstrap 'Install-RelaxKonOS.ps1') -Force
 Copy-Item -LiteralPath $linuxBootstrap -Destination (Join-Path $latestBootstrap 'install-relaxkonos.sh') -Force
+Copy-Item -LiteralPath $windowsUninstall -Destination (Join-Path $latestBootstrap 'Uninstall-RelaxKonOS.ps1') -Force
+Copy-Item -LiteralPath $linuxUninstall -Destination (Join-Path $latestBootstrap 'uninstall-relaxkonos.sh') -Force
 Write-Host "Published $published runtime(s) to $delivery and updated $websiteDownloads"

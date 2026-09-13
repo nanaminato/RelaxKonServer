@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "version": "0.1.0-install-test",
+  "version": "0.1.0-service-fix-test",
   "runtime": "win-x64",
-  "url": "https://downloads.relaxkon.com/relaxkonos/stable/0.1.0-install-test/win-x64/RelaxKonOS-0.1.0-install-test-win-x64.zip",
-  "sha256": "b8a6a78afdceb1ec84e4f8c851f08162a9d477503ea081cf21cad6107cc82889"
+  "url": "https://downloads.relaxkon.com/relaxkonos/stable/0.1.0-service-fix-test/win-x64/RelaxKonOS-0.1.0-service-fix-test-win-x64.zip",
+  "sha256": "1f839ae11a1896ed6929581a5b74db31a85f7e880ec8fb05112f2acc4766fcce"
 }
