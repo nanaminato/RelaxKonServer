@@ -124,6 +124,20 @@ irm https://downloads.relaxkon.com/relaxkonos/stable/latest/install.ps1 | iex
 
 `install.ps1` stages the real Windows installer on disk first, so it can safely restart during UAC elevation. Offline ZIPs and explicitly supplied release URI + SHA-256 remain supported.
 
+## Backend release package
+
+The repository previously contained `Publish-RelaxKonOSRelease.ps1`, which imports RelaxKonOS artifacts into this API's delivery directory, but no script for packaging the API itself. `deployment/New-RelaxKonServerPackage.ps1` now creates a self-contained server ZIP, its SHA-256 file, and a release descriptor that can be consumed by that publishing script.
+
+```powershell
+./deployment/New-RelaxKonServerPackage.ps1 `
+  -Version 0.1.0 `
+  -Runtime linux-x64 `
+  -OutputDirectory artifacts `
+  -ArtifactBaseUri https://downloads.relaxkon.com/releases
+```
+
+The ZIP extracts to the application working directory; start `./RelaxKonServer` there (`RelaxKonServer.exe` on Windows). A self-contained package does not require .NET on the target host. Configure HTTPS through systemd, a Windows Service, or a reverse proxy in production, and do not treat development certificates or `appsettings.Development.json` as production secrets.
+
 ## Caching and security
 
 - `IMemoryCache` caches languages, versions, navigation indexes, documents, releases, FAQ and downloads. Development uses a short TTL, production a longer one. Cache invalidation can be layered on later.

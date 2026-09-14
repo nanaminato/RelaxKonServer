@@ -127,6 +127,20 @@ irm https://downloads.relaxkon.com/relaxkonos/stable/latest/install.ps1 | iex
 
 Windows 的 `install.ps1` 会先把真正的安装器保存到临时目录，因而 UAC 提升可以安全地重新启动它。已有安装器仍支持离线 ZIP，或手工指定发布 URI 和 SHA-256。
 
+## 后端发布包
+
+仓库此前只有 `Publish-RelaxKonOSRelease.ps1`（把 RelaxKonOS 发布物导入本 API 的下载目录），没有打包本 API 自身的脚本。现提供 `deployment/New-RelaxKonServerPackage.ps1`：它会生成自包含的服务端 ZIP、SHA-256 文件和可供上述发布脚本使用的 release descriptor。
+
+```powershell
+./deployment/New-RelaxKonServerPackage.ps1 `
+  -Version 0.1.0 `
+  -Runtime linux-x64 `
+  -OutputDirectory artifacts `
+  -ArtifactBaseUri https://downloads.relaxkon.com/releases
+```
+
+生成的 ZIP 解压后即为应用工作目录；以该目录作为工作目录启动 `./RelaxKonServer`（Windows 为 `RelaxKonServer.exe`）。自包含包不要求目标机预装 .NET。生产环境请通过 systemd、Windows Service 或反向代理配置 HTTPS；不要把开发证书或 `appsettings.Development.json` 当作生产机密配置。
+
 ## 缓存与安全
 
 - `IMemoryCache` 缓存语言、版本、导航索引、文档、发布说明、FAQ 与下载。开发用短 TTL，生产用长 TTL。后续可以再叠加缓存失效机制。

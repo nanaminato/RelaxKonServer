@@ -18,6 +18,7 @@ appsettings.Local.json
 appsettings.*.local.json
 Properties/PublishProfiles/*.pubxml.user
 publish/
+artifacts/
 
 # Operating system files
 .DS_Store

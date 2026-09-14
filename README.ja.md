@@ -122,6 +122,20 @@ irm https://downloads.relaxkon.com/relaxkonos/stable/latest/install.ps1 | iex
 
 `install.ps1` は実際の Windows インストーラーを先にディスクへ保存するため、UAC 昇格時にも安全に再起動できます。オフライン ZIP と、リリース URI + SHA-256 の明示指定も引き続き利用可能です。
 
+## バックエンドのリリースパッケージ
+
+従来の `Publish-RelaxKonOSRelease.ps1` は RelaxKonOS の成果物をこの API の配信ディレクトリへ取り込むためのもので、この API 自体をパッケージ化するスクリプトはありませんでした。`deployment/New-RelaxKonServerPackage.ps1` は、自包含のサーバー ZIP、SHA-256 ファイル、および同じ公開スクリプトで利用できるリリース記述子を生成します。
+
+```powershell
+./deployment/New-RelaxKonServerPackage.ps1 `
+  -Version 0.1.0 `
+  -Runtime linux-x64 `
+  -OutputDirectory artifacts `
+  -ArtifactBaseUri https://downloads.relaxkon.com/releases
+```
+
+ZIP の展開先がアプリケーションの作業ディレクトリです。そこで `./RelaxKonServer`（Windows では `RelaxKonServer.exe`）を起動してください。自包含パッケージのため対象ホストに .NET をあらかじめ入れる必要はありません。本番では systemd、Windows Service、またはリバースプロキシで HTTPS を構成し、開発証明書や `appsettings.Development.json` を本番の機密情報として扱わないでください。
+
 ## キャッシュとセキュリティ
 
 - `IMemoryCache` が言語、バージョン、ナビゲーション索引、ドキュメント、リリースノート、FAQ、ダウンロードをキャッシュします。開発は短い TTL、本番は長い TTL を使います。キャッシュ無効化は後から重ねて実装できます。
