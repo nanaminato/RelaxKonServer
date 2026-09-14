@@ -112,5 +112,53 @@
     "isAvailable": true,
     "fileName": "RelaxKonOS-0.1.0-linux-v1-test-linux-x64-server.zip",
     "packageKind": "server"
+  },
+  {
+    "platform": "linux",
+    "architecture": "x64",
+    "version": "0.1.0",
+    "url": "/relaxkonos/stable/0.1.0/linux-x64/client/RelaxKonOS-0.1.0-linux-x64-client.zip",
+    "size": "54.8 MB",
+    "checksum": "54c7e2b0643afffb1bbe1b164186610d3855494deea6468934db4dbfaafcc00f",
+    "releaseDate": "2026-09-14",
+    "isAvailable": true,
+    "fileName": "RelaxKonOS-0.1.0-linux-x64-client.zip",
+    "packageKind": "client"
+  },
+  {
+    "platform": "linux",
+    "architecture": "x64",
+    "version": "0.1.0",
+    "url": "/relaxkonos/stable/0.1.0/linux-x64/server/RelaxKonOS-0.1.0-linux-x64-server.zip",
+    "size": "147.0 MB",
+    "checksum": "0e8e5fa2f4f27b14f078a5d8daab978dc778db92b364b40fcf9a333ffeb3bda6",
+    "releaseDate": "2026-09-14",
+    "isAvailable": true,
+    "fileName": "RelaxKonOS-0.1.0-linux-x64-server.zip",
+    "packageKind": "server"
+  },
+  {
+    "platform": "windows",
+    "architecture": "x64",
+    "version": "0.1.0",
+    "url": "/relaxkonos/stable/0.1.0/win-x64/client/RelaxKonOS-0.1.0-win-x64-client.zip",
+    "size": "82.4 MB",
+    "checksum": "1c028816091213cac8e2929f4d81c51ea883577d03f9917adeb4b8736fa4559c",
+    "releaseDate": "2026-09-14",
+    "isAvailable": true,
+    "fileName": "RelaxKonOS-0.1.0-win-x64-client.zip",
+    "packageKind": "client"
+  },
+  {
+    "platform": "windows",
+    "architecture": "x64",
+    "version": "0.1.0",
+    "url": "/relaxkonos/stable/0.1.0/win-x64/server/RelaxKonOS-0.1.0-win-x64-server.zip",
+    "size": "146.8 MB",
+    "checksum": "39b442c1f73bdc4b3d48e002ce8be7a5627603809674db30975cff10174fe363",
+    "releaseDate": "2026-09-14",
+    "isAvailable": true,
+    "fileName": "RelaxKonOS-0.1.0-win-x64-server.zip",
+    "packageKind": "server"
   }
 ]

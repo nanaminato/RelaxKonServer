@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "packageKind": "server",
-  "version": "0.1.0-linux-v1-test",
+  "version": "0.1.0",
   "runtime": "linux-x64",
-  "url": "https://downloads.relaxkon.com/relaxkonos/stable/0.1.0-linux-v1-test/linux-x64/server/RelaxKonOS-0.1.0-linux-v1-test-linux-x64-server.zip",
-  "sha256": "0af0cb1a37b0e297a9754275ce9c73370ab0447984dc77ea68c317480c8db46b"
+  "url": "https://downloads.relaxkon.com/relaxkonos/stable/0.1.0/linux-x64/server/RelaxKonOS-0.1.0-linux-x64-server.zip",
+  "sha256": "0e8e5fa2f4f27b14f078a5d8daab978dc778db92b364b40fcf9a333ffeb3bda6"
 }

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "packageKind": "server",
-  "version": "0.1.0-split-test",
+  "version": "0.1.0",
   "runtime": "win-x64",
-  "url": "https://downloads.relaxkon.com/relaxkonos/stable/0.1.0-split-test/win-x64/server/RelaxKonOS-0.1.0-split-test-win-x64-server.zip",
-  "sha256": "ec0804d07c7c2662b07d86e87e914720316b313fd7f239e930395df3214546c4"
+  "url": "https://downloads.relaxkon.com/relaxkonos/stable/0.1.0/win-x64/server/RelaxKonOS-0.1.0-win-x64-server.zip",
+  "sha256": "39b442c1f73bdc4b3d48e002ce8be7a5627603809674db30975cff10174fe363"
 }
