@@ -28,6 +28,10 @@ if [[ -x $(command -v nginx) ]]; then nginx -t && systemctl reload nginx || true
 if [[ $REMOVE_RELEASES == true ]]; then
   [[ -d $ROOT/api/releases && -d $ROOT/frontend/releases ]] || { echo 'Refusing to remove an unrecognised deployment root.' >&2; exit 1; }
   rm -rf -- "$ROOT/api/releases" "$ROOT/frontend/releases"
+  rm -f "$ROOT/api/current" "$ROOT/frontend/current"
+  echo 'RelaxKon service, Nginx site configuration, and all API/frontend release archives have been removed.'
+  echo 'ACME files were not deleted.'
+  exit 0
 fi
 echo 'RelaxKon service and Nginx site configuration have been removed.'
 echo 'ACME files and retained releases were not deleted. Use --remove-releases only after backing up any required release-delivery data.'

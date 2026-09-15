@@ -88,7 +88,9 @@ irm https://downloads.relaxkon.com/relaxkonos/stable/latest/install.ps1 | iex
 
 ## 4. 更新
 
-更新脚本会先停止旧的 API 服务、保留 Nginx、证书和已发布文件，再下载、校验、解压并切换新版。已有标准 Let's Encrypt 证书时，脚本会自动恢复 HTTPS。
+更新脚本会先停止并删除旧 API 服务、Nginx 站点配置和全部 API/前端发布目录，再下载、校验并安装新包。这样新后端包中的 `Content`（包括 `ReleaseDelivery`）是唯一的发布数据来源，不会混入旧文件。ACME 目录会保留；若没有现有证书，脚本会安装 Certbot，并在 HTTP 站点已经启动后为主域、`www` 和下载域申请 Let's Encrypt 证书。首次申请时 Certbot 会交互询问注册邮箱和协议确认；三个域名的 A/AAAA 必须已指向这台服务器。证书就绪后脚本自动启用 HTTPS。
+
+先将整个 `deployment/linux/` 目录上传到服务器，例如 `/root/relaxkon-deploy/`。不要只上传 `update-relaxkon-website.sh`，因为它会调用同目录的安装、卸载和 HTTPS 脚本。
 
 ```bash
 cd /root/relaxkon-deploy

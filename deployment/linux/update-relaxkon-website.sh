@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Explicit update workflow: uninstall the running service, then install a new GitHub release.
+# Destructive update workflow: remove the running deployment, then install a new GitHub release.
 set -Eeuo pipefail
 
 SCRIPT_DIRECTORY=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
@@ -24,13 +24,26 @@ while (( index < ${#arguments[@]} )); do
   esac
 done
 
-"$SCRIPT_DIRECTORY/uninstall-relaxkon-website.sh" --root "$root" --for-update
-"$SCRIPT_DIRECTORY/install-relaxkon-website.sh" "${arguments[@]}" --skip-packages
+# A website release contains the API Content tree, including ReleaseDelivery.
+# Do not retain an earlier Content tree when replacing a release: its artifacts,
+# descriptors and bootstrap scripts must come exclusively from the new package.
+bash "$SCRIPT_DIRECTORY/uninstall-relaxkon-website.sh" --root "$root" --remove-releases
+bash "$SCRIPT_DIRECTORY/install-relaxkon-website.sh" "${arguments[@]}" --skip-packages
 
-# The installer writes the HTTP bootstrap Nginx configuration. Restore HTTPS automatically
-# only when the conventional Let's Encrypt certificate is still present.
-if [[ -r "/etc/letsencrypt/live/$domain/fullchain.pem" && -r "/etc/letsencrypt/live/$domain/privkey.pem" ]]; then
-  "$SCRIPT_DIRECTORY/enable-relaxkon-https.sh" --root "$root" --domain "$domain" --www-domain "$www_domain" --downloads-domain "$downloads_domain" --api-port "$api_port"
-else
-  echo 'Update installed, but HTTPS was not re-enabled because the expected certificate was not found.' >&2
+# The installer leaves an HTTP-only Nginx configuration in place, which is required
+# for ACME HTTP-01. Reuse an existing certificate or issue a new one before enabling
+# HTTPS. Certbot remains interactive when it needs the operator's registration details.
+certificate="/etc/letsencrypt/live/$domain/fullchain.pem"
+certificate_key="/etc/letsencrypt/live/$domain/privkey.pem"
+if [[ ! -r $certificate || ! -r $certificate_key ]]; then
+  if ! command -v certbot >/dev/null 2>&1; then
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends certbot
+  fi
+  echo "Issuing a Let's Encrypt certificate for $domain, $www_domain, and $downloads_domain."
+  certbot certonly --webroot --webroot-path "$root/acme" \
+    --domain "$domain" \
+    --domain "$www_domain" \
+    --domain "$downloads_domain"
 fi
+bash "$SCRIPT_DIRECTORY/enable-relaxkon-https.sh" --root "$root" --domain "$domain" --www-domain "$www_domain" --downloads-domain "$downloads_domain" --api-port "$api_port"
