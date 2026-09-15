@@ -125,6 +125,12 @@ WEB_RELEASE="$ROOT/frontend/releases/$VERSION"
 
 verify_and_unpack "$SERVER_ASSET" "$API_RELEASE"
 verify_and_unpack "$WEB_ASSET" "$WEB_RELEASE"
+[[ -f $API_RELEASE/RelaxKonServer ]] || die 'Server archive does not contain RelaxKonServer at its root.'
+# ZIP files built by PowerShell Compress-Archive on Windows do not preserve the
+# Unix executable bit. The published apphost is still the intended Linux
+# executable, so restore its required mode after checksum validation and
+# extraction rather than rejecting an otherwise valid release archive.
+chmod 0755 "$API_RELEASE/RelaxKonServer"
 [[ -x $API_RELEASE/RelaxKonServer ]] || die 'Server archive does not contain an executable RelaxKonServer at its root.'
 [[ -f $API_RELEASE/appsettings.json && -d $API_RELEASE/Content && -f $WEB_RELEASE/index.html ]] || die 'Release archive layout is incomplete.'
 chown -R root:root "$API_RELEASE" "$WEB_RELEASE"
