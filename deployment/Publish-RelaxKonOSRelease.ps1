@@ -28,6 +28,15 @@ function Write-Utf8Atomically([string] $Path, [string] $Content) {
     }
 }
 
+function Copy-LinuxShellScriptAsLf([string] $Source, [string] $Destination) {
+    # Bootstrap scripts are served verbatim to Linux hosts. Copy-Item would retain
+    # CRLF from a Windows checkout, causing Bash to parse `pipefail\r` as an
+    # invalid option. Keep the public scripts UTF-8 (without BOM) with LF lines.
+    $content = [IO.File]::ReadAllText($Source)
+    $normalized = $content.Replace("`r`n", "`n").Replace("`r", "`n")
+    Write-Utf8Atomically $Destination $normalized
+}
+
 $source = Get-FullDirectory $SourceDirectory 'SourceDirectory'
 $bootstrap = Get-FullDirectory $BootstrapDirectory 'BootstrapDirectory'
 $delivery = [IO.Path]::GetFullPath($DeliveryRoot)
@@ -123,7 +132,7 @@ Write-Utf8Atomically $websiteDownloads (ConvertTo-Json -InputObject @($updatedEn
 $latestBootstrap = Join-Path $delivery 'relaxkonos\stable\latest\bootstrap'
 New-Item -ItemType Directory -Path $latestBootstrap -Force | Out-Null
 Copy-Item -LiteralPath $windowsBootstrap -Destination (Join-Path $latestBootstrap 'Install-RelaxKonOS.ps1') -Force
-Copy-Item -LiteralPath $linuxBootstrap -Destination (Join-Path $latestBootstrap 'install-relaxkonos.sh') -Force
+Copy-LinuxShellScriptAsLf $linuxBootstrap (Join-Path $latestBootstrap 'install-relaxkonos.sh')
 Copy-Item -LiteralPath $windowsUninstall -Destination (Join-Path $latestBootstrap 'Uninstall-RelaxKonOS.ps1') -Force
-Copy-Item -LiteralPath $linuxUninstall -Destination (Join-Path $latestBootstrap 'uninstall-relaxkonos.sh') -Force
+Copy-LinuxShellScriptAsLf $linuxUninstall (Join-Path $latestBootstrap 'uninstall-relaxkonos.sh')
 Write-Host "Published $published runtime(s) to $delivery and updated $websiteDownloads"
