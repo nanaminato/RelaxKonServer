@@ -6,6 +6,9 @@ set -Eeuo pipefail
 REPOSITORY=""
 TAG=""
 VERSION=""
+RELEASE_BASE_URI=""
+SERVER_ASSET=""
+WEB_ASSET=""
 DOMAIN="relaxkon.com"
 WWW_DOMAIN="www.relaxkon.com"
 DOWNLOADS_DOMAIN="downloads.relaxkon.com"
@@ -15,12 +18,15 @@ SKIP_PACKAGES=false
 
 usage() {
   cat >&2 <<'EOF'
-Usage: sudo bash install-relaxkon-website.sh --repository OWNER/REPO --tag TAG --version VERSION [options]
+Usage: sudo bash install-relaxkon-website.sh --version VERSION (--repository OWNER/REPO --tag TAG | --release-base-uri URL) [options]
 
 Required:
   --repository OWNER/REPO  GitHub repository containing the release assets
   --tag TAG               GitHub Release tag, for example v0.1.0
   --version VERSION       Artifact version, for example 0.1.0
+  --release-base-uri URL  Exact asset directory URL; overrides --repository/--tag
+  --server-asset NAME     Server ZIP filename (default: RelaxKonServer-VERSION-linux-x64.zip)
+  --web-asset NAME        Website ZIP filename (default: RelaxKon-web-VERSION.zip)
 
 Options:
   --domain NAME           Main domain (default: relaxkon.com)
@@ -31,8 +37,8 @@ Options:
   --skip-packages         Do not run apt-get; used by the update script
 
 The GitHub Release must contain these four assets:
-  RelaxKonServer-VERSION-linux-x64.zip and its .sha256 file
-  RelaxKon-web-VERSION.zip and its .sha256 file
+  SERVER_ZIP and SERVER_ZIP.sha256
+  WEBSITE_ZIP and WEBSITE_ZIP.sha256
 
 For a private GitHub release, export GITHUB_TOKEN before running this script.
 EOF
@@ -49,6 +55,9 @@ while [[ $# -gt 0 ]]; do
     --repository) REPOSITORY=${2:-}; shift 2 ;;
     --tag) TAG=${2:-}; shift 2 ;;
     --version) VERSION=${2:-}; shift 2 ;;
+    --release-base-uri) RELEASE_BASE_URI=${2:-}; shift 2 ;;
+    --server-asset) SERVER_ASSET=${2:-}; shift 2 ;;
+    --web-asset) WEB_ASSET=${2:-}; shift 2 ;;
     --domain) DOMAIN=${2:-}; shift 2 ;;
     --www-domain) WWW_DOMAIN=${2:-}; shift 2 ;;
     --downloads-domain) DOWNLOADS_DOMAIN=${2:-}; shift 2 ;;
@@ -61,8 +70,16 @@ while [[ $# -gt 0 ]]; do
 done
 
 require_root
-[[ $REPOSITORY =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || die '--repository must be OWNER/REPO.'
-valid_component "$TAG" && valid_component "$VERSION" || die 'Tag and version contain unsupported characters.'
+valid_component "$VERSION" || die 'Version contains unsupported characters.'
+if [[ -n $RELEASE_BASE_URI ]]; then
+  [[ -z $REPOSITORY && -z $TAG ]] || die 'Use either --release-base-uri or --repository with --tag, not both.'
+  [[ $RELEASE_BASE_URI =~ ^https://[^[:space:]]+$ ]] || die '--release-base-uri must be an HTTPS URL.'
+  RELEASE_BASE=${RELEASE_BASE_URI%/}
+else
+  [[ $REPOSITORY =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || die '--repository must be OWNER/REPO.'
+  valid_component "$TAG" || die 'Tag contains unsupported characters.'
+  RELEASE_BASE="https://github.com/$REPOSITORY/releases/download/$TAG"
+fi
 valid_domain "$DOMAIN" && valid_domain "$WWW_DOMAIN" && valid_domain "$DOWNLOADS_DOMAIN" || die 'Invalid domain name.'
 [[ $API_PORT =~ ^[0-9]+$ ]] && (( API_PORT >= 1 && API_PORT <= 65535 )) || die 'Invalid API port.'
 [[ $ROOT == /* && $ROOT != / ]] || die '--root must be an absolute, non-root directory.'
@@ -74,9 +91,9 @@ if [[ $SKIP_PACKAGES == false ]]; then
 fi
 for command in curl unzip sha256sum systemctl nginx install; do command -v "$command" >/dev/null || die "Required command is missing: $command"; done
 
-SERVER_ASSET="RelaxKonServer-$VERSION-linux-x64.zip"
-WEB_ASSET="RelaxKon-web-$VERSION.zip"
-RELEASE_BASE="https://github.com/$REPOSITORY/releases/download/$TAG"
+SERVER_ASSET=${SERVER_ASSET:-"RelaxKonServer-$VERSION-linux-x64.zip"}
+WEB_ASSET=${WEB_ASSET:-"RelaxKon-web-$VERSION.zip"}
+[[ $SERVER_ASSET == *.zip && $SERVER_ASSET != */* && $WEB_ASSET == *.zip && $WEB_ASSET != */* ]] || die 'Asset names must be ZIP filenames without directory segments.'
 TEMPORARY_DIRECTORY=$(mktemp -d)
 cleanup() { rm -rf -- "$TEMPORARY_DIRECTORY"; }
 trap cleanup EXIT

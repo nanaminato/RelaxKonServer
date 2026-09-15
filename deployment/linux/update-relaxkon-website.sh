@@ -4,7 +4,7 @@ set -Eeuo pipefail
 
 SCRIPT_DIRECTORY=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 [[ ${EUID:-$(id -u)} -eq 0 ]] || { echo 'Run with sudo.' >&2; exit 1; }
-[[ $# -gt 0 ]] || { echo 'Usage: sudo bash update-relaxkon-website.sh --repository OWNER/REPO --tag TAG --version VERSION [install options]' >&2; exit 64; }
+[[ $# -gt 0 ]] || { echo 'Usage: sudo bash update-relaxkon-website.sh --version VERSION (--repository OWNER/REPO --tag TAG | --release-base-uri URL) [install options]' >&2; exit 64; }
 
 root=/srv/relaxkon
 domain=relaxkon.com
