@@ -1,3 +1,4 @@
+using RelaxKon_Publisher.Hubs;
 using RelaxKon_Publisher.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,9 +7,10 @@ builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, relo
 builder.Services.Configure<PublisherPathsOptions>(builder.Configuration.GetSection("PublisherPaths"));
 builder.Services.AddSingleton<PublisherService>();
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
     .WithOrigins("http://localhost:4200", "http://127.0.0.1:4200", "http://[::1]:4200")
-    .AllowAnyHeader().AllowAnyMethod()));
+    .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
 var app = builder.Build();
 app.UseExceptionHandler(exceptionApp => exceptionApp.Run(async context =>
@@ -19,4 +21,5 @@ app.UseExceptionHandler(exceptionApp => exceptionApp.Run(async context =>
 }));
 app.UseCors();
 app.MapControllers();
+app.MapHub<PublisherHub>("/hubs/publisher");
 app.Run();

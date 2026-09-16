@@ -4,7 +4,7 @@
     "local-loopback": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
+      "launchBrowser": false,
       "applicationUrl": "http://127.0.0.1:5112;http://[::1]:5112",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
