@@ -178,8 +178,10 @@ public sealed class PublisherService
                 if (request.BuildClient)
                 {
                     SetStep(job, $"构建客户端包（{runtime}）");
-                    var package = await BuildPackageAsync(job, paths.RelaxKonOSPath, stagingBase, stageDelivery, request, runtime, "client", cancellationToken);
+                    if (RemoveStagedPackage(stageDelivery, request.Version, runtime, "client"))
+                        Log(job, "info", $"已删除暂存区中的现有客户端包，将重新生成：{runtime}。");
                     entries.RemoveAll(entry => entry.Runtime == runtime && entry.PackageKind == "client");
+                    var package = await BuildPackageAsync(job, paths.RelaxKonOSPath, stagingBase, stageDelivery, request, runtime, "client", cancellationToken);
                     entries.Add(package.Entry);
                     affected.AddRange(package.Files);
                     job.ProgressCurrent++;
@@ -188,10 +190,14 @@ public sealed class PublisherService
                 if (request.BuildServer)
                 {
                     SetStep(job, $"构建服务端包（{runtime}）");
-                    var package = await BuildPackageAsync(job, paths.RelaxKonOSPath, stagingBase, stageDelivery, request, runtime, "server", cancellationToken);
+                    if (RemoveStagedPackage(stageDelivery, request.Version, runtime, "server"))
+                        Log(job, "info", $"已删除暂存区中的现有服务端包，将重新生成：{runtime}。");
                     entries.RemoveAll(entry => entry.Runtime == runtime && entry.PackageKind == "server");
+                    var package = await BuildPackageAsync(job, paths.RelaxKonOSPath, stagingBase, stageDelivery, request, runtime, "server", cancellationToken);
+                    var latestDescriptor = await WriteLatestServerDescriptorAsync(stageDelivery, package.Entry, cancellationToken);
                     entries.Add(package.Entry);
                     affected.AddRange(package.Files);
+                    affected.Add(latestDescriptor);
                     job.ProgressCurrent++;
                     PushUpdate(job);
                 }
@@ -417,6 +423,19 @@ public sealed class PublisherService
         }
     }
 
+    /// <summary>
+    /// Removes only an already-staged package that this task is about to rebuild.
+    /// The committed output and selected website checkout remain untouched unless
+    /// the whole replacement succeeds.
+    /// </summary>
+    private static bool RemoveStagedPackage(string deliveryRoot, string version, string runtime, string kind)
+    {
+        var packageDirectory = Path.Combine(deliveryRoot, "relaxkonos", "stable", version, runtime, kind);
+        if (!Directory.Exists(packageDirectory)) return false;
+        Directory.Delete(packageDirectory, recursive: true);
+        return true;
+    }
+
     private async Task<BuiltPackage> BuildPackageAsync(PublisherJob job, string osRoot, string stagingBase, string deliveryRoot, PublisherPlanRequest request, string runtime, string kind, CancellationToken cancellationToken)
     {
         var platform = runtime.StartsWith("win-", StringComparison.Ordinal) ? "windows" : "linux";
@@ -477,9 +496,31 @@ public sealed class PublisherService
         return new BuiltPackage(new DownloadEntry(platform, runtime.Split('-')[1], request.Version, url, FormatSize(new FileInfo(archive).Length), hash, DateOnly.FromDateTime(DateTime.UtcNow).ToString("yyyy-MM-dd"), true, Path.GetFileName(archive), kind), files);
     }
 
+    /// <summary>Updates the catalog consumed by the online server installers.</summary>
+    private static async Task<string> WriteLatestServerDescriptorAsync(string deliveryRoot, DownloadEntry package, CancellationToken cancellationToken)
+    {
+        if (!string.Equals(package.PackageKind, "server", StringComparison.Ordinal))
+            throw new ArgumentException("最新安装器描述只能引用服务端包。", nameof(package));
+
+        var latest = Path.Combine(deliveryRoot, "relaxkonos", "stable", "latest");
+        Directory.CreateDirectory(latest);
+        var descriptorPath = Path.Combine(latest, package.Runtime + ".json");
+        var descriptor = new ReleaseDescriptor(1, "server", package.Version, package.Runtime, $"https://downloads.relaxkon.com{package.Url}", package.Checksum);
+        await File.WriteAllTextAsync(descriptorPath, JsonSerializer.Serialize(descriptor, Json), cancellationToken);
+        return Path.GetRelativePath(deliveryRoot, descriptorPath).Replace('\\', '/');
+    }
+
     private async Task DotnetPublishAsync(PublisherJob job, string project, string output, string runtime, CancellationToken cancellationToken)
     {
-        var info = new ProcessStartInfo("dotnet") { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false, CreateNoWindow = true };
+        var info = new ProcessStartInfo("dotnet")
+        {
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
         foreach (var argument in new[] { "publish", project, "--configuration", "Release", "--runtime", runtime, "--self-contained", "true", "--output", output }) info.ArgumentList.Add(argument);
         using var process = new Process { StartInfo = info };
         Log(job, "info", $"执行：dotnet publish {Path.GetFileName(project)} · Release · {runtime} · self-contained");
@@ -592,7 +633,10 @@ public sealed class PublisherService
         var relative = url.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
         var prefix = $"relaxkonos{Path.DirectorySeparatorChar}stable{Path.DirectorySeparatorChar}";
         if (!relative.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) return Path.Combine(delivery, "__invalid_url__");
-        return Path.Combine(delivery, relative[prefix.Length..]);
+        // Release packages are staged below ReleaseDelivery/relaxkonos/stable/….
+        // Keep that full URL-relative path; stripping the prefix makes validation
+        // look under ReleaseDelivery/{version}/… and reject packages that exist.
+        return Path.Combine(delivery, relative);
     }
 
     private void CommitManagedOutput(string stagingRoot, string output, Guid jobId)

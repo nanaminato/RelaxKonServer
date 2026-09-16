@@ -1,5 +1,8 @@
+using System.Text;
 using RelaxKon_Publisher.Hubs;
 using RelaxKon_Publisher.Services;
+
+Console.OutputEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://127.0.0.1:5112", "http://[::1]:5112");
