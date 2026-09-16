@@ -11,8 +11,16 @@ public sealed class PublisherHub(PublisherService publisher) : Hub
 
     public async Task<PublisherPreview> Preview(PublisherPlanRequest request)
     {
-        try { return await publisher.PreviewAsync(request, Context.ConnectionAborted); }
-        catch (InvalidOperationException exception) { throw new HubException(exception.Message); }
+        try
+        {
+            return await publisher.PreviewAsync(request, Context.ConnectionAborted,
+                entry => Clients.Caller.SendAsync("previewLog", entry));
+        }
+        catch (InvalidOperationException exception)
+        {
+            await Clients.Caller.SendAsync("previewLog", new PublisherLogEntry(DateTimeOffset.UtcNow, "error", exception.Message));
+            throw new HubException(exception.Message);
+        }
     }
 
     public async Task Subscribe(Guid jobId)

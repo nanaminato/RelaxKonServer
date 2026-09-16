@@ -61,20 +61,32 @@ public sealed class PublisherService
         return job;
     }
 
-    public async Task<PublisherPreview> PreviewAsync(PublisherPlanRequest request, CancellationToken cancellationToken)
+    public async Task<PublisherPreview> PreviewAsync(PublisherPlanRequest request, CancellationToken cancellationToken, Func<PublisherLogEntry, Task>? report = null)
     {
+        async Task ReportAsync(string level, string message)
+        {
+            if (report is not null) await report(new PublisherLogEntry(DateTimeOffset.UtcNow, level, message));
+        }
+
+        await ReportAsync("info", "开始执行构建前检查。");
         var paths = await ValidateAsync(request, cancellationToken);
+        await ReportAsync("success", "本机路径与发布计划格式校验通过。");
         var sourceContent = Path.Combine(paths.RelaxKonServerPath, "Content");
+        await ReportAsync("info", "正在扫描旧发布包和 downloads.json。");
         var existing = ReadExistingPackages(sourceContent);
         var changes = PlannedChanges(request, paths, existing);
         var checks = CreatePreflightChecks(request, paths);
         if (checks.Any(check => !check.Passed)) throw new InvalidOperationException(string.Join("；", checks.Where(check => !check.Passed).Select(check => check.Detail)));
+        await ReportAsync("success", $"发现 {existing.Count} 个现有发布包，计划产生 {changes.Count} 项输出变化。");
+        await ReportAsync("info", "正在读取来源仓库 Git 状态。");
         var git = await ReadGitAsync(paths.RelaxKonServerPath, cancellationToken);
         var warnings = new List<string>();
         if (!request.BuildClient && !request.BuildServer) warnings.Add("尚未选择要构建的客户端或服务端包；只会生成选中的辅助文件。" );
         if (changes.Any(change => change.Action == "替换")) warnings.Add("存在同名输出，显式生成时将先备份后替换。" );
-        return new PublisherPreview(paths, git.Root, git.Head, git.Status,
+        var preview = new PublisherPreview(paths, git.Root, git.Head, git.Status,
             ["win-x64 / Release", "win-arm64 / Release", "linux-x64 / Release", "linux-arm64 / Release"], existing, changes, warnings, checks);
+        await ReportAsync("success", "预览完成；没有修改任何目录。");
+        return preview;
     }
 
     public PublisherJob StartGeneration(PublisherPlanRequest request)
