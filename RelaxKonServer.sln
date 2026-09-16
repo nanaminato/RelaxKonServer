@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RelaxKonServer", "RelaxKonServer\RelaxKonServer.csproj", "{BE6020F3-E4B5-4167-BD8F-9DBC0DE4A0A7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RelaxKonPublisherServer", "RelaxKonPublisherServer\RelaxKonPublisherServer.csproj", "{53C2F07B-A3B7-4EC9-8069-C983681C8641}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{BE6020F3-E4B5-4167-BD8F-9DBC0DE4A0A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE6020F3-E4B5-4167-BD8F-9DBC0DE4A0A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE6020F3-E4B5-4167-BD8F-9DBC0DE4A0A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53C2F07B-A3B7-4EC9-8069-C983681C8641}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53C2F07B-A3B7-4EC9-8069-C983681C8641}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53C2F07B-A3B7-4EC9-8069-C983681C8641}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53C2F07B-A3B7-4EC9-8069-C983681C8641}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
