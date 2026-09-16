@@ -20,6 +20,12 @@ Properties/PublishProfiles/*.pubxml.user
 publish/
 artifacts/
 
+# Generated release catalogs and versioned delivery packages. Keep latest/bootstrap
+# tracked because it contains the installer source files.
+RelaxKonServer/Content/Downloads/downloads.json
+RelaxKonServer/Content/ReleaseDelivery/relaxkonos/stable/latest/*.json
+RelaxKonServer/Content/ReleaseDelivery/relaxkonos/stable/[0-9]*/
+
 # Operating system files
 .DS_Store
 Thumbs.db

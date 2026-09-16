@@ -14,7 +14,7 @@ namespace RelaxKon_Publisher.Services;
 /// <summary>Local-only publishing coordinator. It never writes to the selected website checkout.</summary>
 public sealed class PublisherService
 {
-    private static readonly HashSet<string> Runtimes = ["win-x64", "win-arm64", "linux-x64", "linux-arm64"];
+    private static readonly HashSet<string> Runtimes = ["win-x64", "win-arm64", "linux-x64", "linux-arm64", "osx-arm64"];
     private static readonly SemaphoreSlim GenerationLock = new(1, 1);
     private static readonly JsonSerializerOptions Json = new() { WriteIndented = true, PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
     private readonly ConcurrentDictionary<Guid, PublisherJob> jobs = new();
@@ -48,6 +48,9 @@ public sealed class PublisherService
         if (string.IsNullOrWhiteSpace(request.Version) || !System.Text.RegularExpressions.Regex.IsMatch(request.Version, "^[0-9A-Za-z][0-9A-Za-z._-]{0,63}$"))
             throw new InvalidOperationException("版本号不能为空，且只能包含字母、数字、点、下划线和连字符。");
         if (SelectedRuntimes(request).Any(runtime => !Runtimes.Contains(runtime))) throw new InvalidOperationException("运行时必须是预定义的发布预设。");
+        if (request.BuildClient && SelectedClientRuntimes(request).Count == 0) throw new InvalidOperationException("至少选择一个客户端运行时。");
+        if (request.BuildServer && SelectedServerRuntimes(request).Count == 0) throw new InvalidOperationException("至少选择一个服务端运行时。");
+        if (request.BuildServer && SelectedServerRuntimes(request).Any(runtime => runtime.StartsWith("osx-", StringComparison.OrdinalIgnoreCase))) throw new InvalidOperationException("macOS 目前仅支持客户端包，不能选择服务端目标运行时。");
         if (!request.BuildClient && !request.BuildServer && !request.IncludeInstallers) throw new InvalidOperationException("至少选择一项要生成的发布内容。");
     }
 
@@ -87,7 +90,7 @@ public sealed class PublisherService
         if (!request.BuildClient && !request.BuildServer) warnings.Add("尚未选择要构建的客户端或服务端包；只会生成选中的辅助文件。" );
         if (changes.Any(change => change.Action == "替换")) warnings.Add("存在同名输出，显式生成时将先备份后替换。" );
         var preview = new PublisherPreview(paths, git.Root, git.Head, git.Status,
-            ["win-x64 / Release", "win-arm64 / Release", "linux-x64 / Release", "linux-arm64 / Release"], existing, changes, warnings, checks);
+            ["客户端：win-x64、win-arm64、linux-x64、linux-arm64、osx-arm64 / Release", "服务端：win-x64、win-arm64、linux-x64、linux-arm64 / Release"], existing, changes, warnings, checks);
         await ReportAsync("success", "预览完成；没有修改任何目录。");
         return preview;
     }
@@ -135,9 +138,11 @@ public sealed class PublisherService
             var paths = await ValidateAsync(request, cancellationToken);
             var checks = CreatePreflightChecks(request, paths);
             if (checks.Any(check => !check.Passed)) throw new InvalidOperationException(string.Join("；", checks.Where(check => !check.Passed).Select(check => check.Detail)));
-            var runtimes = SelectedRuntimes(request);
-            Log(job, "info", $"构建前检查通过；目标平台：{string.Join("、", runtimes)}。");
-            job.ProgressTotal = 3 + runtimes.Count * ((request.BuildClient ? 1 : 0) + (request.BuildServer ? 1 : 0));
+            var clientRuntimes = request.BuildClient ? SelectedClientRuntimes(request) : [];
+            var serverRuntimes = request.BuildServer ? SelectedServerRuntimes(request) : [];
+            var runtimes = clientRuntimes.Concat(serverRuntimes).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            Log(job, "info", $"构建前检查通过；客户端：{string.Join("、", clientRuntimes.DefaultIfEmpty("未选择"))}；服务端：{string.Join("、", serverRuntimes.DefaultIfEmpty("未选择"))}。");
+            job.ProgressTotal = 3 + clientRuntimes.Count + serverRuntimes.Count;
             job.ProgressCurrent = 1;
             var sourceContent = Path.Combine(paths.RelaxKonServerPath, "Content");
             var stagingBase = Path.Combine(toolRoot, "artifacts", "staging", job.Id.ToString("N"));
@@ -175,7 +180,7 @@ public sealed class PublisherService
             foreach (var runtime in runtimes)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (request.BuildClient)
+                if (clientRuntimes.Contains(runtime, StringComparer.OrdinalIgnoreCase))
                 {
                     SetStep(job, $"构建客户端包（{runtime}）");
                     if (RemoveStagedPackage(stageDelivery, request.Version, runtime, "client"))
@@ -187,7 +192,7 @@ public sealed class PublisherService
                     job.ProgressCurrent++;
                     PushUpdate(job);
                 }
-                if (request.BuildServer)
+                if (serverRuntimes.Contains(runtime, StringComparer.OrdinalIgnoreCase))
                 {
                     SetStep(job, $"构建服务端包（{runtime}）");
                     if (RemoveStagedPackage(stageDelivery, request.Version, runtime, "server"))
@@ -217,6 +222,8 @@ public sealed class PublisherService
                 paths,
                 request.Version,
                 runtimes,
+                clientRuntimes,
+                serverRuntimes,
                 request.BuildClient,
                 request.BuildServer,
                 affectedFiles = affected,
@@ -276,9 +283,31 @@ public sealed class PublisherService
 
     private static IReadOnlyList<string> SelectedRuntimes(PublisherPlanRequest request)
     {
+        var selected = new List<string>();
+        if (request.BuildClient) selected.AddRange(SelectedClientRuntimes(request));
+        if (request.BuildServer) selected.AddRange(SelectedServerRuntimes(request));
+        if (selected.Count == 0) selected.AddRange(LegacyRuntimes(request));
+        selected = selected.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        if (selected.Count == 0) throw new InvalidOperationException("至少选择一个运行时。");
+        return selected;
+    }
+
+    private static IReadOnlyList<string> SelectedClientRuntimes(PublisherPlanRequest request) =>
+        HasSeparateRuntimeSelections(request)
+            ? request.ClientRuntimes.Where(runtime => !string.IsNullOrWhiteSpace(runtime)).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+            : LegacyRuntimes(request);
+
+    private static IReadOnlyList<string> SelectedServerRuntimes(PublisherPlanRequest request) =>
+        HasSeparateRuntimeSelections(request)
+            ? request.ServerRuntimes.Where(runtime => !string.IsNullOrWhiteSpace(runtime)).Distinct(StringComparer.OrdinalIgnoreCase).ToList()
+            : LegacyRuntimes(request);
+
+    private static bool HasSeparateRuntimeSelections(PublisherPlanRequest request) => request.ClientRuntimes.Count > 0 || request.ServerRuntimes.Count > 0;
+
+    private static IReadOnlyList<string> LegacyRuntimes(PublisherPlanRequest request)
+    {
         var selected = request.Runtimes.Where(runtime => !string.IsNullOrWhiteSpace(runtime)).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         if (selected.Count == 0 && !string.IsNullOrWhiteSpace(request.Runtime)) selected.Add(request.Runtime);
-        if (selected.Count == 0) throw new InvalidOperationException("至少选择一个运行时。");
         return selected;
     }
 
@@ -288,7 +317,8 @@ public sealed class PublisherService
         {
             new("RelaxKonOS 解决方案", File.Exists(Path.Combine(paths.RelaxKonOSPath, "RelaxKonOS.sln")), "RelaxKonOS.sln 可用于构建"),
             new("独立输出目录", !IsSameOrChild(paths.ContentOutputPath, Path.Combine(paths.RelaxKonServerPath, "Content")), "输出目录与官网 Content 保持隔离"),
-            new("目标运行时", SelectedRuntimes(request).All(Runtimes.Contains), $"已选择：{string.Join("、", SelectedRuntimes(request))}")
+            new("客户端目标运行时", !request.BuildClient || SelectedClientRuntimes(request).All(Runtimes.Contains), request.BuildClient ? $"已选择：{string.Join("、", SelectedClientRuntimes(request))}" : "未构建客户端"),
+            new("服务端目标运行时", !request.BuildServer || SelectedServerRuntimes(request).All(runtime => Runtimes.Contains(runtime) && !runtime.StartsWith("osx-", StringComparison.Ordinal)), request.BuildServer ? $"已选择：{string.Join("、", SelectedServerRuntimes(request))}" : "未构建服务端")
         };
         if (request.BuildClient)
         {
@@ -303,7 +333,7 @@ public sealed class PublisherService
                 var exists = relative.EndsWith(".csproj", StringComparison.Ordinal) ? File.Exists(path) : Directory.Exists(path);
                 checks.Add(new PublisherPreflightCheck($"服务端输入：{relative}", exists, exists ? "构建输入已找到" : $"找不到构建输入：{path}"));
             }
-            foreach (var platform in SelectedRuntimes(request).Select(runtime => runtime.StartsWith("win-", StringComparison.Ordinal) ? "windows" : "linux").Distinct())
+            foreach (var platform in SelectedServerRuntimes(request).Select(RuntimePlatform).Distinct())
             {
                 var path = Path.Combine(paths.RelaxKonOSPath, "deployment", platform);
                 checks.Add(new PublisherPreflightCheck($"部署文件：{platform}", Directory.Exists(path), Directory.Exists(path) ? "部署文件已找到" : $"找不到部署文件：{path}"));
@@ -382,22 +412,41 @@ public sealed class PublisherService
     private static IReadOnlyList<OutputChange> PlannedChanges(PublisherPlanRequest request, PublisherPaths paths, IReadOnlyList<ExistingPackage> existing)
     {
         var changes = new List<OutputChange>();
-        foreach (var runtime in SelectedRuntimes(request))
+        foreach (var runtime in request.BuildClient ? SelectedClientRuntimes(request) : [])
         {
-            foreach (var kind in new[] { request.BuildClient ? "client" : null, request.BuildServer ? "server" : null }.Where(kind => kind is not null))
-            {
-                var filename = $"RelaxKonOS-{request.Version}-{runtime}-{kind}.zip";
-                var relative = $"ReleaseDelivery/relaxkonos/stable/{request.Version}/{runtime}/{kind}/{filename}";
-                var output = Path.Combine(paths.ContentOutputPath, relative.Replace('/', Path.DirectorySeparatorChar));
-                changes.Add(new OutputChange(relative, File.Exists(output) ? "替换" : "新增", $"构建最新 {kind} 包（{runtime}）"));
-            }
+            AddPlannedPackageChange(changes, paths, request.Version, runtime, "client");
         }
+        foreach (var runtime in request.BuildServer ? SelectedServerRuntimes(request) : []) AddPlannedPackageChange(changes, paths, request.Version, runtime, "server");
         changes.Add(new OutputChange("Downloads/downloads.json", File.Exists(Path.Combine(paths.ContentOutputPath, "Downloads", "downloads.json")) ? "替换" : "新增", "根据选择的可下载包重建"));
         foreach (var history in request.HistoricalPackages.Where(item => item.CopyToOutput))
             changes.Add(new OutputChange($"ReleaseDelivery/{history.RelativePath}", "复制", history.IsDownloadable ? "保留为公开历史包" : "仅复制，不在下载清单公开"));
         if (request.OnlyLatestDownloadable && existing.Any()) changes.Add(new OutputChange("Downloads/downloads.json", "隐藏", "新下载清单排除旧客户端和服务端"));
         return changes;
     }
+
+    private static void AddPlannedPackageChange(List<OutputChange> changes, PublisherPaths paths, string version, string runtime, string kind)
+    {
+        var filename = $"RelaxKonOS-{version}-{runtime}-{kind}.zip";
+        var relative = $"ReleaseDelivery/relaxkonos/stable/{version}/{runtime}/{kind}/{filename}";
+        var output = Path.Combine(paths.ContentOutputPath, relative.Replace('/', Path.DirectorySeparatorChar));
+        changes.Add(new OutputChange(relative, File.Exists(output) ? "替换" : "新增", $"构建最新 {kind} 包（{runtime}）"));
+    }
+
+    private static string RuntimePlatform(string runtime) => runtime switch
+    {
+        var value when value.StartsWith("win-", StringComparison.OrdinalIgnoreCase) => "windows",
+        var value when value.StartsWith("linux-", StringComparison.OrdinalIgnoreCase) => "linux",
+        var value when value.StartsWith("osx-", StringComparison.OrdinalIgnoreCase) => "macos",
+        _ => throw new InvalidOperationException($"不支持的运行时：{runtime}")
+    };
+
+    private static string[] SupportedSystems(string platform) => platform switch
+    {
+        "windows" => ["windows"],
+        "macos" => ["macos"],
+        "linux" => ["debian-12", "ubuntu-22.04", "ubuntu-24.04", "ubuntu-26.04"],
+        _ => throw new InvalidOperationException($"不支持的平台：{platform}")
+    };
 
     private static void CopyManagedOutput(string output, string staging)
     {
@@ -438,7 +487,7 @@ public sealed class PublisherService
 
     private async Task<BuiltPackage> BuildPackageAsync(PublisherJob job, string osRoot, string stagingBase, string deliveryRoot, PublisherPlanRequest request, string runtime, string kind, CancellationToken cancellationToken)
     {
-        var platform = runtime.StartsWith("win-", StringComparison.Ordinal) ? "windows" : "linux";
+        var platform = RuntimePlatform(runtime);
         var extension = platform == "windows" ? ".exe" : "";
         var packageName = $"RelaxKonOS-{request.Version}-{runtime}-{kind}";
         var buildRoot = Path.Combine(stagingBase, "build", packageName);
@@ -450,6 +499,7 @@ public sealed class PublisherService
             await DotnetPublishAsync(job, Path.Combine(osRoot, "Client", "RelaxKonOS.Client.Desktop", "RelaxKonOS.Client.Desktop.csproj"), target, runtime, cancellationToken);
             EnsureExecutable(target, $"RelaxKonOS{extension}");
             await WriteManifestAsync(packageRoot, kind, request.Version, runtime, platform, new Dictionary<string, string> { ["client"] = $"payload/{platform}/client/RelaxKonOS{extension}" });
+            if (platform == "macos") await WriteMacOsReadmeAsync(packageRoot, cancellationToken);
         }
         else
         {
@@ -598,7 +648,20 @@ public sealed class PublisherService
     }
 
     private static Task WriteManifestAsync(string packageRoot, string kind, string version, string runtime, string platform, Dictionary<string, string> payload) =>
-        File.WriteAllTextAsync(Path.Combine(packageRoot, "manifest.json"), JsonSerializer.Serialize(new { schemaVersion = 1, packageKind = kind, version, runtime, supportedSystems = platform == "windows" ? new[] { "windows" } : new[] { "debian-12", "ubuntu-22.04", "ubuntu-24.04", "ubuntu-26.04" }, payload = new Dictionary<string, object> { [platform] = payload } }, Json));
+        File.WriteAllTextAsync(Path.Combine(packageRoot, "manifest.json"), JsonSerializer.Serialize(new { schemaVersion = 1, packageKind = kind, version, runtime, supportedSystems = SupportedSystems(platform), payload = new Dictionary<string, object> { [platform] = payload } }, Json));
+
+    private static Task WriteMacOsReadmeAsync(string packageRoot, CancellationToken cancellationToken) =>
+        File.WriteAllTextAsync(Path.Combine(packageRoot, "README-macOS.txt"), """
+            RelaxKonOS macOS portable client
+
+            1. Extract this ZIP in Finder or with `unzip`.
+            2. In Terminal, run:
+               chmod +x payload/macos/client/RelaxKonOS
+               ./payload/macos/client/RelaxKonOS
+
+            This portable build is not code-signed or notarized by the local publisher.
+            For distribution outside a controlled environment, sign and notarize it in the Apple release workflow.
+            """, Encoding.UTF8, cancellationToken);
 
     private static async Task<string> ComputeHashAsync(string path, CancellationToken cancellationToken)
     {
@@ -685,7 +748,7 @@ public sealed class PublisherService
 
     private sealed record DownloadEntry(string Platform, string Architecture, string Version, string Url, string Size, string Checksum, string ReleaseDate, bool IsAvailable, string FileName, string PackageKind)
     {
-        public string Runtime => (Platform == "windows" ? "win" : Platform) + "-" + Architecture;
+        public string Runtime => (Platform == "windows" ? "win" : Platform == "macos" ? "osx" : Platform) + "-" + Architecture;
     }
     private sealed record ReleaseDescriptor(int SchemaVersion, string PackageKind, string Version, string Runtime, string Url, string Sha256);
     private sealed record BuiltPackage(DownloadEntry Entry, IReadOnlyList<string> Files);

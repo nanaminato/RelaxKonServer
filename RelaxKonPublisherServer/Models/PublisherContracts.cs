@@ -9,6 +9,10 @@ public sealed class PublisherPlanRequest
     public string Runtime { get; init; } = "win-x64";
     /// <summary>Selected target runtimes. Runtime is retained for older local clients.</summary>
     public List<string> Runtimes { get; init; } = [];
+    /// <summary>Selected client runtimes. Empty preserves the legacy Runtimes selection.</summary>
+    public List<string> ClientRuntimes { get; init; } = [];
+    /// <summary>Selected server runtimes. Empty preserves the legacy Runtimes selection.</summary>
+    public List<string> ServerRuntimes { get; init; } = [];
     public bool BuildClient { get; init; } = true;
     public bool BuildServer { get; init; } = true;
     public bool IncludeChecksums { get; init; } = true;

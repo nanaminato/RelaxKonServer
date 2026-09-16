@@ -1,8 +1,0 @@
-{
-  "schemaVersion": 1,
-  "packageKind": "server",
-  "version": "0.1.1",
-  "runtime": "win-x64",
-  "url": "https://downloads.relaxkon.com/relaxkonos/stable/0.1.1/win-x64/server/RelaxKonOS-0.1.1-win-x64-server.zip",
-  "sha256": "f3831c2f3c718ada7d55d7c2cb689db2eb75d3bba804ee20f04e2e13d918e6bd"
-}
