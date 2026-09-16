@@ -9,18 +9,10 @@ public sealed class PublisherHub(PublisherService publisher) : Hub
 {
     public static string JobGroup(Guid jobId) => $"publisher-job-{jobId:N}";
 
-    public async Task<PublisherPreview> Preview(PublisherPlanRequest request)
+    public Task StartPreview(PublisherPlanRequest request)
     {
-        try
-        {
-            return await publisher.PreviewAsync(request, Context.ConnectionAborted,
-                entry => Clients.Caller.SendAsync("previewLog", entry));
-        }
-        catch (InvalidOperationException exception)
-        {
-            await Clients.Caller.SendAsync("previewLog", new PublisherLogEntry(DateTimeOffset.UtcNow, "error", exception.Message));
-            throw new HubException(exception.Message);
-        }
+        publisher.StartPreview(request, Context.ConnectionId);
+        return Task.CompletedTask;
     }
 
     public async Task Subscribe(Guid jobId)

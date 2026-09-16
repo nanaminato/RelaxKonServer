@@ -22,12 +22,14 @@ public sealed class PublisherService
     private readonly PublisherPathsOptions configuredPaths;
     private readonly string toolRoot;
     private readonly IHubContext<PublisherHub> publisherHub;
+    private readonly ILogger<PublisherService> logger;
 
-    public PublisherService(IOptions<PublisherPathsOptions> configuredPaths, IWebHostEnvironment environment, IHubContext<PublisherHub> publisherHub)
+    public PublisherService(IOptions<PublisherPathsOptions> configuredPaths, IWebHostEnvironment environment, IHubContext<PublisherHub> publisherHub, ILogger<PublisherService> logger)
     {
         this.configuredPaths = configuredPaths.Value;
         toolRoot = environment.ContentRootPath;
         this.publisherHub = publisherHub;
+        this.logger = logger;
     }
 
     public PublisherPaths GetDefaultPaths() => new(
@@ -65,6 +67,7 @@ public sealed class PublisherService
     {
         async Task ReportAsync(string level, string message)
         {
+            WriteBackendLog(level, $"[预览] {message}");
             if (report is not null) await report(new PublisherLogEntry(DateTimeOffset.UtcNow, level, message));
         }
 
@@ -87,6 +90,24 @@ public sealed class PublisherService
             ["win-x64 / Release", "win-arm64 / Release", "linux-x64 / Release", "linux-arm64 / Release"], existing, changes, warnings, checks);
         await ReportAsync("success", "预览完成；没有修改任何目录。");
         return preview;
+    }
+
+    public void StartPreview(PublisherPlanRequest request, string connectionId)
+    {
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var preview = await PreviewAsync(request, CancellationToken.None,
+                    entry => publisherHub.Clients.Client(connectionId).SendAsync("previewLog", entry));
+                await publisherHub.Clients.Client(connectionId).SendAsync("previewCompleted", preview);
+            }
+            catch (Exception exception)
+            {
+                WriteBackendLog("error", $"[预览] 预览失败：{exception.Message}");
+                await publisherHub.Clients.Client(connectionId).SendAsync("previewFailed", exception.Message);
+            }
+        });
     }
 
     public PublisherJob StartGeneration(PublisherPlanRequest request)
@@ -492,7 +513,19 @@ public sealed class PublisherService
     private void Log(PublisherJob job, string level, string message)
     {
         job.AddLog(level, message);
+        WriteBackendLog(level, $"[任务 {job.Id:N}] {message}");
         PushUpdate(job);
+    }
+
+    private void WriteBackendLog(string level, string message)
+    {
+        switch (level)
+        {
+            case "error": logger.LogError("{Message}", message); break;
+            case "warning": logger.LogWarning("{Message}", message); break;
+            case "success": logger.LogInformation("✓ {Message}", message); break;
+            default: logger.LogInformation("{Message}", message); break;
+        }
     }
 
     private void PushUpdate(PublisherJob job) =>
