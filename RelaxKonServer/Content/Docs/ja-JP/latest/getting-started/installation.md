@@ -15,7 +15,17 @@ RelaxKonOS は**クライアント**と**サーバー**で構成されます。�
 - クライアント OS：Windows 10/11、macOS、Ubuntu 20.04+
 - サーバー OS：Ubuntu 20.04+ または Windows Server 2016+
 
-## サーバーの起動
+## まずサーバーのインストール方法を選ぶ
+
+| 方式 | 権限 | 説明 |
+| --- | --- | --- |
+| [ユーザーモード](/docs/ja-JP/latest/getting-started/user-mode) | sudo 不要 | 一般の Linux アカウントでサーバーを実行。`127.0.0.1` のみ待ち受け、システムディレクトリは変更しません |
+| システムモード | root / 管理者 | ワンコマンド インストーラーがシステムサービスと特権ヘルパーを登録。マルチユーザー本番環境向け |
+| ソースから実行 | .NET 10 SDK | 以下に示す手順。開発とデバッグ向けです |
+
+> **Note**: 以下の手順は .NET SDK を必要とし、ソースツリーを直接実行するもので、**一般ユーザー向けのインストール方法ではありません**。サーバーを配備する場合は、先に[ユーザーモードでのインストール](/docs/ja-JP/latest/getting-started/user-mode)または公式サイトの[ダウンロードページ](https://relaxkon.com/downloads)をお読みください。
+
+## ソースからサーバーを起動する
 
 ```bash
 cd RelaxKonOS.Server
@@ -43,5 +53,7 @@ dotnet run
 
 ## 次のステップ
 
+- [ユーザーモードでのインストール（Linux）](/docs/ja-JP/latest/getting-started/user-mode)
 - [クイックスタート](/docs/ja-JP/latest/getting-started/quick-start)
 - [セキュリティモデル](/docs/ja-JP/latest/concepts/security)
+- ソースと Issue: [nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)

@@ -30,5 +30,7 @@ Unlike remote desktop tools, RelaxKonOS transfers **state and intent**, never de
 ## Next steps
 
 - [Installation](/docs/en-US/latest/getting-started/installation)
+- [User Mode installation (Linux, no sudo)](/docs/en-US/latest/getting-started/user-mode)
 - [Quick start](/docs/en-US/latest/getting-started/quick-start)
 - [Client / server architecture](/docs/en-US/latest/concepts/architecture)
+- Source repository and issues: [nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)

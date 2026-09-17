@@ -30,5 +30,7 @@ RelaxKonOS 是一个**跨平台的云原生桌面操作系统环境**。它把�
 ## 接下来
 
 - [安装 RelaxKonOS](/docs/zh-CN/latest/getting-started/installation)
+- [用户模式安装（Linux，无 sudo）](/docs/zh-CN/latest/getting-started/user-mode)
 - [快速开始](/docs/zh-CN/latest/getting-started/quick-start)
 - [客户端 / 服务端架构](/docs/zh-CN/latest/concepts/architecture)
+- 源码仓库与 Issue：[nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)

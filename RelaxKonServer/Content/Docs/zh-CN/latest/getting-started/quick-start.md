@@ -2,7 +2,7 @@
 title: 快速开始
 description: 用几分钟时间了解桌面、窗口与内置应用的基本操作。
 category: 开始使用
-order: 3
+order: 4
 ---
 
 # 快速开始

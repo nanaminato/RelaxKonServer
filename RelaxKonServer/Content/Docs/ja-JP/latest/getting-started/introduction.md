@@ -30,5 +30,7 @@ RelaxKonOS は**クロスプラットフォームのクラウドネイティブ�
 ## 次のステップ
 
 - [インストール](/docs/ja-JP/latest/getting-started/installation)
+- [ユーザーモードでのインストール（Linux、sudo なし）](/docs/ja-JP/latest/getting-started/user-mode)
 - [クイックスタート](/docs/ja-JP/latest/getting-started/quick-start)
 - [クライアント / サーバー アーキテクチャ](/docs/ja-JP/latest/concepts/architecture)
+- ソースリポジトリと Issue: [nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)

@@ -15,7 +15,17 @@ RelaxKonOS 由**客户端**与**服务端**两部分组成。客户端安装在�
 - 客户端操作系统：Windows 10/11、macOS、Ubuntu 20.04+
 - 服务端操作系统：Ubuntu 20.04+ 或 Windows Server 2016+
 
-## 安装服务端
+## 先选择服务端安装方式
+
+| 方式 | 权限 | 说明 |
+| --- | --- | --- |
+| [用户模式](/docs/zh-CN/latest/getting-started/user-mode) | 不需要 sudo | 在普通 Linux 账号下运行服务端，只监听 `127.0.0.1`，不改动系统目录 |
+| 系统模式 | root / 管理员 | 用一键安装器注册系统服务与权限助手，适合多用户生产环境 |
+| 从源码运行 | .NET 10 SDK | 本页下面的步骤，只适合开发与调试 |
+
+> **注意**：下面的步骤需要 .NET SDK 并直接运行源码，**不是**面向普通用户的安装方式。想直接部署服务端，请先阅读[用户模式安装](/docs/zh-CN/latest/getting-started/user-mode)或官网[下载页](https://relaxkon.com/downloads)。
+
+## 从源码运行服务端
 
 ```bash
 cd RelaxKonOS.Server
@@ -43,5 +53,7 @@ dotnet run
 
 ## 下一步
 
+- [用户模式安装（Linux）](/docs/zh-CN/latest/getting-started/user-mode)
 - [快速开始](/docs/zh-CN/latest/getting-started/quick-start)
 - [安全模型](/docs/zh-CN/latest/concepts/security)
+- 源码与 Issue：[nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)

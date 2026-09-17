@@ -2,6 +2,8 @@
 
 [中文](./README.md) · [日本語](./README.ja.md)
 
+Website <https://relaxkon.com> · Product source repository <https://github.com/nanaminato/RelaxKonOS>
+
 `RelaxKonServer/RelaxKonServer` is a pure **ASP.NET Core 10** REST API for the RelaxKon website. It does not host Razor pages, MVC views, static website files or the Angular client: it is the single source of truth for documentation and website content. Controlled API endpoints also stream RelaxKonOS releases, so a separate download project is unnecessary.
 
 ## Run locally
@@ -48,7 +50,7 @@ order: 14
 - **Add a language**: create `Content/Docs/<code>/latest`. Languages are returned in the fixed order `en-US`, `zh-CN`, `ja-JP`; display names for `zh-CN` and `ja-JP` are built in (简体中文 / 日本語) and any other code falls back to the code itself.
 - **Add a version**: create another directory next to `latest`. `latest` sorts first.
 - **Translation fallback**: if a slug is missing in the requested language it is served from `en-US`, and the response sets `isFallback` so the UI can say so. Fallback entries keep the requested language's category labels so the navigation tree stays uniformly grouped.
-- **Current state**: `en-US`, `zh-CN` and `ja-JP` each hold 26 documents and are fully aligned. **Keep the three languages at the same document count when you add or remove files**, otherwise fallback entries appear in the navigation.
+- **Current state**: `en-US`, `zh-CN` and `ja-JP` each hold 27 documents and are fully aligned. **Keep the three languages at the same document count when you add or remove files**, otherwise fallback entries appear in the navigation.
 - Language and version segments accept only `[A-Za-z0-9-]`; slugs additionally accept `/` and `_` up to 256 characters. Anything else returns 404.
 
 ### Releases, FAQ and downloads

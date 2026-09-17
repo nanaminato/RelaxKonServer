@@ -2,7 +2,7 @@
 title: Quick start
 description: Learn the desktop, windows and built-in applications in a few minutes.
 category: Getting Started
-order: 3
+order: 4
 ---
 
 # Quick start

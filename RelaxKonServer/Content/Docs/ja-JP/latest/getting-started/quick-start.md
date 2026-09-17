@@ -2,7 +2,7 @@
 title: クイックスタート
 description: デスクトップ、ウィンドウ、標準アプリの基本を数分で把握します。
 category: はじめに
-order: 3
+order: 4
 ---
 
 # クイックスタート
