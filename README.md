@@ -46,11 +46,11 @@ order: 14
 ```
 
 - **新增文档**：在版本目录下的任意位置创建 `.md` 文件，slug 就是去掉 `.md` 的路径（`apps/terminal`）。
-- **导航分组**：`category` 成为侧边栏分组；分组与文档都按 `order` 排序，其次按标题排序。
+- **导航分组**：`category` 成为侧边栏分组；分组按组内最小的 `order` 排序，组内文档按 `order` 排序，其次按标题。注意详情页的上一页/下一页是把**全部**文档按 `order` 全局排序后取相邻项，所以 `order` 必须在整个文档集里唯一，而不只是组内唯一——重复值会让翻页跳到一篇不相干的文档。`tools/verify-doc-order.mjs` 会检查这一点，`tools/verify-doc-links.mjs` 另外检查全部内链与 front matter。
 - **新增语言**：创建 `Content/Docs/<code>/latest`。语言目录按 `en-US`、`zh-CN`、`ja-JP` 的固定顺序返回，`zh-CN` 与 `ja-JP` 的显示名称为内置（简体中文 / 日本語），其他代码回退为代码本身。
 - **新增版本**：在 `latest` 同级再建一个目录；`latest` 排在最前。
 - **翻译回退**：目标语言缺少某个 slug 时改用 `en-US` 的版本，并在响应中把 `isFallback` 置为 `true`；回退项的分类名仍按目标语言本地化，以保证导航分组标题统一。
-- **当前状态**：`en-US`、`zh-CN`、`ja-JP` 各 27 篇且完全对齐。**增删内容文件时必须让三种语言的篇数保持一致**，否则导航会出现回退项。
+- **当前状态**：`en-US`、`zh-CN`、`ja-JP` 各 36 篇（入门 4 + 概念 9 + 应用 23）且完全对齐。**增删内容文件时必须让三种语言的篇数保持一致**，否则导航会出现回退项。改完跑 `node tools/verify-doc-order.mjs`（篇数 / `order` 唯一性 / 三语对齐）与 `node tools/verify-doc-links.mjs`（内链与 front matter）复核。
 - slug 与语言/版本段只允许 `[A-Za-z0-9-]`，slug 额外允许 `/` 与 `_`，最长 256 字符；不符合规则的请求返回 404。
 
 ### 发布说明、FAQ 与下载
@@ -93,7 +93,6 @@ order: 14
 | GET | `/api/releases/{version}` | 单条发布说明，含 Markdown 正文 |
 | GET | `/api/faq?language=` | 指定语言的 FAQ 条目（默认 `en-US`） |
 | GET/HEAD | `/relaxkonos/{artifact}` | RelaxKonOS ZIP、校验和、描述和引导安装器；支持 HTTP Range 续传 |
-| GET/HEAD | `/apt/{artifact}` | 已签名的 APT 元数据与 RelaxKonOS Client Debian 包；支持 HTTP Range 续传 |
 
 搜索细节：`q` 少于 2 个字符返回 400；正文命中时返回的 `snippet` 是剥离 Markdown 语法后的纯文本摘要，最多 20 条结果，标题命中的排在前面。
 
@@ -109,9 +108,7 @@ order: 14
 
 它会验证 ZIP 的 SHA-256，将文件放到 `stable/{version}/{runtime}/`，生成 `latest/{runtime}.json`，并同步更新现有 `/api/downloads` 清单，所以官网的离线包卡片无需人工维护。`-PublicBaseUri https://relaxkon.com` 可让主站成为规范 URL；默认 URL 是 `https://downloads.relaxkon.com`。两者由同一个网站部署提供服务。
 
-部署 `deployment/nginx/relaxkon.com.conf` 后，让 `relaxkon.com`、`www.relaxkon.com`、`downloads.relaxkon.com` 指向同一台服务器，并配置覆盖全部名称的证书。`/api/`、`/relaxkonos/`、`/apt/` 反向代理到本 API，其余请求继续由现有 Angular 构建产物处理。
-
-客户端 APT 仓库置于 `Content/ReleaseDelivery/apt/`。用 [`../RelaxKonOS/deployment/packaging/publish-relaxkonos-apt-repository.sh`](../RelaxKonOS/deployment/packaging/publish-relaxkonos-apt-repository.sh) 以受保护的发布密钥生成或更新该目录；该脚本会重建索引、`Release`、`InRelease` 和签名。客户端构建及用户安装说明见 [`../RelaxKonOS/deployment/ClientDistribution.md`](../RelaxKonOS/deployment/ClientDistribution.md)。
+部署 `deployment/nginx/relaxkon.com.conf` 后，让 `relaxkon.com`、`www.relaxkon.com`、`downloads.relaxkon.com` 指向同一台服务器，并配置覆盖全部名称的证书。`/api/`、`/relaxkonos/` 反向代理到本 API，其余请求继续由现有 Angular 构建产物处理。
 
 用户可任选其中一个域名，安装器会下载稳定版描述并验证 ZIP SHA-256：
 

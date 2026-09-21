@@ -37,7 +37,7 @@ For continuous push and bidirectional streams:
 
 ## Why SignalR
 
-- Automatic reconnect
+- Built-in reconnect support (whether it is enabled is **decided per hub**; the terminal hub does not enable it today, so a dropped connection means reopening the terminal)
 - Built-in JWT authentication via `AccessTokenProvider`
 - Strongly typed hub contracts
 - No need to maintain a separate bare WebSocket endpoint

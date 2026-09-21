@@ -188,7 +188,6 @@ server {
     location ^~ /.well-known/acme-challenge/ { root $ROOT/acme; }
     location /api/ { include proxy_params; proxy_pass http://127.0.0.1:$API_PORT; proxy_set_header X-Forwarded-Proto \$scheme; }
     location /relaxkonos/ { include proxy_params; proxy_pass http://127.0.0.1:$API_PORT; proxy_set_header X-Forwarded-Proto \$scheme; proxy_request_buffering off; proxy_buffering off; }
-    location /apt/ { include proxy_params; proxy_pass http://127.0.0.1:$API_PORT; proxy_set_header X-Forwarded-Proto \$scheme; proxy_request_buffering off; proxy_buffering off; }
     location / { try_files \$uri \$uri/ /index.html; }
 }
 EOF

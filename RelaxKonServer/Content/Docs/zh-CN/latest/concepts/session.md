@@ -42,4 +42,4 @@ Session 结束（Workspace 保留）
 ## 相关文档
 
 - [工作区](/docs/zh-CN/latest/concepts/workspace)
-- [重连](/docs/zh-CN/latest/concepts/reconnect)
+- [持久化](/docs/zh-CN/latest/concepts/persistence)

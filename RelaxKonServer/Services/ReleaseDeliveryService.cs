@@ -16,11 +16,9 @@ public sealed class ReleaseDeliveryService : IReleaseDeliveryService
     private static readonly IReadOnlyDictionary<string, string> ContentTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {
         [".zip"] = "application/zip",
-        [".deb"] = "application/vnd.debian.binary-package",
         [".msix"] = "application/msix",
         [".json"] = "application/json",
         [".sha256"] = "text/plain",
-        [".gpg"] = "application/pgp-signature",
         [".gz"] = "application/gzip",
         [".ps1"] = "text/plain",
         [".sh"] = "text/plain",
@@ -57,7 +55,7 @@ public sealed class ReleaseDeliveryService : IReleaseDeliveryService
         return true;
     }
 
-    // Debian package filenames may contain a version with '+', ':', or '~'. They are
+    // Artifact filenames may carry a version containing '+', ':', or '~'. They are
     // still constrained to individual path segments above, so permitting them cannot
     // introduce path traversal.
     private static bool IsSafePathCharacter(char value) => char.IsAsciiLetterOrDigit(value) || value is '.' or '-' or '_' or '+' or ':' or '~';

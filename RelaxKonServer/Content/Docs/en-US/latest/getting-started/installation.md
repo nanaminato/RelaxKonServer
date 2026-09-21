@@ -25,6 +25,35 @@ RelaxKonOS is made of a **client** and a **server**. The client runs on the devi
 
 > **Note**: the steps below need the .NET SDK and run the source tree directly — they are **not** the installation path for end users. To deploy a server, read [User Mode installation](/docs/en-US/latest/getting-started/user-mode) or the website [downloads page](https://relaxkon.com/downloads) first.
 
+## Host authorization and the privileged helper
+
+The server **does not run as root or administrator**. Every operation that needs host privilege goes through a dedicated privileged helper that accepts only fixed, structured actions and offers no general command execution entry point. The following points decide which features are available after installation.
+
+### Administrator rights are a precondition
+
+A System Mode install creates a dedicated service account, makes the helper's publish directory and policy files unwritable by that account, and allows only the service account to call the helper with no arguments. As a result:
+
+- **Discovery and read-only features** work as soon as the service process can read.
+- **Features that change host state** (installing runtimes, writing system configuration, controlling system services, deploying certificates and so on) require RelaxKonOS to hold sufficient privilege. When it does not, the UI returns an explicit problem code and asks you to redeploy with more privilege, instead of failing silently.
+- The client **never** collects sudo, administrator or service-account passwords and never joins request parameters into a shell command. The correct response to insufficient privilege is to reinstall or restart the server with the required rights.
+
+### Docker access is an explicit choice
+
+Control of the Docker daemon socket is close to root privilege, so installation does **not** add the service account to that group by default. If you deliberately want [Docker Manager](/docs/en-US/latest/apps/docker) to manage the local engine, add `--docker-access` explicitly during a System Mode install:
+
+```bash
+sudo deployment/bootstrap/install-relaxkonos.sh --mode system --bundle /path/to/release --docker-access
+```
+
+- The choice is written to a root-only policy file; if Docker is already installed, the installer grants access and restarts the server.
+- If Docker is installed by RelaxKonOS later, the helper performs the same fixed authorization afterwards and marks the task as "restart required". Restart the server and refresh the Docker status.
+- **Without that option, a Docker install refuses to run before modifying the host** rather than changing half the system and then failing.
+- User Mode does not support Docker by default: even when the service account could reach the socket, it is reported as a root-equivalent risk and requires separate confirmation.
+
+### What happens when the helper is unavailable
+
+When the helper is missing, uninstalled, or refuses a call, the affected feature fails with a stable problem code that explains why — for example, elevation-dependent proxy or Docker operations cannot complete. **Running workloads are not interrupted** and saved configuration is not rolled back; whether the failure happened before or after touching the host is recorded, so you can fix the cause and retry.
+
 ## Run the server from source
 
 ```bash
@@ -56,4 +85,5 @@ The client opens a login window. Sign in with the credentials of a **host operat
 - [User Mode installation (Linux)](/docs/en-US/latest/getting-started/user-mode)
 - [Quick start](/docs/en-US/latest/getting-started/quick-start)
 - [Security model](/docs/en-US/latest/concepts/security)
+- [Docker Manager](/docs/en-US/latest/apps/docker) and [Proxy Manager](/docs/en-US/latest/apps/proxy-manager), which need host authorization
 - Source and issues: [nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)

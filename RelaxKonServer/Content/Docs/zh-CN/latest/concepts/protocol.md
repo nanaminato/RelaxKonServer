@@ -37,7 +37,7 @@ RelaxKonOS 的客户端与服务端之间有一层**显式协议**。业务代�
 
 ## 为什么选择 SignalR
 
-- 自动重连
+- 内建重连机制（**是否启用由各 Hub 决定**：终端 Hub 当前未启用，断开后需要重新打开终端）
 - 内建 JWT 鉴权（`AccessTokenProvider`）
 - 强类型 Hub 契约
 - 不需要再维护一套裸 WebSocket 端点
@@ -51,4 +51,4 @@ RelaxKonOS 的客户端与服务端之间有一层**显式协议**。业务代�
 ## 相关文档
 
 - [客户端 / 服务端架构](/docs/zh-CN/latest/concepts/architecture)
-- [重连](/docs/zh-CN/latest/concepts/reconnect)
+- [会话与设备](/docs/zh-CN/latest/concepts/session)

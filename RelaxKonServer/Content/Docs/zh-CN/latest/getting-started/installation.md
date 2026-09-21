@@ -25,6 +25,35 @@ RelaxKonOS 由**客户端**与**服务端**两部分组成。客户端安装在�
 
 > **注意**：下面的步骤需要 .NET SDK 并直接运行源码，**不是**面向普通用户的安装方式。想直接部署服务端，请先阅读[用户模式安装](/docs/zh-CN/latest/getting-started/user-mode)或官网[下载页](https://relaxkon.com/downloads)。
 
+## 宿主授权与特权助手
+
+服务端**不以 root 或管理员身份运行**。所有需要宿主特权的操作都通过一个专用的特权助手执行，它只接受固定的、结构化的动作，不提供通用命令执行入口。安装时请留意以下几点，它们决定了后续哪些功能可用。
+
+### 管理员权限是前提
+
+以系统模式安装时，安装器会创建专用的服务账户、把助手的发布目录与策略文件设为服务账户不可写，并只允许服务账户以无参数方式调用助手。因此：
+
+- **发现与只读功能**在服务进程可读时即可使用。
+- **会改变宿主状态的功能**（安装运行时、写系统配置、控制系统服务、部署证书等）要求 RelaxKonOS 具备足够权限；权限不足时界面返回明确的问题码，并提示以更高权限重新部署，而不是失败得无声无息。
+- 客户端**不会**收集 sudo、管理员或服务账户口令，也不会把请求参数拼接成 shell 命令。遇到权限不足时，正确处理方式是重新以所需权限安装或启动服务端。
+
+### Docker 访问需要显式选择
+
+Docker 守护进程套接字的控制权接近 root 权限，因此安装默认**不会**把服务账户加入相应权限组。若确定要让 [Docker 管理器](/docs/zh-CN/latest/apps/docker)管理本机引擎，必须在系统模式安装时显式追加 `--docker-access`：
+
+```bash
+sudo deployment/bootstrap/install-relaxkonos.sh --mode system --bundle /path/to/release --docker-access
+```
+
+- 这项选择会写入仅 root 可读的策略文件；若 Docker 已安装，安装器会授予访问权限并重启服务端。
+- 若 Docker 由 RelaxKonOS 之后安装，助手会在安装后执行同一固定授权，并把该任务标记为「需要重启」；重启服务端后再刷新 Docker 状态即可。
+- **未选择该选项时，Docker 安装会在修改主机之前拒绝执行**，而不是先改一半再失败。
+- 用户模式默认不支持 Docker，即使服务账户能访问套接字也会报告为等价 root 的风险并要求单独确认。
+
+### 助手不可用时的表现
+
+助手缺失、被卸载或调用被拒绝时，相关功能会以稳定问题码失败并说明原因，例如代理或 Docker 的提权类操作无法完成。此时**已运行的工作负载不会被中断**，已保存的配置也不会被回滚——失败发生在动到宿主之前或之后都有明确记录，可按提示修复后重试。
+
 ## 从源码运行服务端
 
 ```bash
@@ -56,4 +85,5 @@ dotnet run
 - [用户模式安装（Linux）](/docs/zh-CN/latest/getting-started/user-mode)
 - [快速开始](/docs/zh-CN/latest/getting-started/quick-start)
 - [安全模型](/docs/zh-CN/latest/concepts/security)
+- [Docker 管理器](/docs/zh-CN/latest/apps/docker)与[代理管理器](/docs/zh-CN/latest/apps/proxy-manager)（需要宿主授权）
 - 源码与 Issue：[nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)

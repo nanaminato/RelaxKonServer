@@ -48,4 +48,4 @@ Shell
 ## 相关文档
 
 - [协议与通信](/docs/zh-CN/latest/concepts/protocol)
-- [重连](/docs/zh-CN/latest/concepts/reconnect)
+- [会话与设备](/docs/zh-CN/latest/concepts/session)

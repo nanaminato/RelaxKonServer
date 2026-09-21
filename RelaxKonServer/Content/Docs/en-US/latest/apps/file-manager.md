@@ -20,6 +20,7 @@ The interface is ported from Jaya File Manager. Every file operation runs throug
 - Upload and download
 - File and folder properties, with editable POSIX permissions on Linux
 - Open with the default application or "open with", driven by the extension declarations in each application manifest
+- Theme-aware vector icons that follow the light and dark appearance and stay sharp on high-density displays
 
 ## How to use it
 
@@ -30,6 +31,12 @@ Open File Manager from the start menu, double-click a folder to enter it, and do
 - Every operation runs as the **signed-in user** on the host OS
 - Out-of-scope access is refused by the host OS; RelaxKonOS does not bypass it
 - There is no separate elevation path; privilege escalation is always delegated to the host
+
+### Directory readability is reported honestly
+
+When a directory cannot be read because of insufficient permission the UI **says "no access" and explains why instead of presenting it as empty**. An empty listing therefore always means the directory really is empty, not that you cannot see its contents.
+
+Reading a protected directory is enabled by an administrator granting read access (or by running the server under an identity that holds it), never by the client collecting or forwarding a password.
 
 ## Architecture
 
