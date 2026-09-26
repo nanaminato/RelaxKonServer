@@ -18,8 +18,28 @@ public sealed class PublisherPlanRequest
     public bool IncludeChecksums { get; init; } = true;
     public bool IncludeDescriptors { get; init; } = true;
     public bool IncludeInstallers { get; init; }
+    /// <summary>Imports the fixed, locally verified Android APK from AndroidImport.ArtifactDirectory.</summary>
+    public bool ImportAndroidApk { get; init; }
+    /// <summary>Archives the fixed, locally verified Android App Bundle. AAB files are not website-downloadable.</summary>
+    public bool ImportAndroidAab { get; init; }
     public bool OnlyLatestDownloadable { get; init; }
     public List<HistoricalPackageDecision> HistoricalPackages { get; init; } = [];
+}
+
+/// <summary>
+/// Local-only Android import settings. This deliberately contains verification paths and public
+/// certificate data only; a keystore, alias, and any password belong exclusively on the Android
+/// signing machine and must never be configured in the publisher.
+/// </summary>
+public sealed class AndroidImportOptions
+{
+    public string ArtifactDirectory { get; init; } = "";
+    public string ExpectedPackageName { get; init; } = "app.relaxkonos.mobile";
+    public string ExpectedCertificateSha256 { get; init; } = "";
+    public string ApkSignerPath { get; init; } = "";
+    public string Aapt2Path { get; init; } = "";
+    public string KeytoolPath { get; init; } = "";
+    public string JarSignerPath { get; init; } = "";
 }
 
 public sealed record HistoricalPackageDecision(string RelativePath, bool CopyToOutput, bool IsDownloadable);

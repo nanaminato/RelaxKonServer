@@ -16,6 +16,8 @@ public sealed class ReleaseDeliveryService : IReleaseDeliveryService
     private static readonly IReadOnlyDictionary<string, string> ContentTypes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
     {
         [".zip"] = "application/zip",
+        [".apk"] = "application/vnd.android.package-archive",
+        [".aab"] = "application/octet-stream",
         [".msix"] = "application/msix",
         [".json"] = "application/json",
         [".sha256"] = "text/plain",

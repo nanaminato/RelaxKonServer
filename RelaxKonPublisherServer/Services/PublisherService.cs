@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using RelaxKon_Publisher.Hubs;
@@ -20,13 +21,15 @@ public sealed class PublisherService
     private readonly ConcurrentDictionary<Guid, PublisherJob> jobs = new();
     private readonly ConcurrentDictionary<Guid, CancellationTokenSource> jobCancellation = new();
     private readonly PublisherPathsOptions configuredPaths;
+    private readonly AndroidImportOptions androidImport;
     private readonly string toolRoot;
     private readonly IHubContext<PublisherHub> publisherHub;
     private readonly ILogger<PublisherService> logger;
 
-    public PublisherService(IOptions<PublisherPathsOptions> configuredPaths, IWebHostEnvironment environment, IHubContext<PublisherHub> publisherHub, ILogger<PublisherService> logger)
+    public PublisherService(IOptions<PublisherPathsOptions> configuredPaths, IOptions<AndroidImportOptions> androidImport, IWebHostEnvironment environment, IHubContext<PublisherHub> publisherHub, ILogger<PublisherService> logger)
     {
         this.configuredPaths = configuredPaths.Value;
+        this.androidImport = androidImport.Value;
         toolRoot = environment.ContentRootPath;
         this.publisherHub = publisherHub;
         this.logger = logger;
@@ -51,7 +54,8 @@ public sealed class PublisherService
         if (request.BuildClient && SelectedClientRuntimes(request).Count == 0) throw new InvalidOperationException("至少选择一个客户端运行时。");
         if (request.BuildServer && SelectedServerRuntimes(request).Count == 0) throw new InvalidOperationException("至少选择一个服务端运行时。");
         if (request.BuildServer && SelectedServerRuntimes(request).Any(runtime => runtime.StartsWith("osx-", StringComparison.OrdinalIgnoreCase))) throw new InvalidOperationException("macOS 目前仅支持客户端包，不能选择服务端目标运行时。");
-        if (!request.BuildClient && !request.BuildServer && !request.IncludeInstallers) throw new InvalidOperationException("至少选择一项要生成的发布内容。");
+        if (!request.BuildClient && !request.BuildServer && !request.IncludeInstallers && !request.ImportAndroidApk && !request.ImportAndroidAab)
+            throw new InvalidOperationException("至少选择一项要生成的发布内容。");
     }
 
     public PublisherJob? CancelJob(Guid id)
@@ -142,7 +146,7 @@ public sealed class PublisherService
             var serverRuntimes = request.BuildServer ? SelectedServerRuntimes(request) : [];
             var runtimes = clientRuntimes.Concat(serverRuntimes).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             Log(job, "info", $"构建前检查通过；客户端：{string.Join("、", clientRuntimes.DefaultIfEmpty("未选择"))}；服务端：{string.Join("、", serverRuntimes.DefaultIfEmpty("未选择"))}。");
-            job.ProgressTotal = 3 + clientRuntimes.Count + serverRuntimes.Count;
+            job.ProgressTotal = 3 + clientRuntimes.Count + serverRuntimes.Count + (request.ImportAndroidApk ? 1 : 0) + (request.ImportAndroidAab ? 1 : 0);
             job.ProgressCurrent = 1;
             var sourceContent = Path.Combine(paths.RelaxKonServerPath, "Content");
             var stagingBase = Path.Combine(toolRoot, "artifacts", "staging", job.Id.ToString("N"));
@@ -203,6 +207,30 @@ public sealed class PublisherService
                     entries.Add(package.Entry);
                     affected.AddRange(package.Files);
                     affected.Add(latestDescriptor);
+                    job.ProgressCurrent++;
+                    PushUpdate(job);
+                }
+            }
+
+            if (request.ImportAndroidApk || request.ImportAndroidAab)
+            {
+                var import = GetAndroidImportSettings(request.ImportAndroidApk, request.ImportAndroidAab);
+                var androidReleaseManifest = await ReadAndVerifyAndroidReleaseManifestAsync(import, request.Version, cancellationToken);
+                if (request.ImportAndroidApk)
+                {
+                    SetStep(job, "导入并验证已签名 Android APK");
+                    entries.RemoveAll(entry => entry.Runtime == "android-universal" && entry.PackageKind == "client");
+                    var imported = await ImportAndroidArtifactAsync(job, import, androidReleaseManifest, stageDelivery, request, ".apk", cancellationToken);
+                    entries.Add(imported.Entry!);
+                    affected.AddRange(imported.Files);
+                    job.ProgressCurrent++;
+                    PushUpdate(job);
+                }
+                if (request.ImportAndroidAab)
+                {
+                    SetStep(job, "归档并验证已签名 Android App Bundle");
+                    var imported = await ImportAndroidArtifactAsync(job, import, androidReleaseManifest, stageDelivery, request, ".aab", cancellationToken);
+                    affected.AddRange(imported.Files);
                     job.ProgressCurrent++;
                     PushUpdate(job);
                 }
@@ -311,7 +339,7 @@ public sealed class PublisherService
         return selected;
     }
 
-    private static IReadOnlyList<PublisherPreflightCheck> CreatePreflightChecks(PublisherPlanRequest request, PublisherPaths paths)
+    private IReadOnlyList<PublisherPreflightCheck> CreatePreflightChecks(PublisherPlanRequest request, PublisherPaths paths)
     {
         var checks = new List<PublisherPreflightCheck>
         {
@@ -339,8 +367,41 @@ public sealed class PublisherService
                 checks.Add(new PublisherPreflightCheck($"部署文件：{platform}", Directory.Exists(path), Directory.Exists(path) ? "部署文件已找到" : $"找不到部署文件：{path}"));
             }
         }
+        if (request.ImportAndroidApk || request.ImportAndroidAab)
+        {
+            var importDirectory = NormalizeConfiguredDirectory(androidImport.ArtifactDirectory);
+            var certificate = NormalizeCertificateFingerprint(androidImport.ExpectedCertificateSha256);
+            checks.Add(new PublisherPreflightCheck("Android 导入目录", importDirectory is not null && Directory.Exists(importDirectory), importDirectory is null ? "必须在 appsettings.Local.json 配置绝对 ArtifactDirectory" : "已配置本机受控导入目录"));
+            checks.Add(new PublisherPreflightCheck("Android 应用 ID", !string.IsNullOrWhiteSpace(androidImport.ExpectedPackageName), string.IsNullOrWhiteSpace(androidImport.ExpectedPackageName) ? "必须配置 ExpectedPackageName" : androidImport.ExpectedPackageName));
+            checks.Add(new PublisherPreflightCheck("Android 发布证书", certificate is not null, certificate is null ? "ExpectedCertificateSha256 必须是 64 位 SHA-256 十六进制指纹" : "已配置受信任证书指纹"));
+            if (request.ImportAndroidApk)
+            {
+                checks.Add(new PublisherPreflightCheck("APK 验签工具", IsExistingFile(androidImport.ApkSignerPath), "apksigner 必须在本机可用"));
+                checks.Add(new PublisherPreflightCheck("APK 元数据工具", IsExistingFile(androidImport.Aapt2Path), "aapt2 必须在本机可用"));
+            }
+            if (request.ImportAndroidAab)
+            {
+                checks.Add(new PublisherPreflightCheck("AAB 验签工具", IsExistingFile(androidImport.JarSignerPath), "jarsigner 必须在本机可用"));
+                checks.Add(new PublisherPreflightCheck("AAB 证书工具", IsExistingFile(androidImport.KeytoolPath), "keytool 必须在本机可用"));
+            }
+            if (importDirectory is not null)
+            {
+                var releaseManifest = AndroidManifestPath(importDirectory, request.Version);
+                checks.Add(new PublisherPreflightCheck("Android 发布清单", File.Exists(releaseManifest), File.Exists(releaseManifest) ? "已找到由签名构建生成的发布清单" : $"缺少 {Path.GetFileName(releaseManifest)}"));
+                foreach (var extension in new[] { (request.ImportAndroidApk, ".apk"), (request.ImportAndroidAab, ".aab") }.Where(item => item.Item1).Select(item => item.Item2))
+                {
+                    var artifact = AndroidArtifactPath(importDirectory, request.Version, extension);
+                    checks.Add(new PublisherPreflightCheck($"Android {extension.TrimStart('.').ToUpperInvariant()}", File.Exists(artifact), File.Exists(artifact) ? "已找到待导入的签名产物" : $"缺少 {Path.GetFileName(artifact)}"));
+                }
+            }
+        }
         return checks;
     }
+
+    private static string? NormalizeConfiguredDirectory(string? value) =>
+        string.IsNullOrWhiteSpace(value) || !Path.IsPathFullyQualified(value) ? null : Path.TrimEndingDirectorySeparator(Path.GetFullPath(value));
+
+    private static bool IsExistingFile(string? value) => !string.IsNullOrWhiteSpace(value) && Path.IsPathFullyQualified(value) && File.Exists(value);
 
     private static string NormalizeExistingDirectory(string? value, string label)
     {
@@ -385,7 +446,7 @@ public sealed class PublisherService
         var known = result.Select(item => item.FileName).ToHashSet(StringComparer.OrdinalIgnoreCase);
         var delivery = Path.Combine(content, "ReleaseDelivery");
         if (Directory.Exists(delivery))
-            foreach (var zip in Directory.EnumerateFiles(delivery, "*.zip", SearchOption.AllDirectories))
+            foreach (var zip in Directory.EnumerateFiles(delivery, "*.*", SearchOption.AllDirectories).Where(path => Path.GetExtension(path).Equals(".zip", StringComparison.OrdinalIgnoreCase) || Path.GetExtension(path).Equals(".apk", StringComparison.OrdinalIgnoreCase) || Path.GetExtension(path).Equals(".aab", StringComparison.OrdinalIgnoreCase)))
             {
                 var name = Path.GetFileName(zip);
                 if (known.Add(name)) result.Add(new ExistingPackage(Path.GetRelativePath(delivery, zip).Replace('\\', '/'), name, new FileInfo(zip).Length, null, null, null, false));
@@ -417,6 +478,8 @@ public sealed class PublisherService
             AddPlannedPackageChange(changes, paths, request.Version, runtime, "client");
         }
         foreach (var runtime in request.BuildServer ? SelectedServerRuntimes(request) : []) AddPlannedPackageChange(changes, paths, request.Version, runtime, "server");
+        if (request.ImportAndroidApk) AddPlannedAndroidArtifactChange(changes, paths, request.Version, ".apk", "导入经本机工具验证的签名 APK，并加入公开下载清单");
+        if (request.ImportAndroidAab) AddPlannedAndroidArtifactChange(changes, paths, request.Version, ".aab", "归档经本机工具验证的签名 AAB；AAB 不加入公开下载清单");
         changes.Add(new OutputChange("Downloads/downloads.json", File.Exists(Path.Combine(paths.ContentOutputPath, "Downloads", "downloads.json")) ? "替换" : "新增", "根据选择的可下载包重建"));
         foreach (var history in request.HistoricalPackages.Where(item => item.CopyToOutput))
             changes.Add(new OutputChange($"ReleaseDelivery/{history.RelativePath}", "复制", history.IsDownloadable ? "保留为公开历史包" : "仅复制，不在下载清单公开"));
@@ -430,6 +493,14 @@ public sealed class PublisherService
         var relative = $"ReleaseDelivery/relaxkonos/stable/{version}/{runtime}/{kind}/{filename}";
         var output = Path.Combine(paths.ContentOutputPath, relative.Replace('/', Path.DirectorySeparatorChar));
         changes.Add(new OutputChange(relative, File.Exists(output) ? "替换" : "新增", $"构建最新 {kind} 包（{runtime}）"));
+    }
+
+    private static void AddPlannedAndroidArtifactChange(List<OutputChange> changes, PublisherPaths paths, string version, string extension, string reason)
+    {
+        var filename = AndroidArtifactFileName(version, extension);
+        var relative = $"ReleaseDelivery/relaxkonos/stable/{version}/android-universal/client/{filename}";
+        var output = Path.Combine(paths.ContentOutputPath, relative.Replace('/', Path.DirectorySeparatorChar));
+        changes.Add(new OutputChange(relative, File.Exists(output) ? "替换" : "新增", reason));
     }
 
     private static string RuntimePlatform(string runtime) => runtime switch
@@ -544,6 +615,157 @@ public sealed class PublisherService
             files.Add(Path.GetRelativePath(deliveryRoot, descriptorPath).Replace('\\', '/'));
         }
         return new BuiltPackage(new DownloadEntry(platform, runtime.Split('-')[1], request.Version, url, FormatSize(new FileInfo(archive).Length), hash, DateOnly.FromDateTime(DateTime.UtcNow).ToString("yyyy-MM-dd"), true, Path.GetFileName(archive), kind), files);
+    }
+
+    private AndroidImportSettings GetAndroidImportSettings(bool requireApk, bool requireAab)
+    {
+        var directory = NormalizeConfiguredDirectory(androidImport.ArtifactDirectory);
+        var certificate = NormalizeCertificateFingerprint(androidImport.ExpectedCertificateSha256);
+        if (directory is null || !Directory.Exists(directory)) throw new InvalidOperationException("Android ArtifactDirectory 必须是存在的本机绝对路径。");
+        if (string.IsNullOrWhiteSpace(androidImport.ExpectedPackageName)) throw new InvalidOperationException("必须配置 Android ExpectedPackageName。");
+        if (certificate is null) throw new InvalidOperationException("Android ExpectedCertificateSha256 必须是 64 位 SHA-256 十六进制指纹。");
+        if (requireApk && (!IsExistingFile(androidImport.ApkSignerPath) || !IsExistingFile(androidImport.Aapt2Path)))
+            throw new InvalidOperationException("导入 APK 需要将 apksigner 和 aapt2 配置为本机绝对文件路径。");
+        if (requireAab && (!IsExistingFile(androidImport.KeytoolPath) || !IsExistingFile(androidImport.JarSignerPath)))
+            throw new InvalidOperationException("导入 AAB 需要将 keytool 和 jarsigner 配置为本机绝对文件路径。");
+        return new AndroidImportSettings(directory, androidImport.ExpectedPackageName, certificate, androidImport.ApkSignerPath, androidImport.Aapt2Path, androidImport.KeytoolPath, androidImport.JarSignerPath);
+    }
+
+    private async Task<AndroidReleaseManifest> ReadAndVerifyAndroidReleaseManifestAsync(AndroidImportSettings import, string version, CancellationToken cancellationToken)
+    {
+        var path = AndroidManifestPath(import.ArtifactDirectory, version);
+        if (!File.Exists(path)) throw new InvalidOperationException($"缺少 Android 发布清单：{Path.GetFileName(path)}");
+        AndroidReleaseManifest? manifest;
+        try
+        {
+            await using var stream = File.OpenRead(path);
+            manifest = await JsonSerializer.DeserializeAsync<AndroidReleaseManifest>(stream, Json, cancellationToken);
+        }
+        catch (JsonException exception)
+        {
+            throw new InvalidOperationException($"Android 发布清单不是有效 JSON：{exception.Message}");
+        }
+        if (manifest is null || manifest.SchemaVersion != 1 || manifest.Artifacts.Count == 0)
+            throw new InvalidOperationException("Android 发布清单格式无效。");
+        if (!string.Equals(manifest.PackageName, import.ExpectedPackageName, StringComparison.Ordinal))
+            throw new InvalidOperationException($"Android 应用 ID 不匹配：期望 {import.ExpectedPackageName}，实际 {manifest.PackageName}。");
+        if (!string.Equals(manifest.VersionName, version, StringComparison.Ordinal))
+            throw new InvalidOperationException($"Android versionName 不匹配：发布计划为 {version}，发布清单为 {manifest.VersionName}。");
+        if (!string.Equals(NormalizeCertificateFingerprint(manifest.CertificateSha256), import.ExpectedCertificateSha256, StringComparison.Ordinal))
+            throw new InvalidOperationException("Android 发布清单的签名证书与本机受信任指纹不匹配。");
+        return manifest;
+    }
+
+    private async Task<ImportedAndroidArtifact> ImportAndroidArtifactAsync(PublisherJob job, AndroidImportSettings import, AndroidReleaseManifest manifest, string deliveryRoot, PublisherPlanRequest request, string extension, CancellationToken cancellationToken)
+    {
+        var source = AndroidArtifactPath(import.ArtifactDirectory, request.Version, extension);
+        if (!File.Exists(source)) throw new InvalidOperationException($"缺少 Android {extension}：{Path.GetFileName(source)}");
+        EnsureReadableArchive(source);
+        var hash = await ComputeHashAsync(source, cancellationToken);
+        var declared = manifest.Artifacts.SingleOrDefault(item => string.Equals(item.FileName, Path.GetFileName(source), StringComparison.OrdinalIgnoreCase));
+        if (declared is null || !string.Equals(NormalizeCertificateFingerprint(declared.Sha256), hash, StringComparison.Ordinal))
+            throw new InvalidOperationException($"Android 发布清单中的 SHA-256 与 {Path.GetFileName(source)} 不匹配。");
+
+        if (extension.Equals(".apk", StringComparison.OrdinalIgnoreCase))
+        {
+            var signature = await RunToolAsync(import.ApkSignerPath, ["verify", "--verbose", "--print-certs", source], cancellationToken);
+            EnsureExpectedCertificate(signature, import.ExpectedCertificateSha256, "APK");
+            var badging = await RunToolAsync(import.Aapt2Path, ["dump", "badging", source], cancellationToken);
+            EnsureApkMetadata(badging, import.ExpectedPackageName, request.Version);
+        }
+        else
+        {
+            var verification = await RunToolAsync(import.JarSignerPath, ["-verify", source], cancellationToken);
+            if (!verification.Contains("jar verified", StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("AAB 签名验证未确认 jar verified。");
+            var certificate = await RunToolAsync(import.KeytoolPath, ["-printcert", "-jarfile", source], cancellationToken);
+            EnsureExpectedCertificate(certificate, import.ExpectedCertificateSha256, "AAB");
+        }
+
+        var targetDirectory = Path.Combine(deliveryRoot, "relaxkonos", "stable", request.Version, "android-universal", "client");
+        Directory.CreateDirectory(targetDirectory);
+        var target = Path.Combine(targetDirectory, Path.GetFileName(source));
+        foreach (var path in new[] { target, target + ".sha256", target + ".json" })
+            if (File.Exists(path)) File.Delete(path);
+        File.Copy(source, target, overwrite: true);
+        var files = new List<string> { Path.GetRelativePath(deliveryRoot, target).Replace('\\', '/') };
+        var manifestSource = AndroidManifestPath(import.ArtifactDirectory, request.Version);
+        var manifestTarget = Path.Combine(targetDirectory, Path.GetFileName(manifestSource));
+        File.Copy(manifestSource, manifestTarget, overwrite: true);
+        files.Add(Path.GetRelativePath(deliveryRoot, manifestTarget).Replace('\\', '/'));
+        if (request.IncludeChecksums)
+        {
+            var checksum = target + ".sha256";
+            await File.WriteAllTextAsync(checksum, $"{hash}  {Path.GetFileName(target)}\n", cancellationToken);
+            files.Add(Path.GetRelativePath(deliveryRoot, checksum).Replace('\\', '/'));
+        }
+        var url = $"/relaxkonos/stable/{request.Version}/android-universal/client/{Path.GetFileName(target)}";
+        if (request.IncludeDescriptors)
+        {
+            var descriptor = target + ".json";
+            await File.WriteAllTextAsync(descriptor, JsonSerializer.Serialize(new ReleaseDescriptor(1, "client", request.Version, "android-universal", $"https://downloads.relaxkon.com{url}", hash), Json), cancellationToken);
+            files.Add(Path.GetRelativePath(deliveryRoot, descriptor).Replace('\\', '/'));
+        }
+        Log(job, "success", $"已验证并导入 Android {extension.TrimStart('.').ToUpperInvariant()}：{Path.GetFileName(source)}。");
+        var entry = extension.Equals(".apk", StringComparison.OrdinalIgnoreCase)
+            ? new DownloadEntry("android", "universal", request.Version, url, FormatSize(new FileInfo(target).Length), hash, DateOnly.FromDateTime(DateTime.UtcNow).ToString("yyyy-MM-dd"), true, Path.GetFileName(target), "client")
+            : null;
+        return new ImportedAndroidArtifact(entry, files);
+    }
+
+    private static void EnsureReadableArchive(string path)
+    {
+        try
+        {
+            using var archive = ZipFile.OpenRead(path);
+            if (archive.Entries.Count == 0) throw new InvalidOperationException($"Android 产物为空：{Path.GetFileName(path)}");
+        }
+        catch (InvalidDataException exception)
+        {
+            throw new InvalidOperationException($"Android 产物不是可读取的 APK/AAB ZIP：{Path.GetFileName(path)}（{exception.Message}）");
+        }
+    }
+
+    private static void EnsureApkMetadata(string output, string expectedPackageName, string expectedVersion)
+    {
+        var match = Regex.Match(output, "package:\\s+name='(?<package>[^']+)'\\s+versionCode='[^']*'\\s+versionName='(?<version>[^']+)'", RegexOptions.CultureInvariant);
+        if (!match.Success) throw new InvalidOperationException("无法从 aapt2 输出读取 APK 应用 ID 和版本。");
+        if (!string.Equals(match.Groups["package"].Value, expectedPackageName, StringComparison.Ordinal) || !string.Equals(match.Groups["version"].Value, expectedVersion, StringComparison.Ordinal))
+            throw new InvalidOperationException($"APK 元数据不匹配：期望 {expectedPackageName} {expectedVersion}。");
+    }
+
+    private static void EnsureExpectedCertificate(string output, string expectedFingerprint, string artifactKind)
+    {
+        var fingerprints = Regex.Matches(output, "SHA-?256(?:\\s+digest)?\\s*:\\s*(?<value>[0-9A-Fa-f:]{64,95})", RegexOptions.CultureInvariant)
+            .Select(match => NormalizeCertificateFingerprint(match.Groups["value"].Value))
+            .Where(value => value is not null)
+            .Cast<string>();
+        if (!fingerprints.Contains(expectedFingerprint, StringComparer.Ordinal))
+            throw new InvalidOperationException($"{artifactKind} 签名证书与本机受信任指纹不匹配。");
+    }
+
+    private static string? NormalizeCertificateFingerprint(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        var normalized = value.Replace(":", "", StringComparison.Ordinal).Replace(" ", "", StringComparison.Ordinal).ToLowerInvariant();
+        return Regex.IsMatch(normalized, "^[0-9a-f]{64}$", RegexOptions.CultureInvariant) ? normalized : null;
+    }
+
+    private static string AndroidArtifactFileName(string version, string extension) => $"RelaxKonOS-{version}-android-universal{extension}";
+    private static string AndroidArtifactPath(string directory, string version, string extension) => Path.Combine(directory, AndroidArtifactFileName(version, extension));
+    private static string AndroidManifestPath(string directory, string version) => Path.Combine(directory, $"RelaxKonOS-{version}-android-universal.release.json");
+
+    private static async Task<string> RunToolAsync(string executable, IEnumerable<string> arguments, CancellationToken cancellationToken)
+    {
+        var info = new ProcessStartInfo(executable) { RedirectStandardOutput = true, RedirectStandardError = true, StandardOutputEncoding = Encoding.UTF8, StandardErrorEncoding = Encoding.UTF8, UseShellExecute = false, CreateNoWindow = true };
+        foreach (var argument in arguments) info.ArgumentList.Add(argument);
+        using var process = new Process { StartInfo = info };
+        process.Start();
+        var standardOutput = process.StandardOutput.ReadToEndAsync(cancellationToken);
+        var standardError = process.StandardError.ReadToEndAsync(cancellationToken);
+        await process.WaitForExitAsync(cancellationToken);
+        var output = (await standardOutput) + "\n" + (await standardError);
+        if (process.ExitCode != 0) throw new InvalidOperationException($"Android 验证工具 {Path.GetFileName(executable)} 失败（退出代码 {process.ExitCode}）：{output.Trim()}");
+        return output;
     }
 
     /// <summary>Updates the catalog consumed by the online server installers.</summary>
@@ -752,4 +974,8 @@ public sealed class PublisherService
     }
     private sealed record ReleaseDescriptor(int SchemaVersion, string PackageKind, string Version, string Runtime, string Url, string Sha256);
     private sealed record BuiltPackage(DownloadEntry Entry, IReadOnlyList<string> Files);
+    private sealed record AndroidImportSettings(string ArtifactDirectory, string ExpectedPackageName, string ExpectedCertificateSha256, string ApkSignerPath, string Aapt2Path, string KeytoolPath, string JarSignerPath);
+    private sealed record AndroidReleaseManifest(int SchemaVersion, string PackageName, string VersionName, long VersionCode, string CertificateSha256, List<AndroidReleaseManifestArtifact> Artifacts);
+    private sealed record AndroidReleaseManifestArtifact(string FileName, string Sha256);
+    private sealed record ImportedAndroidArtifact(DownloadEntry? Entry, IReadOnlyList<string> Files);
 }
