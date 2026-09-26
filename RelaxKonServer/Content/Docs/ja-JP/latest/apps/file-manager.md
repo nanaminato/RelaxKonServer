@@ -11,7 +11,7 @@ order: 12
 
 ## 概要
 
-UI は Jaya File Manager から移植されています。すべてのファイル操作はサーバー REST API（`/api/v1.0/files/*`）経由で実行され、サーバーはホスト OS プロセスとしてファイルシステムを操作するため、**ホストのユーザーと権限をそのまま利用**し、別の ACL を持ち込みません。
+UI は Jaya File Manager から移植されています。RelaxKonOS Server のワークスペースでは、すべてのファイル操作がサーバー REST API（`/api/v1.0/files/*`）を通じて実行され、サインインしたホストユーザーの権限を再利用します。別の ACL は作りません。SSH デスクトップでは専用の SFTP ファイルブラウザーを使用します。これは確認済みの SSH 接続に限定され、RelaxKonOS Server API は呼び出しません。
 
 ## 機能
 
@@ -41,4 +41,5 @@ UI は Jaya File Manager から移植されています。すべてのファイ�
 ## 関連ドキュメント
 
 - [ファイルサービス](/docs/ja-JP/latest/apps/file-services)
+- [サーバーセンター](/docs/ja-JP/latest/apps/server-center)
 - [セキュリティモデル](/docs/ja-JP/latest/concepts/security)

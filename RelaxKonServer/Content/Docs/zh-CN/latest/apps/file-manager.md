@@ -11,7 +11,7 @@ order: 12
 
 ## 概述
 
-界面移植自 Jaya File Manager，所有文件操作都通过服务端 REST API（`/api/v1.0/files/*`）执行。服务端以宿主 OS 进程身份调用文件系统，因此**沿用宿主系统的用户与权限**，不额外建立一套 ACL。
+界面移植自 Jaya File Manager。在 RelaxKonOS Server 工作区中，所有文件操作都通过服务端 REST API（`/api/v1.0/files/*`）执行，并沿用已登录宿主用户的权限，不额外建立一套 ACL。SSH 桌面则使用专用 SFTP 文件浏览器；它只限于已确认的 SSH 连接，不会调用 RelaxKonOS Server API。
 
 ## 功能
 
@@ -53,4 +53,5 @@ RelaxKonOS.Server
 ## 相关文档
 
 - [文件服务](/docs/zh-CN/latest/apps/file-services)
+- [服务器中心](/docs/zh-CN/latest/apps/server-center)
 - [安全模型](/docs/zh-CN/latest/concepts/security)

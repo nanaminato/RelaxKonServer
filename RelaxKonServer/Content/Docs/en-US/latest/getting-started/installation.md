@@ -72,6 +72,8 @@ dotnet run
 
 The client opens a login window. Sign in with the credentials of a **host operating system** account.
 
+You can also choose **SSH** in the login window to connect to a host before it runs RelaxKonOS Server. SSH mode uses a confirmed host key and offers a focused maintenance desktop; it does not create a RelaxKonOS workspace. Read [Server Center](/docs/en-US/latest/apps/server-center) before using it to install or maintain a server.
+
 ## First sign-in
 
 1. Open the client and wait for the login window
@@ -84,6 +86,7 @@ The client opens a login window. Sign in with the credentials of a **host operat
 
 - [User Mode installation (Linux)](/docs/en-US/latest/getting-started/user-mode)
 - [Quick start](/docs/en-US/latest/getting-started/quick-start)
+- [Server Center](/docs/en-US/latest/apps/server-center)
 - [Security model](/docs/en-US/latest/concepts/security)
 - [Docker Manager](/docs/en-US/latest/apps/docker) and [Proxy Manager](/docs/en-US/latest/apps/proxy-manager), which need host authorization
 - Source and issues: [nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)

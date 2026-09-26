@@ -7,7 +7,7 @@ order: 18
 
 # Code Editor
 
-The code editor edits code files on the **server host**, with syntax highlighting and multi-encoding support.
+The code editor edits code files on a RelaxKonOS Server host, with syntax highlighting and multi-encoding support. In an SSH desktop, it can also open, browse, and save code through SFTP after the host key has been confirmed.
 
 ## Features
 
@@ -18,7 +18,7 @@ The code editor edits code files on the **server host**, with syntax highlightin
 
 ## How to use it
 
-Open it from the start menu, or launch it via "open with" from File Manager using an extension declaration. Saving writes back to the file **on the server**.
+Open it from the start menu, or launch it via "open with" from File Manager using an extension declaration. In an SSH desktop, open a code file from the SSH File Browser instead. Saving writes back to the connected server or SSH host; it never writes a remote file to the client by default.
 
 ## Permissions and security
 
@@ -30,3 +30,4 @@ Open it from the start menu, or launch it via "open with" from File Manager usin
 
 - [Notepad](/docs/en-US/latest/apps/notepad)
 - [File Manager](/docs/en-US/latest/apps/file-manager)
+- [Server Center](/docs/en-US/latest/apps/server-center)

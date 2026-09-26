@@ -11,7 +11,7 @@ File Manager (Explorer) lets you work with files on the **server host** as if th
 
 ## Overview
 
-The interface is ported from Jaya File Manager. Every file operation runs through the server REST API (`/api/v1.0/files/*`). The server calls the file system as the host OS process and therefore **reuses the host user and its permissions** instead of introducing a second ACL.
+The interface is ported from Jaya File Manager. In a RelaxKonOS Server workspace, every file operation runs through the server REST API (`/api/v1.0/files/*`), which reuses the signed-in host user's permissions instead of introducing a second ACL. An SSH desktop instead uses its dedicated SFTP file browser; it is limited to the confirmed SSH connection and does not call the RelaxKonOS Server API.
 
 ## Features
 
@@ -53,4 +53,5 @@ RelaxKonOS.Server
 ## Related documentation
 
 - [File services](/docs/en-US/latest/apps/file-services)
+- [Server Center](/docs/en-US/latest/apps/server-center)
 - [Security model](/docs/en-US/latest/concepts/security)

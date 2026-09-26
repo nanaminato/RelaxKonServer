@@ -9,6 +9,13 @@ order: 4
 
 Once you are signed in you will see the RelaxKonOS desktop. Here is what people do first.
 
+## Pick a connection mode
+
+- **RelaxKonOS Server** opens the full desktop with your persistent workspace and the applications supported by that server.
+- **SSH** opens a focused desktop for a confirmed SSH host. It includes Terminal, Server Center, SSH File Browser, Code Editor, and Image Viewer; it is not a RelaxKonOS workspace.
+
+On a first SSH connection, check the displayed host-key fingerprint before choosing **Trust and connect**. See [Server Center](/docs/en-US/latest/apps/server-center) for the installation and maintenance workflow.
+
 ## Desktop and windows
 
 - **Start menu**: click the button in the lower-left corner to list applications
@@ -32,4 +39,5 @@ Click any application in the start menu. Most are single-window (Settings, Task 
 ## Next steps
 
 - [Applications](/docs/en-US/latest/apps/terminal)
+- [Server Center](/docs/en-US/latest/apps/server-center)
 - [Protocol and communication](/docs/en-US/latest/concepts/protocol)

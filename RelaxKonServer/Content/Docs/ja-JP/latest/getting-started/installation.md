@@ -72,6 +72,8 @@ dotnet run
 
 ログインウィンドウが開きます。**ホスト OS** のアカウント資格情報でサインインします。
 
+ログイン画面では **SSH** も選べるため、RelaxKonOS Server を実行していないホストへ先に接続できます。SSH モードはホスト鍵を確認し、保守向けの専用デスクトップを提供しますが、RelaxKonOS ワークスペースは作成しません。導入や保守に使う前に[サーバーセンター](/docs/ja-JP/latest/apps/server-center)を読んでください。
+
 ## 初回サインイン
 
 1. クライアントを起動してログインウィンドウを待つ
@@ -84,6 +86,7 @@ dotnet run
 
 - [ユーザーモードでのインストール（Linux）](/docs/ja-JP/latest/getting-started/user-mode)
 - [クイックスタート](/docs/ja-JP/latest/getting-started/quick-start)
+- [サーバーセンター](/docs/ja-JP/latest/apps/server-center)
 - [セキュリティモデル](/docs/ja-JP/latest/concepts/security)
 - [Docker マネージャー](/docs/ja-JP/latest/apps/docker)と[プロキシーマネージャー](/docs/ja-JP/latest/apps/proxy-manager)（ホストの認可が必要です）
 - ソースと Issue: [nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)

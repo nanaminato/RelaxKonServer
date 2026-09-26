@@ -39,6 +39,10 @@ order: 24
 
 出站代理是这一规则的例外：它属于**服务器级**配置，由所有用户共享，不随工作区同步。
 
+### 语言偏好
+
+对于 RelaxKonOS Server 连接，「时间和语言」可选择「跟随系统」。它将中文解析为 `zh-CN`、日文解析为 `ja-JP`，其他系统语言解析为 `en-US`，并把该工作区偏好同步到其他设备。SSH 桌面始终跟随客户端系统语言，绝不会读取或修改服务端工作区偏好。
+
 ## 权限边界
 
 宿主 OS 级设置（时区、网卡）只做**只读展示**。RelaxKonOS 不修改宿主 OS 的系统配置，这属于硬约束「权限提升委托宿主 OS」。
@@ -48,4 +52,5 @@ order: 24
 - [Docker 管理器](/docs/zh-CN/latest/apps/docker)
 - [代理管理器](/docs/zh-CN/latest/apps/proxy-manager)
 - [网络诊断器](/docs/zh-CN/latest/apps/network-inspector)
+- [服务器中心](/docs/zh-CN/latest/apps/server-center)
 - [工作区](/docs/zh-CN/latest/concepts/workspace)

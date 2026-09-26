@@ -50,7 +50,7 @@ order: 14
 - **新增语言**：创建 `Content/Docs/<code>/latest`。语言目录按 `en-US`、`zh-CN`、`ja-JP` 的固定顺序返回，`zh-CN` 与 `ja-JP` 的显示名称为内置（简体中文 / 日本語），其他代码回退为代码本身。
 - **新增版本**：在 `latest` 同级再建一个目录；`latest` 排在最前。
 - **翻译回退**：目标语言缺少某个 slug 时改用 `en-US` 的版本，并在响应中把 `isFallback` 置为 `true`；回退项的分类名仍按目标语言本地化，以保证导航分组标题统一。
-- **当前状态**：`en-US`、`zh-CN`、`ja-JP` 各 36 篇（入门 4 + 概念 9 + 应用 23）且完全对齐。**增删内容文件时必须让三种语言的篇数保持一致**，否则导航会出现回退项。改完跑 `node tools/verify-doc-order.mjs`（篇数 / `order` 唯一性 / 三语对齐）与 `node tools/verify-doc-links.mjs`（内链与 front matter）复核。
+- **当前状态**：`en-US`、`zh-CN`、`ja-JP` 各 37 篇（入门 4 + 概念 9 + 应用 24）且完全对齐。**增删内容文件时必须让三种语言的篇数保持一致**，否则导航会出现回退项。改完跑 `node tools/verify-doc-order.mjs`（篇数 / `order` 唯一性 / 三语对齐）与 `node tools/verify-doc-links.mjs`（内链与 front matter）复核。
 - slug 与语言/版本段只允许 `[A-Za-z0-9-]`，slug 额外允许 `/` 与 `_`，最长 256 字符；不符合规则的请求返回 404。
 
 ### 发布说明、FAQ 与下载

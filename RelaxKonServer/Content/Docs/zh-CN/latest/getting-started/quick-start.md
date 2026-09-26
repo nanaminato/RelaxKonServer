@@ -9,6 +9,13 @@ order: 4
 
 登录成功后你会看到 RelaxKonOS 桌面。下面是最常见的几件事。
 
+## 选择连接模式
+
+- **RelaxKonOS Server** 会打开完整桌面，其中包含持久工作区与该服务端支持的应用。
+- **SSH** 会为已确认的 SSH 主机打开精简桌面，其中有终端、服务器中心、SSH 文件浏览器、代码编辑器和图片查看器；它不是 RelaxKonOS 工作区。
+
+第一次 SSH 连接时，请在选择「信任并连接」前核对显示的主机密钥指纹。安装与维护流程请参阅[服务器中心](/docs/zh-CN/latest/apps/server-center)。
+
 ## 桌面与窗口
 
 - **开始菜单**：点击左下角按钮打开应用列表
@@ -32,4 +39,5 @@ order: 4
 ## 下一步
 
 - [应用程序总览](/docs/zh-CN/latest/apps/terminal)
+- [服务器中心](/docs/zh-CN/latest/apps/server-center)
 - [协议与通信](/docs/zh-CN/latest/concepts/protocol)

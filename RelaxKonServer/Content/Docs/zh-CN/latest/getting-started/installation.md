@@ -72,6 +72,8 @@ dotnet run
 
 客户端启动后会显示登录窗口，输入**宿主系统**的用户名与密码即可登录。
 
+登录窗口也可以选择 **SSH**，在主机尚未运行 RelaxKonOS Server 时直接连接。SSH 模式会确认主机密钥，并提供精简的维护桌面；它不会创建 RelaxKonOS 工作区。使用它安装或维护服务端前，请先阅读[服务器中心](/docs/zh-CN/latest/apps/server-center)。
+
 ## 首次登录
 
 1. 打开客户端，进入登录窗口
@@ -84,6 +86,7 @@ dotnet run
 
 - [用户模式安装（Linux）](/docs/zh-CN/latest/getting-started/user-mode)
 - [快速开始](/docs/zh-CN/latest/getting-started/quick-start)
+- [服务器中心](/docs/zh-CN/latest/apps/server-center)
 - [安全模型](/docs/zh-CN/latest/concepts/security)
 - [Docker 管理器](/docs/zh-CN/latest/apps/docker)与[代理管理器](/docs/zh-CN/latest/apps/proxy-manager)（需要宿主授权）
 - 源码与 Issue：[nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)

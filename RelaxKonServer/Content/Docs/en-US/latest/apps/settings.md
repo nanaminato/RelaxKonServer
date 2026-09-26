@@ -39,6 +39,10 @@ Workspace preferences persist through `/api/v1.0/workspaces/{id}/preferences` to
 
 The outbound proxy is the exception to that rule: it is a **server-level** configuration shared by all users and does not follow the workspace.
 
+### Language preference
+
+For a RelaxKonOS Server connection, **Time and language** can use **Follow system**. It resolves Chinese to `zh-CN`, Japanese to `ja-JP`, and other system languages to `en-US`, then synchronizes that workspace preference across devices. An SSH desktop always follows the client system language and never reads or changes a server workspace preference.
+
 ## Permission boundary
 
 Host OS level settings (time zone, network adapters) are shown **read-only**. RelaxKonOS does not modify host system configuration; this is the hard rule that privilege changes are delegated to the host OS.
@@ -48,4 +52,5 @@ Host OS level settings (time zone, network adapters) are shown **read-only**. Re
 - [Docker Manager](/docs/en-US/latest/apps/docker)
 - [Proxy Manager](/docs/en-US/latest/apps/proxy-manager)
 - [Network Inspector](/docs/en-US/latest/apps/network-inspector)
+- [Server Center](/docs/en-US/latest/apps/server-center)
 - [Workspace](/docs/en-US/latest/concepts/workspace)

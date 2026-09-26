@@ -39,6 +39,10 @@ order: 24
 
 外向きプロキシーはこの規則の例外で、**サーバー単位**の設定として全利用者が共有し、ワークスペースには追従しません。
 
+### 言語設定
+
+RelaxKonOS Server 接続では、「時刻と言語」で **システムに従う** を選べます。中国語は `zh-CN`、日本語は `ja-JP`、その他のシステム言語は `en-US` に解決され、そのワークスペース設定は他のデバイスにも同期されます。SSH デスクトップは常にクライアントのシステム言語に従い、サーバーのワークスペース設定を読んだり変更したりしません。
+
 ## 権限の境界
 
 ホスト OS レベルの設定（タイムゾーン、ネットワークアダプター）は**読み取り専用**で表示されます。RelaxKonOS はホストのシステム構成を変更しません。
@@ -48,4 +52,5 @@ order: 24
 - [Docker マネージャー](/docs/ja-JP/latest/apps/docker)
 - [プロキシーマネージャー](/docs/ja-JP/latest/apps/proxy-manager)
 - [ネットワークインスペクター](/docs/ja-JP/latest/apps/network-inspector)
+- [サーバーセンター](/docs/ja-JP/latest/apps/server-center)
 - [ワークスペース](/docs/ja-JP/latest/concepts/workspace)
