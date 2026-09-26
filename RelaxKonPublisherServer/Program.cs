@@ -14,7 +14,9 @@ builder.Services.AddSingleton<PublisherService>();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy
-    .WithOrigins("http://localhost:4200", "http://127.0.0.1:4200", "http://[::1]:4200")
+    .WithOrigins(
+        "http://localhost:4200", "http://127.0.0.1:4200", "http://[::1]:4200",
+        "http://localhost:4201", "http://127.0.0.1:4201", "http://[::1]:4201")
     .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 
 var app = builder.Build();
