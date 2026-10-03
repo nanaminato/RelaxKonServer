@@ -9,7 +9,7 @@ order: 5
 
 > 本页对照当前源码说明能力，不是某个发布包的功能清单。已发布产物与日期见[发行说明](/releases/0.1.2)，功能验收状态以所链接的实现记录为准。
 
-Android 客户端是独立的 Kotlin、Jetpack Compose 与 Material 3 应用，面向手机和平板，不使用 Avalonia 或 .NET Android。工程最低 Android API 为 23；这不代表全部功能已在所有系统版本和设备上验收。
+Android 客户端是独立的 Kotlin、Jetpack Compose 与 Material 3 应用，面向手机和平板，不使用 Avalonia 或 .NET Android。最低支持 Android 10（API 29）；这不代表全部功能已在所有系统版本和设备上验收。
 
 ## 连接与功能
 

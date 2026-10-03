@@ -9,7 +9,7 @@ order: 5
 
 > このページは現在のソース機能を説明し、特定パッケージの収録機能一覧ではありません。公開成果物と日付は[リリースノート](/releases/0.1.2)、検証状況はリンク先の実装記録で確認してください。
 
-Android はスマートフォンとタブレット向けの独立した Kotlin・Jetpack Compose・Material 3 アプリです。Avalonia や .NET Android は使用しません。プロジェクトの最低 API は 23 ですが、すべての OS・端末で全機能の検証が完了したことを意味しません。
+Android はスマートフォンとタブレット向けの独立した Kotlin・Jetpack Compose・Material 3 アプリです。Avalonia や .NET Android は使用しません。最低対応バージョンは Android 10（API 29） ですが、すべての OS・端末で全機能の検証が完了したことを意味しません。
 
 ## 接続と機能
 
