@@ -7,180 +7,35 @@ order: 3
 
 # 用户模式安装（Linux）
 
-当前下载目录只列出 Windows/Linux x64 的 client 与 system server 包，没有 user-server 包。请取得真实发布且经过校验的 user-server 产物后再执行本页命令。系统服务端包不能代替用户模式包。系统安装命令必须与所下载包内的安装器匹配：当前源码安装器要求显式 --mode system，历史 0.1.2 引导脚本使用其自身参数，不要混用。
+Linux 用户模式适合在自己的普通账号下运行服务端，不需要 sudo，也不安装系统服务或权限助手。服务仅监听 `127.0.0.1`，远程访问由客户端管理的 SSH 隧道完成。
 
-> 本页对照当前源码说明能力，不是某个发布包的功能清单。已发布产物与日期见[发行说明](/releases/0.1.2)，功能验收状态以所链接的实现记录为准。
+## 通过服务器中心安装
 
-**用户模式（User Mode）** 面向「我只想在自己的 Linux 账号下跑一份服务端」的场景。它与系统模式共用同一套 Server 与 Guardian 二进制，但把全部持久状态限制在该账号的 XDG 目录中：不创建 systemd 系统服务、不安装常驻权限助手、不修改 PAM、sudoers、防火墙或 `/etc`。
+1. 从[下载页](/downloads)取得客户端，并通过服务器中心连接目标 Linux 主机，核对主机密钥。
+2. 使用普通非 root 账号执行环境检查，进入安装向导，明确选择 **Linux 用户模式**。
+3. 选择官方稳定版、客户端本地 ZIP、服务器上的 ZIP 或自定义 HTTPS 下载。用户模式必须使用 `*-user-server.zip`，系统模式包不能代替。
+4. 设置端口（默认 5000），按需填写数据、配置、状态和缓存目录；留空使用下方 XDG 默认目录。
+5. 审阅选项后确认安装，等待 `/ready` 检查及最终操作回执，随后通过客户端的受管 SSH 隧道登录。
 
-## 三种安装方式先分清
+实际发布包以下载目录为准；若用户模式包尚未发布，请先取得适用的发布包。目标主机需具备 Bash、Python 3、curl、unzip、realpath、stat、find、sha256sum 和 flock，不需要 systemd。
 
-RelaxKonOS 的服务端有三种安装方式，用途互不重叠。本页只讲**用户模式**。
-
-| 方式 | 权限 | 适用场景 | 下载的包 |
-| --- | --- | --- | --- |
-| **用户模式** | 普通账号，**禁止 root** | 个人在已有账号下自建服务端 | `*-user-server.zip` |
-| [系统模式](/docs/zh-CN/latest/getting-started/installation) | root / 管理员 | 多用户生产环境，注册系统服务 | `*-server.zip` |
-| 开发者模式 | 需要 .NET 10 SDK | 参与 RelaxKonOS 开发 | 源码仓库 |
-
-> **警告**：客户端包与服务端包不能混用。用户模式只接受 manifest 中 `packageKind` 为 `user-server` 的发布包。
-
-### 用户模式与系统模式的差别
-
-| 项目 | 用户模式 | 系统模式 |
-| --- | --- | --- |
-| 运行身份 | 你自己的账号 | Server / Guardian 系统服务账户 |
-| 服务注册 | 无，由 `relaxkon` 命令管理进程 | systemd 服务或 Windows 服务 |
-| 监听地址 | 仅 `127.0.0.1` | 可配置：仅本机 / 局域网 / 反向代理 |
-| 权限助手 | 不安装，`Privileges: disabled` | 安装，并由固定的 sudoers 规则调用 |
-| 主机改动 | 仅 XDG 目录 | `/etc`、systemd、sudoers、防火墙 |
-| 升级 | `relaxkon upgrade`，就绪检查失败自动回滚 | 重新运行安装器 |
-| 卸载 | `relaxkon uninstall` | 发布包内的卸载脚本 |
-
-## 安装前准备
-
-- 一个**普通（非 root）Linux 账号**。安装脚本与生命周期命令都会拒绝 root，`sudo` 反而会让安装失败。
-- 系统命令：`bash`、`realpath`、`stat`、`find`、`sha256sum`，以及 `flock`（通常由 `util-linux` 提供）。缺少 `flock` 时安装会直接报错。
-- 若从 HTTPS 发布地址在线安装，还需要 `curl` 与 `unzip`。
-- 一份 `*-user-server.zip` 发布包及其官方公布的 SHA-256。
-- 不需要 systemd，不需要 sudo，不需要 root。
-
-> **提示**：官网[下载页](https://relaxkon.com/downloads)会列出稳定通道的包名、大小与校验和；离线服务器只需把服务端包复制过去。
-
-## 分步安装
-
-### 1. 解压发布包
-
-以目标账号操作，**不要**加 `sudo`：
-
-```bash
-unzip RelaxKonOS-<version>-linux-x64-user-server.zip -d RelaxKonOS-user-server
-```
-
-### 2. 运行安装器
-
-```bash
-./RelaxKonOS-user-server/deployment/user/install-relaxkonos.sh \
-  --mode user \
-  --bundle ./RelaxKonOS-user-server
-```
-
-安装器会依次完成：
-
-1. 校验 bundle 是否完整（`manifest.json`、`payload/`、`deployment/user/relaxkon`）；
-2. 校验 `manifest.json` 的 `schemaVersion` 与 `packageKind: "user-server"`；
-3. 校验包内不存在符号链接；
-4. 用 `sha256sum` 校验全部文件，并确认文件清单与实际内容完全一致；
-5. 把版本落到 `server/versions/<version>/`，再用 `server/current` 软链切换，并更新 `bin/relaxkon`。
-
-也可以从官方发布地址在线安装。此时 `--release-uri` 必须是 HTTPS，且必须同时给出 64 位十六进制 SHA-256：
-
-```bash
-./deployment/user/install-relaxkonos.sh \
-  --mode user \
-  --release-uri https://<host>/relaxkonos/stable/<version>/linux-x64/server/<archive>.zip \
-  --release-sha256 <64-hex-sha256>
-```
-
-### 3. 确认安装位置
-
-用户模式只写入该账号的 XDG 目录，权限为 `0700` / `0600`：
+## 目录与权限
 
 | 用途 | 默认路径 |
 | --- | --- |
-| 程序与版本目录 | `${XDG_DATA_HOME:-$HOME/.local/share}/relaxkonos/` |
-| 生命周期命令 | `${XDG_DATA_HOME:-$HOME/.local/share}/relaxkonos/bin/relaxkon` |
-| 配置与密钥 | `${XDG_CONFIG_HOME:-$HOME/.config}/relaxkonos/`（`appsettings.user.json`、`secrets/guardian.secret`） |
-| 运行状态 | `${XDG_STATE_HOME:-$HOME/.local/state}/relaxkonos/`（PID、控制套接字、`install-state.json`、SQLite 数据库） |
-| 日志 | `${XDG_STATE_HOME:-$HOME/.local/state}/relaxkonos/logs/{server,guardian}.log` |
-| 下载缓存 | `${XDG_CACHE_HOME:-$HOME/.cache}/relaxkonos/` |
+| 程序与版本 | `${XDG_DATA_HOME:-$HOME/.local/share}/relaxkonos/` |
+| 配置与密钥 | `${XDG_CONFIG_HOME:-$HOME/.config}/relaxkonos/` |
+| 状态、数据库与日志 | `${XDG_STATE_HOME:-$HOME/.local/state}/relaxkonos/` |
+| 缓存 | `${XDG_CACHE_HOME:-$HOME/.cache}/relaxkonos/` |
 
-安装器**不会**修改你的 `PATH`，也不会写入系统级可执行路径。
+目录必须是绝对路径，避免相互重叠。私有目录与文件采用 `0700` / `0600`。客户端会保存宿主侧目录定位，重连后的维护继续使用实际安装位置。
 
-## 启动与验证
+用户模式不安装 PAM 或 sudoers 配置，不更改系统防火墙，不提供系统模式的 Docker 等特权功能。网络固定仅本机，不配置系统模式的 TLS 和特权文件范围。
 
-```bash
-RELAXKON=""${XDG_DATA_HOME:-$HOME/.local/share}/relaxkonos/bin/relaxkon""
+## 更新与卸载
 
-"$RELAXKON" start
-"$RELAXKON" status
-```
+在服务器中心选中主机，通过维护操作升级、修复、回滚或卸载；无需额外 SSH 客户端或手动运行生命周期命令。升级就绪失败时执行恢复，结果以操作回执为准。卸载默认保留数据，永久删除数据需要单独确认。
 
-`status` 的期望输出：
+端口占用、依赖缺失、包类型或架构不匹配、校验失败和操作锁冲突都会阻断操作；请查看环境检查与操作记录，修复原因后重试。
 
-```text
-RelaxKonOS User Mode is running (pid <n>, loopback 127.0.0.1:5000).
-```
-
-它并不是简单地检查进程是否存在，而是通过当前用户私有的控制套接字（`…/relaxkonos/run/server.sock`，权限 `0600`）请求 `/ready`。只要套接字没有就绪，它会明确报告未就绪，而不是给出成功。
-
-其他常用命令：
-
-```bash
-"$RELAXKON" start --foreground   # 前台运行，便于直接观察输出
-"$RELAXKON" stop                 # 停止 Server 与 Guardian
-```
-
-服务端默认监听 `http://127.0.0.1:5000`，端口可以覆盖：
-
-```bash
-RELAXKONOS_PORT=5100 "$RELAXKON" start
-```
-
-### 从自己的电脑连接
-
-用户模式只绑定回环地址，所以远程访问要走 SSH 本地转发，再把客户端指向本机地址：
-
-```bash
-ssh -L 5000:127.0.0.1:5000 <user>@<server>
-```
-
-## 升级
-
-```bash
-"$RELAXKON" upgrade --bundle ./RelaxKonOS-<new-version>-linux-x64-user-server
-```
-
-升级会停止服务、安装新版本、重新启动并等待就绪。**如果就绪检查失败，它会自动切回升级前的版本**，因此升级不会把你留在一个起不来的服务上。
-
-> **注意**：同一个版本号不能被重复安装。升级时请使用新的版本号。
-
-## 卸载
-
-```bash
-"$RELAXKON" uninstall
-```
-
-它会先停止服务，然后删除 data / config / state / cache 四个目录。
-
-> **警告**：`uninstall` 会一并删除数据库、配置、密钥与日志，且**不可恢复**。如需保留，请先备份 `${XDG_STATE_HOME:-$HOME/.local/state}/relaxkonos/` 与 `${XDG_CONFIG_HOME:-$HOME/.config}/relaxkonos/`。
-
-## 常见问题
-
-| 现象 | 原因与处理 |
-| --- | --- |
-| `User Mode must not be installed as root.` | 用了 `sudo` 或已切到 root。请回到普通账号重新执行。 |
-| `--mode user or --mode system is required.` | 漏写 `--mode user`，或在没有 `sudo` 的情况下写了 `--mode system`。 |
-| `not a complete user-server bundle` | 解压的不是 `*-user-server` 包，或包不完整。 |
-| `bundle is not a user-server manifest` | 包的 `manifest.json` 不是 `packageKind: "user-server"`。 |
-| `bundle file checksum verification failed` | 文件损坏。重新下载并核对官方公布的 SHA-256。 |
-| `another RelaxKonOS lifecycle operation is already running` | 另一处正在执行生命周期操作并持有 `…/relaxkonos/run/launcher.lock`。等它结束。 |
-| `flock is required for safe User Mode lifecycle operations` | 系统缺少 `flock`（`util-linux`）。安装后重试。 |
-| `status` 报进程在跑但控制套接字未就绪 | 查看 `logs/server.log`；通常是首次启动仍在初始化，或端口被占用。 |
-| `version already installed: <version>` | 该版本已安装。换新版本号，或先 `uninstall`。 |
-
-## 查看源码与反馈
-
-用户模式安装器的完整实现可以直接阅读：
-
-- 生命周期命令：`deployment/user/relaxkon`
-- 用户模式入口：`deployment/user/install-relaxkonos.sh`
-- 系统模式安装器（对照用）：`deployment/bootstrap/install-relaxkonos.sh`
-
-源码仓库、Issue 与 Pull Request 都在 [nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)。
-
-## 下一步
-
-- [快速开始](/docs/zh-CN/latest/getting-started/quick-start)
-- [安装](/docs/zh-CN/latest/getting-started/installation)
-- [安全模型](/docs/zh-CN/latest/concepts/security)
+完整来源、目录与维护选项见[安装指南](/docs/zh-CN/latest/getting-started/installation)，入口说明见[服务器中心](/docs/zh-CN/latest/apps/server-center)。

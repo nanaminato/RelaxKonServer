@@ -7,93 +7,68 @@ order: 2
 
 # Installation
 
-> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+RelaxKonOS consists of a client and a server. Install the client on your device, then use **Server Center** to install or maintain the server.
 
-RelaxKonOS is made of a **client** and a **server**. The client runs on the device you use every day; the server runs on the machine that should keep your workspace alive.
+## Before installation
 
-## Requirements
+- Get the matching client from [Downloads](/downloads). Published packages require no .NET SDK. See [Android](/docs/en-US/latest/getting-started/android) for mobile installation.
+- Enable SSH on the target host and prepare a management account. Verify the host key fingerprint when connecting.
+- Linux System Mode defaults to Debian 12 and Ubuntu 22.04/24.04/26.04; it requires root or approved sudo, systemd and Python 3. Other Linux systems require an explicit advanced-option choice.
+- Linux User Mode requires a non-root account, Bash, Python 3, curl, unzip, realpath, stat, find, sha256sum and flock. It needs no sudo or systemd.
+- Windows System Mode requires an elevated administrator SSH session and system PowerShell.
+- Check architecture, space, dependencies and port availability. First installation uses host SSH before a Server API exists.
 
-- **.NET 10.0 SDK** or later
-- Client operating systems: Windows 10/11, macOS, Ubuntu 20.04+
-- Server operating systems: Ubuntu 20.04+ or Windows Server 2016+
+## Install from the client
 
-## Pick a server installation method first
+1. Open **Server Center / Install or manage a server**. Desktop users can also select SSH in the login window and open Server Center after connecting.
+2. Add the host with its SSH address, port and account; verify and trust its host key.
+3. Run preflight and choose **Install server**. An installed host follows the upgrade flow with installation identity verification.
+4. Choose the source, mode and installation options, then review the host and configuration.
+5. Confirm and wait for the host operation receipt and health check. On failure, read the reason and logs in the operation history.
+6. Return to sign-in after installation. User Mode and loopback-only installations can use a client-managed SSH tunnel.
 
-| Method | Privileges | Notes |
-| --- | --- | --- |
-| [User Mode](/docs/en-US/latest/getting-started/user-mode) | No sudo | Runs the server under an ordinary Linux account, binds `127.0.0.1` only, writes nothing into system directories |
-| System Mode | root / administrator | The one-command installer registers system services and the privileged helper, for multi-user production |
-| Run from source | .NET 10 SDK | The steps below; suited to development and debugging only |
+## Release sources
 
-> **Note**: the steps below need the .NET SDK and run the source tree directly — they are **not** the installation path for end users. To deploy a server, read [User Mode installation](/docs/en-US/latest/getting-started/user-mode) or the website [downloads page](https://relaxkon.com/downloads) first.
+| Source | Action and checks |
+| --- | --- |
+| Official stable | The host downloads the package and verifies the official ZIP digest and file inventory; an HTTPS catalog base can be specified |
+| Local release bundle | Select and upload a ZIP from the client; suitable for an offline host |
+| Bundle on the server | Browse or enter an absolute server ZIP path; the host reads that file directly |
+| Custom HTTPS download | Supply the release ZIP HTTPS URL and its full 64-character hexadecimal SHA-256; the download digest is verified |
 
-## Host authorization and the privileged helper
+Local and server files still receive package-kind, architecture, required-file and extraction-safety checks. System Mode uses `*-server.zip`; User Mode uses `*-user-server.zip`. A client package cannot replace a server package. Actual availability follows the download catalog.
 
-The server **does not run as root or administrator**. Every operation that needs host privilege goes through a dedicated privileged helper that accepts only fixed, structured actions and offers no general command execution entry point. The following points decide which features are available after installation.
+## Installation options
 
-### Administrator rights are a precondition
+| Option | Scope and meaning |
+| --- | --- |
+| Mode | Linux System, Linux User or Windows System; Automatic follows preflight recommendations |
+| Server port | 1–65535, default 5000; choose an available port |
+| Program and data directories | System Mode allows separate roots; User Mode stores programs under its data root. Blank uses defaults; existing installations retain recorded roots |
+| Configuration, state and cache directories | Linux User Mode allows all four XDG-related roots; use absolute paths that do not overlap |
+| Network | System Mode offers loopback or LAN; User Mode remains loopback-only. LAN does not open the firewall automatically |
+| TLS certificate | System Mode offers none, custom or self-signed. Select PFX/P12 with its password, or a PEM chain and private key. Self-signed names are comma-separated |
+| File access | System Mode offers restricted, whitelist or full. Enter one absolute host directory per line for a whitelist |
+| Administrator and root file access | Linux System Mode configures separate scopes and whitelists for both identities |
+| Docker authorization | Explicit opt-in for Linux System Mode; off by default. Docker socket access is close to root authority |
+| Other Linux systems | Explicitly allow a system outside the supported matrix; architecture, privilege and dependency checks remain |
+| sudo credentials | Linux System Mode uses root or a sudo password; blank tries the current SSH password |
 
-A System Mode install creates a dedicated service account, makes the helper's publish directory and policy files unwritable by that account, and allows only the service account to call the helper with no arguments. As a result:
+The client handles language, fixed actions, non-interactive execution, private staging paths, certificate password files and existing installation identity. No script arguments need to be entered. Certificate passwords are excluded from review.
 
-- **Discovery and read-only features** work as soon as the service process can read.
-- **Features that change host state** (installing runtimes, writing system configuration, controlling system services, deploying certificates and so on) require RelaxKonOS to hold sufficient privilege. When it does not, the UI returns an explicit problem code and asks you to redeploy with more privilege, instead of failing silently.
-- Host authorization uses unified administrator authentication: system-authenticated administrators are checked dynamically; ordinary users and Alias sessions explicitly authenticate a selected administrator. Credentials never enter logs or arbitrary shell commands. Installation permissions and action authorization are separate; see [Sign-in and Account Security](/docs/en-US/latest/getting-started/login).
+## Update, repair and uninstall
 
-### Docker access is an explicit choice
+Select an installed host in Server Center and open maintenance. Upgrade, repair and rollback continue with recorded directories; reinstalling retained data preserves installation identity. Ordinary upgrades and repairs retain TLS identity; certificate regeneration is an explicit choice.
 
-Control of the Docker daemon socket is close to root privilege, so installation does **not** add the service account to that group by default. If you deliberately want [Docker Manager](/docs/en-US/latest/apps/docker) to manage the local engine, add `--docker-access` explicitly during a System Mode install:
-
-```bash
-sudo deployment/bootstrap/install-relaxkonos.sh --mode system --bundle /path/to/release --docker-access
-```
-
-- The choice is written to a root-only policy file; if Docker is already installed, the installer grants access and restarts the server.
-- If Docker is installed by RelaxKonOS later, the helper performs the same fixed authorization afterwards and marks the task as "restart required". Restart the server and refresh the Docker status.
-- **Without that option, a Docker install refuses to run before modifying the host** rather than changing half the system and then failing.
-- User mode enforces host-management restrictions on the server; socket access or a confirmation cannot bypass them.
-
-### What happens when the helper is unavailable
-
-When the helper is missing, uninstalled, or refuses a call, the affected feature fails with a stable problem code that explains why — for example, elevation-dependent proxy or Docker operations cannot complete. **Running workloads are not interrupted** and saved configuration is not rolled back; whether the failure happened before or after touching the host is recorded, so you can fix the cause and retry.
-
-## Run the server from source
-
-```bash
-cd RelaxKonOS.Server
-dotnet run
-```
-
-For production, change `Jwt:Secret` in `appsettings.json` to a random string of at least 32 characters and terminate HTTPS at a reverse proxy.
-
-## Run the client
-
-```bash
-cd Client/RelaxKonOS.Client.Desktop
-dotnet run
-```
-
-The client opens a login window. Sign in with the credentials of a **host operating system** account.
-
-You can also choose **SSH** in the login window to connect to a host before it runs RelaxKonOS Server. SSH mode uses a confirmed host key and offers a focused maintenance desktop; it does not create a RelaxKonOS workspace. Read [Server Center](/docs/en-US/latest/apps/server-center) before using it to install or maintain a server.
+Uninstall retains data by default. Permanently deleting databases, configuration, keys and logs requires separate confirmation. The client verifies host state afterward. Use operation logs and repair when the privileged helper is unavailable.
 
 ## First sign-in
 
-1. Open the client and wait for the login window
-2. Enter the host OS credentials of the server machine
-3. The desktop opens and your workspace is created and synchronised
-
-> System sign-in uses host verification; Alias uses an independent password hash bound to the same host user. The server does not persist system sign-in passwords. Remembered credentials are an explicit local secure-storage choice.
+After health verification, sign in with a host system account or a configured Alias. System accounts use host authentication; Alias uses an independent password hash. The server does not persist system sign-in passwords. Remembering credentials is an explicit local secure-storage choice.
 
 ## Next steps
 
-- [User Mode installation (Linux)](/docs/en-US/latest/getting-started/user-mode)
-- [Quick start](/docs/en-US/latest/getting-started/quick-start)
 - [Server Center](/docs/en-US/latest/apps/server-center)
-- [Security model](/docs/en-US/latest/concepts/security)
-- [Docker Manager](/docs/en-US/latest/apps/docker) and [Proxy Manager](/docs/en-US/latest/apps/proxy-manager), which need host authorization
-- Source and issues: [nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)
-
-## Client and account guides
-
-- [Android phones and tablets](/docs/en-US/latest/getting-started/android)
-- [System accounts, Alias and credential security](/docs/en-US/latest/getting-started/login)
+- [Linux User Mode](/docs/en-US/latest/getting-started/user-mode)
+- [Quick start](/docs/en-US/latest/getting-started/quick-start)
+- [Sign-in and account security](/docs/en-US/latest/getting-started/login)

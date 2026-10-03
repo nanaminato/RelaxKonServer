@@ -34,7 +34,7 @@ SSH 桌面始终跟随客户端系统语言，不读取或覆盖 RelaxKonOS 工�
 - 修复、回滚与卸载
 - 读取主机侧最终操作回执，而不是把启动器退出码直接当作成功
 
-Linux 主机若没有 root SSH 会话，会被引导到[用户模式安装](/docs/zh-CN/latest/getting-started/user-mode)。系统模式部署需要能够管理系统服务与特权功能的相应权限。
+Linux 系统模式可以使用 root 或经验证的 sudo；Linux 用户模式使用普通账号且不需要 sudo。Windows 系统模式要求 SSH 会话已提升管理员权限。安装向导覆盖来源、端口、目录、网络、证书、文件访问范围、Linux 分身份授权与 Docker 选项，详见[安装指南](/docs/zh-CN/latest/getting-started/installation)。
 
 卸载默认保留服务端数据。删除数据属于显式的破坏性操作，必须再次确认服务器名称。
 

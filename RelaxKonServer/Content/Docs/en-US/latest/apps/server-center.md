@@ -34,7 +34,7 @@ For a confirmed SSH host, Server Center can run a preflight check, read the host
 - Repair, rollback, and uninstall
 - Reading the final host-side operation receipt rather than assuming that a launcher exit code means success
 
-On Linux, a host without a root SSH session is directed to [User Mode installation](/docs/en-US/latest/getting-started/user-mode). A System Mode deployment requires the permissions appropriate for managing system services and privileged features.
+Linux System Mode can use root or authenticated sudo; Linux User Mode uses an ordinary account without sudo. Windows System Mode requires an elevated administrator SSH session. The wizard covers sources, ports, directories, network, TLS, file scopes, Linux identity scopes and Docker authorization; see [Installation](/docs/en-US/latest/getting-started/installation).
 
 Uninstall keeps server data by default. Removing data is an explicit destructive choice and requires confirming the server name.
 
