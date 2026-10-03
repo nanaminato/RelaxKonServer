@@ -3,7 +3,7 @@
     "category": "Product",
     "order": 1,
     "question": "Is RelaxKonOS a remote desktop product?",
-    "answer": "No. RelaxKonOS is a remote workspace operating environment. The client renders its own interface locally with Avalonia, while the server manages workspace state, storage, runtime and remote services. It does not encode or transmit a desktop image."
+    "answer": "No. Desktop clients use Avalonia and Android uses Kotlin/Compose to render locally. The server manages workspace, storage and runtime rather than desktop pixels."
   },
   {
     "category": "Product",
@@ -15,13 +15,13 @@
     "category": "Product",
     "order": 3,
     "question": "Which platforms are supported?",
-    "answer": "The desktop client is cross-platform and built on Avalonia. The server runs on Ubuntu (Linux) and Windows Server. Available artifacts for each platform and architecture are published on the Downloads page as they are released."
+    "answer": "Desktop targets Windows, Linux and macOS, with a separate native Android client; servers target Linux and Windows. The catalog currently includes Windows/Linux x64 clients and system servers. Android, macOS and user-mode packages depend on actual catalog entries, not source support alone."
   },
   {
     "category": "Product",
     "order": 4,
     "question": "What built-in applications ship with RelaxKonOS?",
-    "answer": "The shell includes Welcome, Notepad, Code Editor, Image Viewer, Settings, Terminal, File Manager, Browser, Port Forwarding, Task Manager, Docker Manager, Process Guardian, Firewall, Certificate Manager, Web Server Manager, Git Client, Tunnel Manager, Registry and App Installer. Each application has a guide in the Documentation section."
+    "answer": "Alongside files, terminals, settings and service managers, the desktop includes Server Center and Application Deployments; the event/alert center is partially implemented. Android uses separate native screens. Server mode, host capabilities and permissions gate actions; parity is not assumed."
   },
   {
     "category": "Architecture",
@@ -45,24 +45,54 @@
     "category": "Security",
     "order": 8,
     "question": "How is authentication handled?",
-    "answer": "Identity is delegated to the host operating system. Windows logons are validated with the native LogonUser API; Linux logons use PAM with NSS. RelaxKonOS issues its own tokens after the host OS confirms the credentials, and it never stores user passwords."
+    "answer": "System sign-in uses Windows LogonUser or Linux PAM. Alias uses an independent password hash bound to the same host user. The server does not persist system sign-in passwords. Remembered sign-in credentials are an explicit local secure-storage choice, not workspace-synced data."
   },
   {
     "category": "Security",
     "order": 9,
     "question": "Are privileged operations safe?",
-    "answer": "Elevated work is isolated. Privileged operations run through a dedicated helper process with an audited, narrow contract, and destructive actions require explicit confirmation. Where the host OS already provides a mechanism such as sudo, UFW or systemd, RelaxKonOS defers to it instead of reinventing it."
+    "answer": "Privileged actions use fixed Helper contracts. System-authenticated administrators are checked dynamically; ordinary users and Alias sessions explicitly authenticate a selected administrator. User mode disables elevation."
   },
   {
     "category": "Extensibility",
     "order": 10,
     "question": "Can I build my own applications?",
-    "answer": "Yes. Applications implement the IRemoteApplication interface or derive from RemoteApplicationBase and are packaged as .roapp bundles with the developer CLI. They receive the same window management, lifecycle and capability APIs as the built-in applications."
+    "answer": "Desktop .roapp extensions use IExternalRemoteApplication and the scoped IExternalAppContext, packaged with the developer CLI. Built-in apps have a separate RemoteApplicationBase entry point."
   },
   {
     "category": "Extensibility",
     "order": 11,
     "question": "Is the source available?",
     "answer": "RelaxKonOS is published under the RelaxKonOS Non-Commercial Source-Available License. You may use, modify and study it for non-commercial purposes. Commercial resale, redistribution or hosted service offerings require a commercial license."
+  },
+  {
+    "category": "Usage and Operations",
+    "order": 12,
+    "question": "How does Android connect?",
+    "answer": "Use a Server address reachable from the device, or add SSH and confirm the host fingerprint. Server provides a workspace; SSH offers corresponding terminals, SFTP and maintenance. Downloads list only verified published signed APKs."
+  },
+  {
+    "category": "Usage and Operations",
+    "order": 13,
+    "question": "What happens after a large upload is interrupted?",
+    "answer": "Query the server session offset and resume from an unchanged, available source. An expired session or missing source requires restarting. 100% transfer is not a completed commit; cancellation and staging cleanup are supported."
+  },
+  {
+    "category": "Usage and Operations",
+    "order": 14,
+    "question": "Does application rollback restore a database?",
+    "answer": "No. Image/configuration rollback does not undo data migrations. Definition restoration creates a new stopped instance without replacing old volumes or secrets. Volume/database adapters are unverified, and Android has no restore submission UI yet."
+  },
+  {
+    "category": "Usage and Operations",
+    "order": 15,
+    "question": "Is the alert center fully available?",
+    "answer": "A persistent ledger, queries, basic action APIs and a minimal read-only desktop UI exist. Reliable replay, complete sources and background notifications remain outstanding; sole production delivery is not guaranteed."
+  },
+  {
+    "category": "Usage and Operations",
+    "order": 16,
+    "question": "Can I install without sudo?",
+    "answer": "Linux user mode needs no sudo but requires a verified user-server package rather than a system server bundle. The current catalog has no user-mode package. It listens on loopback and enforces capability restrictions."
   }
 ]

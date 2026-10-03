@@ -7,6 +7,8 @@ order: 60
 
 # 应用模型
 
+> 本页对照当前源码说明能力，不是某个发布包的功能清单。已发布产物与日期见[发行说明](/releases/0.1.2)，功能验收状态以所链接的实现记录为准。
+
 RelaxKonOS 中的应用**不是普通可执行文件**。它们由运行时（Runtime）装配，并接入统一的窗口管理与生命周期。
 
 ## 应用的结构
@@ -22,15 +24,26 @@ Application Package
 
 ## 接入方式
 
-```csharp
-public class MyApp : RemoteApplicationBase
-{
-    public override string Id => "com.example.myapp";
-    public override string DisplayName => "My Application";
+内置应用可继承 RemoteApplicationBase 并实现 Manifest/Activate(AppContext)。桌面 .roapp 则必须实现 IExternalRemoteApplication，通过 ActivateAsync(IExternalAppContext) 接收受限能力，不获得宿主 IServiceProvider。下面是当前扩展入口的最小示例；需引用匹配当前版本的 SDK 与 Avalonia。Android 不执行桌面程序集。
 
-    public override void Activate(AppContext context)
+```csharp
+using Avalonia.Controls;
+using RelaxKonOS.AppSDK;
+using RelaxKonOS.Core.Applications;
+using System.Threading;
+using System.Threading.Tasks;
+
+public sealed class MyApp : IExternalRemoteApplication
+{
+    public ApplicationManifest Manifest { get; } = new(
+        new AppId("com.example.myapp"), "My Application");
+
+    public Task ActivateAsync(IExternalAppContext context,
+        CancellationToken cancellationToken = default)
     {
-        context.ShowWindow("My Window", contentFactory: () => new MyView());
+        context.Windows.ShowWindow("My Window",
+            new TextBlock { Text = "Hello, RelaxKonOS!" });
+        return Task.CompletedTask;
     }
 }
 ```
@@ -44,7 +57,7 @@ ApplicationManager.Launch
       |
 创建 AppContext
       |
-IRemoteApplication.Activate
+Built-in Activate / Package ActivateAsync
       |
 WindowManager.Create
       |

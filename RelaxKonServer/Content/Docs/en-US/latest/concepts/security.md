@@ -7,73 +7,26 @@ order: 64
 
 # Security Model
 
-RelaxKonOS does not rebuild an identity and permission system. It **delegates identity and file permissions to the host operating system**.
+> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
 
-## Three themes
+Host OS identity and execution permissions remain authoritative, but system sign-in and Alias are different credential entry points. Windows system sign-in uses LogonUser; Linux uses PAM/NSS. Alias verifies an independent one-way password hash bound to the existing host user and Workspace. The server does not persist system sign-in passwords; explicitly remembered local credentials use OS secure storage or Android vaults.
 
-### 1. Identity delegated to the host
+## File and application authorization
 
-- Windows: the native `LogonUser` API, supporting local and domain accounts
-- Linux: PAM with NSS
-- RelaxKonOS issues its own token only after the host confirms the credentials, and **never stores passwords**
+Ordinary file operations follow the bound host identity, paths and OS permissions. App permission cannot replace OS permission. Protected directories use separate file authorization and narrow Helper contracts. Refused reads are shown as inaccessible, not empty. User mode is limited to the current Unix home and has no file elevation.
 
-### 2. Permissions inherited from the host
+## Administrator authorization and Helper
 
-- File operations run as the signed-in user on the host OS
-- There is no separate ACL layer
-- Out-of-scope requests are refused by the host OS
+In system mode, system-authenticated administrator/root sessions have eligibility checked dynamically and eligible non-file actions need no repeated password. Ordinary users and Alias sessions explicitly authenticate a selected valid administrator to obtain precise, short-lived, token-bound authorization. Cross-account Guardian/script actions still need explicit approval for that operation. File actions follow separate path authorization.
 
-### 3. Elevation isolated
+Server runs with minimal privilege; Helper accepts fixed, strongly typed, audited actions. Installation permissions, the service account's ability to invoke Helper and the current user's authority over a target are separate conditions. Docker socket access is an explicit system-install choice. User mode disables host management such as Docker, firewall, proxy and certificates. A missing or rejecting Helper causes a reported failure, not a high-privilege Server bypass.
 
-- Privileged operations run through a dedicated helper process
-- The contract is narrow and audited
-- Destructive actions require explicit confirmation
-- Existing host mechanisms (sudo, UFW, systemd) are reused where possible
+## Credentials and diagnostics
 
-## Both permission layers must hold
+Passwords, private keys and tokens must not enter logs, audit or diagnostics. Alias hashes differ from reversible secrets; persistent application secrets use controlled encryption. Local vaults and SSH credentials are not workspace-synced. Credential changes or deletion can revoke existing sessions.
 
-Host-facing management features ([Docker Manager](/docs/en-US/latest/apps/docker), [Proxy Manager](/docs/en-US/latest/apps/proxy-manager), [Web Server Manager](/docs/en-US/latest/apps/web-server-manager), [Certificate Manager](/docs/en-US/latest/apps/certificate-manager)) are constrained by two layers at once:
+HTTPS, validation, path normalization, authorization and auditing constrain operations together. Uploads, destructive actions and restoration retain separate confirmation boundaries. There is no generic arbitrary-command elevation interface.
 
-```text
-RelaxKonOS authorization (role / permission / authenticated session)
-              +
-Host OS privilege (service account rights, privileged helper)
-```
+[Sign-in and account security](/docs/en-US/latest/getting-started/login) · [File uploads and resumption](/docs/en-US/latest/apps/file-transfers)
 
-A component running with high privilege **does not** mean any RelaxKonOS user may control it. Conversely, a user holding a permission does not mean the server has host privilege available.
-
-## The boundary of the privileged helper
-
-- The server **does not run as root or administrator**; every operation needing host privilege is handed to the helper.
-- The helper accepts only **fixed, strongly typed** actions. It offers no "run any command as root" style entry point and accepts no arbitrary executable or arguments.
-- A policy file written at install time decides what the service account may do, and the helper directory and policy files are not writable by that account.
-- Everyday start and stop **should not trigger elevation repeatedly**: installation, authorization and the definition of privileged actions happen once, and later routine toggles need no user approval.
-
-## The consequences of host authorization are explicit
-
-- Capabilities needing host privilege are **off by default**. Docker is the clearest example: control of the daemon socket is close to root privilege, so deployment does not grant it automatically and you must opt in explicitly at install time (see [Installation](/docs/en-US/latest/getting-started/installation)).
-- When privilege is missing a feature returns a **stable problem code** and explains why, and the UI asks you to redeploy or restart with more privilege instead of failing silently.
-- When the helper is missing, uninstalled or refuses a call, the affected feature fails with a problem code; **running workloads are not interrupted** and saved configuration is not rolled back, so you can fix the cause and retry.
-- The client **shows localized explanations only**: it never collects sudo, administrator or service-account passwords, and never turns the API into an arbitrary command elevation channel.
-
-## Defence in depth
-
-| Layer | Measures |
-| --- | --- |
-| Transport | HTTPS, JWT |
-| Protocol | Explicit contracts, input validation |
-| Server | Path normalisation, directory traversal protection, unified error handling |
-| Execution | Structured arguments instead of shell concatenation, confirmation for destructive actions, operation auditing |
-| Rendering | Markdown escaping; embedded HTML is not trusted by default |
-
-## Secrets and logs
-
-- Passwords, private keys, account keys, controller secrets, subscription URLs and proxy passwords **never reach logs, audit records or error details**.
-- The operator-facing exception: a field that must round-trip through a form, such as a proxy address, is returned unchanged — otherwise one round trip would rewrite real credentials as a mask. Masking then applies only to logs and diagnostics aimed at other readers.
-- Secrets that must be stored are encrypted with the server's data protection mechanism, and the API reports only a version or a reference.
-
-## Related documentation
-
-- [Installation](/docs/en-US/latest/getting-started/installation) (host authorization and the privileged helper)
-- [Persistence](/docs/en-US/latest/concepts/persistence)
-- [Sessions and devices](/docs/en-US/latest/concepts/session)
+[Authorization operations guide](https://github.com/nanaminato/RelaxKonOS/blob/master/docs/platform/RelaxKonOS.PrivilegedOperations.Operations.md)

@@ -7,6 +7,8 @@ order: 4
 
 # Quick start
 
+> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+
 Once you are signed in you will see the RelaxKonOS desktop. Here is what people do first.
 
 ## Pick a connection mode
@@ -41,3 +43,8 @@ Click any application in the start menu. Most are single-window (Settings, Task 
 - [Applications](/docs/en-US/latest/apps/terminal)
 - [Server Center](/docs/en-US/latest/apps/server-center)
 - [Protocol and communication](/docs/en-US/latest/concepts/protocol)
+
+## Client and account guides
+
+- [Android phones and tablets](/docs/en-US/latest/getting-started/android)
+- [System accounts, Alias and credential security](/docs/en-US/latest/getting-started/login)

@@ -54,3 +54,5 @@ Host OS level settings (time zone, network adapters) are shown **read-only**. Re
 - [Network Inspector](/docs/en-US/latest/apps/network-inspector)
 - [Server Center](/docs/en-US/latest/apps/server-center)
 - [Workspace](/docs/en-US/latest/concepts/workspace)
+
+[Account settings, Alias and session security](/docs/en-US/latest/getting-started/login)

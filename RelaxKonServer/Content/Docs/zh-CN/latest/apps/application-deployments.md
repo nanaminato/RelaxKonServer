@@ -7,6 +7,8 @@ order: 37
 
 # 应用部署
 
+> 本页对照当前源码说明能力，不是某个发布包的功能清单。已发布产物与日期见[发行说明](/releases/0.1.2)，功能验收状态以所链接的实现记录为准。
+
 应用部署（Application Deployments）是一个**与 Docker 管理器分离**的内置应用：Docker 管理器负责操作引擎与容器原语，应用部署负责把一份「应用」当成长期存在的实体来发布、观察和回退。
 
 ## 概览
@@ -61,10 +63,12 @@ order: 37
 - **真实引擎验收未完成**：镜像拉取、构建、创建、就绪、回滚与故障注入等场景尚未在具备 Docker 的宿主上执行。
 - **单服务 Compose 项目部署未实现**：当前改用容器原语表达部署，因此不能在向导中直接提交一份 Compose 项目。
 - **不承诺总体百分比**：构建阶段按阶段内工作量上报进度，没有可靠分母时进度显示为未知，而不是编造数值。
-- 不代替持续集成系统：没有源码构建、仓库钩子或流水线定义。
+- Git 工作区已有受限、固定 SHA 的 Ubuntu BuildKit 构建路径；不构成通用 CI、仓库钩子或任意流水线执行器。
 
 ## 相关文档
 
 - [Docker 管理器](/docs/zh-CN/latest/apps/docker)
 - [Web Server 管理器](/docs/zh-CN/latest/apps/web-server-manager)
 - [证书管理器](/docs/zh-CN/latest/apps/certificate-manager)
+
+[应用回滚与数据恢复的区别](/docs/zh-CN/latest/apps/backup-recovery) · [部署事件与告警边界](/docs/zh-CN/latest/apps/event-alerts)

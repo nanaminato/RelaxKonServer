@@ -7,6 +7,8 @@ order: 51
 
 # サーバーセンター
 
+> このページは現在のソース機能を説明し、特定パッケージの収録機能一覧ではありません。公開成果物と日付は[リリースノート](/releases/0.1.2)、検証状況はリンク先の実装記録で確認してください。
+
 サーバーセンターは、リモートマシンへの接続とデプロイの作業を一か所にまとめます。完全な RelaxKonOS Server 接続と直接 SSH 接続の両方を扱いますが、二つは意図的に異なるモードです。
 
 ## 接続方法を選ぶ
@@ -49,3 +51,5 @@ Linux で root SSH セッションがない場合は、[ユーザーモードの
 - [ターミナル](/docs/ja-JP/latest/apps/terminal)
 - [ファイルマネージャー](/docs/ja-JP/latest/apps/file-manager)
 - [セキュリティモデル](/docs/ja-JP/latest/concepts/security)
+
+[Android サーバーセンターと個別検証状況](/docs/ja-JP/latest/getting-started/android)

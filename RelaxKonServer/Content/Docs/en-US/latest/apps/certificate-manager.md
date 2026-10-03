@@ -38,7 +38,7 @@ Three principles shape the whole module:
 ## Permissions and security
 
 - Operations that change host state (issue, renew, delete, import, deploy, listen on port 80, change the HTTPS binding) run only while RelaxKonOS has administrator rights, and report stable problem codes when it does not.
-- The client shows localized explanations only; it never collects or forwards sudo, UAC or service-account passwords, and never turns the API into an arbitrary command elevation channel.
+- Host authorization uses unified administrator authentication: system-authenticated administrators are checked dynamically; ordinary users and Alias sessions explicitly authenticate a selected administrator. Credentials never enter logs or arbitrary shell commands. Installation permissions and action authorization are separate; see [Sign-in and Account Security](/docs/en-US/latest/getting-started/login).
 - **Private keys, account keys, CSRs and full CA responses appear in no API response, log, audit record or error detail.** The normal API returns the domain, issuer, serial number, validity window, status, thumbprint and renewal state.
 - Preflight returns a structured result: domain normalization and duplicate SAN checks, A and AAAA resolution, port 80 listening rights and occupation, firewalls and upstream proxies. Preflight never fabricates a "publicly reachable" conclusion.
 - The API returns an operation ID and stage for long tasks; cancelling or disconnecting does not lose server-side state.

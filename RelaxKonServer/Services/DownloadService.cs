@@ -49,6 +49,7 @@ public sealed class DownloadService : IDownloadService
         "windows" => 0,
         "linux" => 1,
         "macos" => 2,
+        "android" => 3,
         _ => 9
     };
 }

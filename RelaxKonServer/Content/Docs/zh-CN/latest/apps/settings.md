@@ -54,3 +54,5 @@ order: 24
 - [网络诊断器](/docs/zh-CN/latest/apps/network-inspector)
 - [服务器中心](/docs/zh-CN/latest/apps/server-center)
 - [工作区](/docs/zh-CN/latest/concepts/workspace)
+
+[账户设置、Alias 与会话安全](/docs/zh-CN/latest/getting-started/login)

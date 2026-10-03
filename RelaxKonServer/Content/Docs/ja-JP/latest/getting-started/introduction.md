@@ -7,6 +7,8 @@ order: 1
 
 # RelaxKonOS へようこそ
 
+> このページは現在のソース機能を説明し、特定パッケージの収録機能一覧ではありません。公開成果物と日付は[リリースノート](/releases/0.1.2)、検証状況はリンク先の実装記録で確認してください。
+
 RelaxKonOS は**クロスプラットフォームのクラウドネイティブなデスクトップ OS 環境**です。UI は目の前のデバイスに、ワークスペースはサーバーに置き、同じワークスペースを複数のデバイスで継続して利用できます。
 
 リモートデスクトップ製品と異なり、RelaxKonOS が転送するのは**状態と操作の意図**であり、デスクトップのピクセルではありません。
@@ -34,3 +36,8 @@ RelaxKonOS は**クロスプラットフォームのクラウドネイティブ�
 - [クイックスタート](/docs/ja-JP/latest/getting-started/quick-start)
 - [クライアント / サーバー アーキテクチャ](/docs/ja-JP/latest/concepts/architecture)
 - ソースリポジトリと Issue: [nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)
+
+## クライアントとアカウントのガイド
+
+- [Android スマートフォンとタブレット](/docs/ja-JP/latest/getting-started/android)
+- [システムアカウント・Alias・資格情報](/docs/ja-JP/latest/getting-started/login)

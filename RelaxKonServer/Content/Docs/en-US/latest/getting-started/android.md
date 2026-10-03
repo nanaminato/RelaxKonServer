@@ -1,0 +1,33 @@
+---
+title: Android Phones and Tablets
+description: Android Phones and Tablets
+category: Getting Started
+order: 5
+---
+
+# Android Phones and Tablets
+
+> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+
+Android is a separate Kotlin, Jetpack Compose and Material 3 application for phones and tablets. It does not use Avalonia or .NET Android. The project's minimum API is 23; this does not establish verification of every feature on every OS version or device.
+
+## Connections and features
+
+- RelaxKonOS Server connections expose the signed-in account's workspace, files, terminals, monitoring and capability-gated service management.
+- SSH connections offer host-key confirmation, an SSH terminal, SFTP and server maintenance. They do not create a full RelaxKonOS workspace.
+- Phones and tablets use adaptive navigation. Compact, medium and expanded shell layouts do not imply that every screen has passed tablet split-pane verification.
+- Native screens integrate chunked/resumable uploads, Docker/Compose, Nginx/sites, certificates, Mihomo, FRP, SMB, UFW, Git, deployments, task management and Guardian. Actions still depend on platform, server mode and authorization.
+- The mobile application model is separate from desktop .roapp packages; desktop extensions cannot run directly on Android.
+
+## Installation and first connection
+
+1. Find a published signed Android APK on [Downloads](/downloads) and check SHA-256. An absent entry means this site does not yet provide that package.
+2. Confirm installation in Android. Updates must retain the signing certificate. AAB files are for store distribution, not direct installation.
+3. Enter a server address reachable from the device, or add an SSH host and verify its fingerprint. A physical device cannot reach a development computer using the device's localhost.
+4. Sign in with a system account or an available Alias. User-mode servers retain their SSH forwarding and loopback boundaries.
+
+## Implementation and verification
+
+First-install and maintenance execution paths are integrated; complete device and real-host acceptance is tracked separately. Reliable background alerts, volume/database recovery and the Android restore submission UI must not be advertised as delivered. Detailed mobile specifications and progress remain owned by the Android project; this website supplies an introductory summary.
+
+Authoritative sources: [Android documentation](https://github.com/nanaminato/RelaxKonOS/blob/master/Client/RelaxKonOS.Client.Android/docs/README.md), [implementation](https://github.com/nanaminato/RelaxKonOS/blob/master/Client/RelaxKonOS.Client.Android/docs/status/Progress.md), [verification](https://github.com/nanaminato/RelaxKonOS/blob/master/Client/RelaxKonOS.Client.Android/docs/status/Verification.md), [signing and releases](https://github.com/nanaminato/RelaxKonOS/blob/master/Client/RelaxKonOS.Client.Android/docs/development/android-release.md).

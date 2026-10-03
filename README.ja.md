@@ -50,7 +50,7 @@ order: 14
 - **言語の追加**：`Content/Docs/<code>/latest` を作成します。言語は `en-US`、`zh-CN`、`ja-JP` の固定順で返り、`zh-CN` と `ja-JP` の表示名は組み込み（简体中文 / 日本語）、その他のコードはコード自体が使われます。
 - **バージョンの追加**：`latest` の隣に別のディレクトリを作成します。`latest` が先頭になります。
 - **翻訳フォールバック**：要求された言語に slug が無い場合は `en-US` の版が返り、レスポンスの `isFallback` が `true` になります。フォールバック項目のカテゴリ名は要求言語のままに保たれ、ナビゲーションのグループ見出しが揃います。
-- **現状**：`en-US`、`zh-CN`、`ja-JP` はいずれも 37 件（はじめに 4 + 概念 9 + アプリケーション 24）で完全に揃っています。**ファイルを増減するときは 3 言語の件数を揃えてください。** 揃っていないとナビゲーションにフォールバック項目が現れます。変更後は `node tools/verify-doc-order.mjs`（件数・`order` の一意性・3 言語の一致）と `node tools/verify-doc-links.mjs`（内部リンクと front matter）で確認してください。
+- **現状**：`en-US`、`zh-CN`、`ja-JP` はいずれも 42 件（はじめに 6 + 概念 9 + アプリケーション 27）で完全に揃っています。**ファイルを増減するときは 3 言語の件数を揃えてください。** 揃っていないとナビゲーションにフォールバック項目が現れます。変更後は `node tools/verify-doc-order.mjs`（件数・`order` の一意性・3 言語の一致）と `node tools/verify-doc-links.mjs`（内部リンクと front matter）で確認してください。
 - 言語とバージョンのセグメントは `[A-Za-z0-9-]` のみ、slug はさらに `/` と `_` を許容し最大 256 文字です。それ以外は 404 を返します。
 
 ### リリースノート、FAQ、ダウンロード
@@ -154,3 +154,14 @@ ZIP の展開先がアプリケーションの作業ディレクトリです。�
 ## プロジェクト境界
 
 この API は Angular アプリケーションを配信してはいけません。ワークスペース全体の境界制約は [`../WEBSITE_ARCHITECTURE.ja.md`](../WEBSITE_ARCHITECTURE.ja.md) を参照してください。
+
+## コンテンツ更新と検証
+
+ガイドは現在のソース・実検証・公開パッケージを区別します。Android 詳細仕様の正本は製品の `Client/RelaxKonOS.Client.Android/docs/` で、サイトは利用者向け要約とリンクを提供します。Android・アカウント認証・転送再開・アラート・復元ガイドを追加し、FAQ は 16 件です。0.1.2 リリース記録は既存の四つの成果物から作成し、最近のソース機能の収録を推定しません。
+
+```bash
+node tools/verify-doc-order.mjs
+node tools/verify-doc-links.mjs
+node tools/verify-release-inventory.mjs
+dotnet build RelaxKonServer/RelaxKonServer.csproj --no-restore
+```

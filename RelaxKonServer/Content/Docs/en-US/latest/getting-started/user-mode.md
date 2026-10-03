@@ -7,6 +7,10 @@ order: 3
 
 # User Mode installation (Linux)
 
+The current download catalog lists Windows/Linux x64 client and system server packages, with no user-server package. Obtain an actually published, verified user-server artifact before following these commands. A system server bundle is not interchangeable. Match system installation commands to the downloaded installer: current source requires explicit --mode system, while historical 0.1.2 bootstrap scripts use their own arguments.
+
+> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+
 **User Mode** is for "I just want a server running under my own Linux account." It shares the same Server and Guardian binaries as System Mode, but keeps every piece of persistent state inside that account's XDG directories: it creates no systemd system units, installs no always-on privileged helper, and does not touch PAM, sudoers, the firewall, or `/etc`.
 
 ## Know the three installation methods first

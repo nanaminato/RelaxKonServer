@@ -54,3 +54,5 @@ RelaxKonOS Server 接続では、「時刻と言語」で **システムに従�
 - [ネットワークインスペクター](/docs/ja-JP/latest/apps/network-inspector)
 - [サーバーセンター](/docs/ja-JP/latest/apps/server-center)
 - [ワークスペース](/docs/ja-JP/latest/concepts/workspace)
+
+[アカウント設定・Alias・セッション安全](/docs/ja-JP/latest/getting-started/login)

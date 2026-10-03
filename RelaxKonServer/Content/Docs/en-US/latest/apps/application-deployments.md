@@ -7,6 +7,8 @@ order: 37
 
 # Application Deployments
 
+> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+
 Application Deployments is a built-in application **separate from Docker Manager**: Docker Manager operates the engine and container primitives, while Application Deployments treats an application as a long-lived entity to publish, observe and roll back.
 
 ## Overview
@@ -61,10 +63,12 @@ The deployment target is a **host running Docker Engine**, so this is primarily 
 - **Real engine acceptance is outstanding**: image pull, build, create, readiness, rollback and fault injection have not run on a host with Docker.
 - **Single-service Compose project deployment is not implemented**: deployments are expressed with container primitives, so a Compose project cannot be submitted directly from the wizard.
 - **No overall percentage is promised**: the build stage reports progress from the work in the current stage and shows unknown where there is no reliable denominator instead of inventing a number.
-- It is not a continuous integration system: there is no source build, repository hook or pipeline definition.
+- Git workspaces have a restricted, fixed-SHA Ubuntu BuildKit path; this is not a generic CI system, repository hook or arbitrary pipeline executor.
 
 ## Related documentation
 
 - [Docker Manager](/docs/en-US/latest/apps/docker)
 - [Web Server Manager](/docs/en-US/latest/apps/web-server-manager)
 - [Certificate Manager](/docs/en-US/latest/apps/certificate-manager)
+
+[Application rollback and data recovery are different](/docs/en-US/latest/apps/backup-recovery) · [Deployment events and alert boundaries](/docs/en-US/latest/apps/event-alerts)

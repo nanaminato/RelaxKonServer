@@ -7,6 +7,8 @@ order: 12
 
 # File Manager
 
+> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+
 File Manager (Explorer) lets you work with files on the **server host** as if they were local, but it is not a remote-desktop file browser.
 
 ## Overview
@@ -28,15 +30,9 @@ Open File Manager from the start menu, double-click a folder to enter it, and do
 
 ## Permissions and security
 
-- Every operation runs as the **signed-in user** on the host OS
-- Out-of-scope access is refused by the host OS; RelaxKonOS does not bypass it
-- There is no separate elevation path; privilege escalation is always delegated to the host
+File operations follow host identity and path permissions. Refused reads are shown as inaccessible rather than empty. In system mode, protected directories use precise file authorization and a fixed Helper; renew expired authorization. User mode stays within the current Unix home and cannot elevate. Do not solve access failures by running Server as root/administrator.
 
-### Directory readability is reported honestly
-
-When a directory cannot be read because of insufficient permission the UI **says "no access" and explains why instead of presenting it as empty**. An empty listing therefore always means the directory really is empty, not that you cannot see its contents.
-
-Reading a protected directory is enabled by an administrator granting read access (or by running the server under an identity that holds it), never by the client collecting or forwarding a password.
+[Upload progress, resumption and cancellation](/docs/en-US/latest/apps/file-transfers)
 
 ## Architecture
 

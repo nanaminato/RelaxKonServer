@@ -3,7 +3,7 @@
     "category": "产品",
     "order": 1,
     "question": "RelaxKonOS 是远程桌面软件吗？",
-    "answer": "不是。RelaxKonOS 是远程工作空间操作系统环境。客户端基于 Avalonia 在本地渲染界面，服务端负责管理工作空间状态、存储、运行时与远程服务，不会编码或传输桌面图像。"
+    "answer": "不是。桌面客户端使用 Avalonia，Android 使用 Kotlin/Compose 在本地渲染，服务端管理工作区、存储和运行时，不传输桌面像素。"
   },
   {
     "category": "产品",
@@ -15,13 +15,13 @@
     "category": "产品",
     "order": 3,
     "question": "支持哪些平台？",
-    "answer": "桌面客户端跨平台，基于 Avalonia 构建；服务端可运行于 Ubuntu（Linux）与 Windows Server。各平台与架构的安装包在发布后会在下载页面列出。"
+    "answer": "桌面面向 Windows、Linux、macOS，另有 Android 原生客户端；服务端面向 Linux 与 Windows。当前目录已有 Windows/Linux x64 的客户端和系统服务端包，Android、macOS 与用户模式包以实际下载项为准，不能把源码支持当作发布承诺。"
   },
   {
     "category": "产品",
     "order": 4,
     "question": "RelaxKonOS 内置了哪些应用？",
-    "answer": "桌面 Shell 内置 Welcome、记事本、代码编辑器、图片查看器、设置中心、终端、文件管理器、浏览器、端口转发、任务管理器、Docker 管理器、进程守护、防火墙、证书管理器、Web Server 管理器、Git 客户端、隧道管理器、配置注册表与应用安装器。每个应用在文档中心都有对应指南。"
+    "answer": "除文件、终端、设置和各服务管理应用外，桌面还包含服务器中心与应用部署；事件告警中心处于部分实现阶段。Android 使用独立原生页面，入口和动作受服务器模式、宿主能力与权限约束，不能假定两端功能完全相同。"
   },
   {
     "category": "架构",
@@ -45,24 +45,54 @@
     "category": "安全",
     "order": 8,
     "question": "身份认证是如何实现的？",
-    "answer": "身份委托给宿主操作系统。Windows 使用原生 LogonUser API 校验登录，Linux 使用 PAM 与 NSS。只有在宿主 OS 确认凭据之后，RelaxKonOS 才会签发自己的令牌，并且从不保存用户密码。"
+    "answer": "系统登录通过 Windows LogonUser 或 Linux PAM 验证；Alias 使用独立密码哈希并绑定同一宿主用户。服务端不持久保存系统登录密码。 记住登录属于用户主动选择的本机安全存储，不会随工作区同步。"
   },
   {
     "category": "安全",
     "order": 9,
     "question": "特权操作是否安全？",
-    "answer": "提权操作被隔离执行。特权操作通过专用 Helper 进程、以经过审计的窄接口进行，危险操作需要显式确认。当宿主 OS 已提供 sudo、UFW、systemd 等机制时，RelaxKonOS 会复用这些机制而不是重复实现。"
+    "answer": "特权动作经固定 Helper 契约执行；系统认证管理员会话动态核验资格，普通用户与 Alias 需明确认证所选管理员，用户模式禁用提权。"
   },
   {
     "category": "扩展",
     "order": 10,
     "question": "可以开发自己的应用吗？",
-    "answer": "可以。应用实现 IRemoteApplication 接口或继承 RemoteApplicationBase，并通过开发者 CLI 打包为 .roapp 应用包。它们与内置应用享有相同的窗口管理、生命周期与能力 API。"
+    "answer": "桌面 .roapp 扩展使用 IExternalRemoteApplication 与受限 IExternalAppContext，通过开发者 CLI 打包；内置应用的 RemoteApplicationBase 是独立入口。"
   },
   {
     "category": "扩展",
     "order": 11,
     "question": "源代码开放吗？",
     "answer": "RelaxKonOS 采用 RelaxKonOS Non-Commercial Source-Available License 发布。你可以出于非商业目的使用、修改与研究它。商业转售、再分发或托管服务需要商业许可。"
+  },
+  {
+    "category": "使用与运维",
+    "order": 12,
+    "question": "Android 如何连接？",
+    "answer": "使用可从设备访问的 Server 地址，或添加 SSH 并确认主机指纹。Server 提供工作区；SSH 只提供相应终端、SFTP 与维护能力。下载页只列出验证并发布的签名 APK。"
+  },
+  {
+    "category": "使用与运维",
+    "order": 13,
+    "question": "大文件上传中断后怎么办？",
+    "answer": "从服务端查询上传会话的已确认偏移，再以未变更且可用的源文件续传。会话失效或源文件不可用需重新开始；100% 传输不等于提交完成，支持取消与暂存清理。"
+  },
+  {
+    "category": "使用与运维",
+    "order": 14,
+    "question": "回滚应用能恢复数据库吗？",
+    "answer": "不能。镜像/配置回滚不撤销数据迁移。当前定义恢复只创建新停机实例，不覆盖原卷或秘密；卷/数据库适配器未验证，Android 尚无恢复提交 UI。"
+  },
+  {
+    "category": "使用与运维",
+    "order": 15,
+    "question": "告警中心是否已完整可用？",
+    "answer": "已有持久账本、查询、基本处理 API 与桌面最小只读界面；可靠重放、完整事件源和后台通知仍待完成，不能作为唯一的生产送达保证。"
+  },
+  {
+    "category": "使用与运维",
+    "order": 16,
+    "question": "没有 sudo 可以安装吗？",
+    "answer": "Linux 用户模式不需要 sudo，但必须使用已验证的 user-server 包，不能使用系统服务端包。当前下载目录尚未列出用户模式包，运行后只监听 loopback 并受能力限制。"
   }
 ]

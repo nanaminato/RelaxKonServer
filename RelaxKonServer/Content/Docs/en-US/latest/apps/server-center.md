@@ -7,6 +7,8 @@ order: 51
 
 # Server Center
 
+> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+
 Server Center keeps the connection and deployment workflows for a remote machine in one place. It supports both a full RelaxKonOS Server connection and a direct SSH connection; these are deliberately different modes.
 
 ## Choose the right connection
@@ -49,3 +51,5 @@ Uninstall keeps server data by default. Removing data is an explicit destructive
 - [Terminal](/docs/en-US/latest/apps/terminal)
 - [File Manager](/docs/en-US/latest/apps/file-manager)
 - [Security model](/docs/en-US/latest/concepts/security)
+
+[Android server center and separate verification status](/docs/en-US/latest/getting-started/android)

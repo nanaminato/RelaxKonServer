@@ -7,6 +7,8 @@ order: 2
 
 # 安装
 
+> 本页对照当前源码说明能力，不是某个发布包的功能清单。已发布产物与日期见[发行说明](/releases/0.1.2)，功能验收状态以所链接的实现记录为准。
+
 RelaxKonOS 由**客户端**与**服务端**两部分组成。客户端安装在你每天使用的设备上，服务端运行在你希望长期保持工作区的机器上。
 
 ## 前置要求
@@ -35,7 +37,7 @@ RelaxKonOS 由**客户端**与**服务端**两部分组成。客户端安装在�
 
 - **发现与只读功能**在服务进程可读时即可使用。
 - **会改变宿主状态的功能**（安装运行时、写系统配置、控制系统服务、部署证书等）要求 RelaxKonOS 具备足够权限；权限不足时界面返回明确的问题码，并提示以更高权限重新部署，而不是失败得无声无息。
-- 客户端**不会**收集 sudo、管理员或服务账户口令，也不会把请求参数拼接成 shell 命令。遇到权限不足时，正确处理方式是重新以所需权限安装或启动服务端。
+- 宿主授权使用统一管理员认证：系统认证管理员动态核验资格，普通用户与 Alias 显式认证所选管理员。不会把凭据写入日志或拼成任意 shell 命令；安装权限与日常操作授权分别判断，详见[登录与账户安全](/docs/zh-CN/latest/getting-started/login)。
 
 ### Docker 访问需要显式选择
 
@@ -48,7 +50,7 @@ sudo deployment/bootstrap/install-relaxkonos.sh --mode system --bundle /path/to/
 - 这项选择会写入仅 root 可读的策略文件；若 Docker 已安装，安装器会授予访问权限并重启服务端。
 - 若 Docker 由 RelaxKonOS 之后安装，助手会在安装后执行同一固定授权，并把该任务标记为「需要重启」；重启服务端后再刷新 Docker 状态即可。
 - **未选择该选项时，Docker 安装会在修改主机之前拒绝执行**，而不是先改一半再失败。
-- 用户模式默认不支持 Docker，即使服务账户能访问套接字也会报告为等价 root 的风险并要求单独确认。
+- 用户模式由服务端强制禁用 Docker 等宿主管理功能，不能用套接字权限或一次确认绕过。
 
 ### 助手不可用时的表现
 
@@ -80,7 +82,7 @@ dotnet run
 2. 输入服务端所在宿主 OS 的用户凭据
 3. 登录成功后进入桌面，Workspace 会自动创建并同步
 
-> 身份由宿主操作系统校验（Windows LogonUser / Linux PAM + NSS），RelaxKonOS 不保存你的密码。
+> 系统登录使用宿主验证，Alias 使用独立密码哈希并绑定同一宿主用户。服务端不持久保存系统登录密码；记住凭据是本机安全存储的显式选择。
 
 ## 下一步
 
@@ -90,3 +92,8 @@ dotnet run
 - [安全模型](/docs/zh-CN/latest/concepts/security)
 - [Docker 管理器](/docs/zh-CN/latest/apps/docker)与[代理管理器](/docs/zh-CN/latest/apps/proxy-manager)（需要宿主授权）
 - 源码与 Issue：[nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)
+
+## 客户端与账户入口
+
+- [Android 手机与平板](/docs/zh-CN/latest/getting-started/android)
+- [系统账号、Alias 与凭据安全](/docs/zh-CN/latest/getting-started/login)

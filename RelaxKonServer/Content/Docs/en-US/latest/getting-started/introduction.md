@@ -7,6 +7,8 @@ order: 1
 
 # Welcome to RelaxKonOS
 
+> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+
 RelaxKonOS is a **cross-platform, cloud-native desktop operating environment**. It keeps the interface on the device in front of you and the workspace on the server, so the same workspace follows you across devices.
 
 Unlike remote desktop tools, RelaxKonOS transfers **state and intent**, never desktop pixels.
@@ -34,3 +36,8 @@ Unlike remote desktop tools, RelaxKonOS transfers **state and intent**, never de
 - [Quick start](/docs/en-US/latest/getting-started/quick-start)
 - [Client / server architecture](/docs/en-US/latest/concepts/architecture)
 - Source repository and issues: [nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)
+
+## Client and account guides
+
+- [Android phones and tablets](/docs/en-US/latest/getting-started/android)
+- [System accounts, Alias and credential security](/docs/en-US/latest/getting-started/login)

@@ -7,6 +7,8 @@ order: 51
 
 # 服务器中心
 
+> 本页对照当前源码说明能力，不是某个发布包的功能清单。已发布产物与日期见[发行说明](/releases/0.1.2)，功能验收状态以所链接的实现记录为准。
+
 服务器中心把远程主机的连接与部署流程放在一起。它同时支持完整的 RelaxKonOS Server 连接和直接 SSH 连接；二者是刻意区分的两种模式。
 
 ## 选择连接方式
@@ -49,3 +51,5 @@ Linux 主机若没有 root SSH 会话，会被引导到[用户模式安装](/doc
 - [终端](/docs/zh-CN/latest/apps/terminal)
 - [文件管理器](/docs/zh-CN/latest/apps/file-manager)
 - [安全模型](/docs/zh-CN/latest/concepts/security)
+
+[Android 服务器中心与独立验收状态](/docs/zh-CN/latest/getting-started/android)

@@ -7,6 +7,8 @@ order: 4
 
 # クイックスタート
 
+> このページは現在のソース機能を説明し、特定パッケージの収録機能一覧ではありません。公開成果物と日付は[リリースノート](/releases/0.1.2)、検証状況はリンク先の実装記録で確認してください。
+
 サインインすると RelaxKonOS のデスクトップが表示されます。まずはよく使う操作から。
 
 ## 接続モードを選ぶ
@@ -41,3 +43,8 @@ order: 4
 - [アプリケーション](/docs/ja-JP/latest/apps/terminal)
 - [サーバーセンター](/docs/ja-JP/latest/apps/server-center)
 - [プロトコルと通信](/docs/ja-JP/latest/concepts/architecture)
+
+## クライアントとアカウントのガイド
+
+- [Android スマートフォンとタブレット](/docs/ja-JP/latest/getting-started/android)
+- [システムアカウント・Alias・資格情報](/docs/ja-JP/latest/getting-started/login)

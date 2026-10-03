@@ -7,6 +7,8 @@ order: 60
 
 # Application Model
 
+> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+
 Applications in RelaxKonOS are **not ordinary executables**. The runtime assembles them and wires them into window management and lifecycle handling.
 
 ## Structure
@@ -22,15 +24,26 @@ Application Package
 
 ## How to integrate
 
-```csharp
-public class MyApp : RemoteApplicationBase
-{
-    public override string Id => "com.example.myapp";
-    public override string DisplayName => "My Application";
+Built-in apps may inherit RemoteApplicationBase with Manifest/Activate(AppContext). Desktop .roapp packages implement IExternalRemoteApplication and receive scoped capabilities through ActivateAsync(IExternalAppContext), without the host IServiceProvider. This minimal current entry point requires matching SDK and Avalonia references. Android does not execute desktop assemblies.
 
-    public override void Activate(AppContext context)
+```csharp
+using Avalonia.Controls;
+using RelaxKonOS.AppSDK;
+using RelaxKonOS.Core.Applications;
+using System.Threading;
+using System.Threading.Tasks;
+
+public sealed class MyApp : IExternalRemoteApplication
+{
+    public ApplicationManifest Manifest { get; } = new(
+        new AppId("com.example.myapp"), "My Application");
+
+    public Task ActivateAsync(IExternalAppContext context,
+        CancellationToken cancellationToken = default)
     {
-        context.ShowWindow("My Window", contentFactory: () => new MyView());
+        context.Windows.ShowWindow("My Window",
+            new TextBlock { Text = "Hello, RelaxKonOS!" });
+        return Task.CompletedTask;
     }
 }
 ```
@@ -44,7 +57,7 @@ ApplicationManager.Launch
       |
 Create AppContext
       |
-IRemoteApplication.Activate
+Built-in Activate / Package ActivateAsync
       |
 WindowManager.Create
       |

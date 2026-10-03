@@ -7,6 +7,8 @@ order: 4
 
 # 快速开始
 
+> 本页对照当前源码说明能力，不是某个发布包的功能清单。已发布产物与日期见[发行说明](/releases/0.1.2)，功能验收状态以所链接的实现记录为准。
+
 登录成功后你会看到 RelaxKonOS 桌面。下面是最常见的几件事。
 
 ## 选择连接模式
@@ -41,3 +43,8 @@ order: 4
 - [应用程序总览](/docs/zh-CN/latest/apps/terminal)
 - [服务器中心](/docs/zh-CN/latest/apps/server-center)
 - [协议与通信](/docs/zh-CN/latest/concepts/protocol)
+
+## 客户端与账户入口
+
+- [Android 手机与平板](/docs/zh-CN/latest/getting-started/android)
+- [系统账号、Alias 与凭据安全](/docs/zh-CN/latest/getting-started/login)

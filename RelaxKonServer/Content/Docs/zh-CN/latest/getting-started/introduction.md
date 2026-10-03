@@ -7,6 +7,8 @@ order: 1
 
 # 欢迎使用 RelaxKonOS
 
+> 本页对照当前源码说明能力，不是某个发布包的功能清单。已发布产物与日期见[发行说明](/releases/0.1.2)，功能验收状态以所链接的实现记录为准。
+
 RelaxKonOS 是一个**跨平台的云原生桌面操作系统环境**。它把「界面」留在你面前的设备上，把「工作空间」留在服务端，让同一个工作区可以在多台设备之间连续使用。
 
 与远程桌面类工具不同，RelaxKonOS 传输的是**状态与操作意图**，而不是桌面像素。
@@ -34,3 +36,8 @@ RelaxKonOS 是一个**跨平台的云原生桌面操作系统环境**。它把�
 - [快速开始](/docs/zh-CN/latest/getting-started/quick-start)
 - [客户端 / 服务端架构](/docs/zh-CN/latest/concepts/architecture)
 - 源码仓库与 Issue：[nanaminato/RelaxKonOS](https://github.com/nanaminato/RelaxKonOS)
+
+## 客户端与账户入口
+
+- [Android 手机与平板](/docs/zh-CN/latest/getting-started/android)
+- [系统账号、Alias 与凭据安全](/docs/zh-CN/latest/getting-started/login)
