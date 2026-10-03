@@ -1,13 +1,13 @@
 ---
 title: 防火墙
-description: 管理 Linux 服务端宿主的 UFW 防火墙状态、默认策略与规则。
+description: 管理 Linux 服务器的 UFW 防火墙状态、默认策略与规则。
 category: 应用程序
 order: 32
 ---
 
 # 防火墙
 
-防火墙应用管理 **Linux 服务端宿主**上的 UFW（Uncomplicated Firewall）。
+防火墙应用管理 **Linux 服务器**上的 UFW（Uncomplicated Firewall）。
 
 ## 功能
 

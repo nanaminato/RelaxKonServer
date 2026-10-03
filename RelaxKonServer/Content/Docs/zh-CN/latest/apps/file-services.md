@@ -1,17 +1,17 @@
 ---
 title: 文件服务
-description: 由受管任务驱动的宿主文件共享服务，例如 SMB。
+description: 由 RelaxKonOS 管理的任务驱动的服务器文件共享服务，例如 SMB。
 category: 应用程序
 order: 36
 ---
 
 # 文件服务
 
-文件服务（File Services）把宿主系统上的文件共享能力（首轮为 SMB）纳入统一的受管安装与运维流程。
+文件服务（File Services）把服务器操作系统上的文件共享能力（首轮为 SMB）纳入由 RelaxKonOS 统一管理的安装与运维流程。
 
 ## 目标
 
-- 通过统一的受管任务启动、配置与恢复服务
+- 通过 RelaxKonOS 统一管理的任务启动、配置与恢复服务
 - Linux 侧使用 Samba，Windows 侧使用 SMB Server
 - 与工作区偏好保持一致，避免每台机器重复配置
 

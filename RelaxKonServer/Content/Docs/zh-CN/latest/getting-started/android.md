@@ -28,6 +28,6 @@ Android 客户端是独立的 Kotlin、Jetpack Compose 与 Material 3 应用，�
 
 ## 实现与验收
 
-首次安装与维护执行链已接入，完整设备/真实宿主验收仍独立追踪。可靠后台告警、卷/数据库恢复和 Android 恢复提交界面不能作为已交付功能宣传。详细移动规范与进度由 Android 工程维护，官网只提供此入门摘要。
+首次安装与维护执行链已接入，完整设备/真实服务器环境验收仍独立追踪。可靠后台告警、卷/数据库恢复和 Android 恢复提交界面不能作为已交付功能宣传。详细移动规范与进度由 Android 工程维护，官网只提供此入门摘要。
 
 权威来源：[Android 文档](https://github.com/nanaminato/RelaxKonOS/blob/master/Client/RelaxKonOS.Client.Android/docs/README.md)、[当前实现](https://github.com/nanaminato/RelaxKonOS/blob/master/Client/RelaxKonOS.Client.Android/docs/status/Progress.md)、[测试与验收](https://github.com/nanaminato/RelaxKonOS/blob/master/Client/RelaxKonOS.Client.Android/docs/status/Verification.md)、[签名与发布](https://github.com/nanaminato/RelaxKonOS/blob/master/Client/RelaxKonOS.Client.Android/docs/development/android-release.md)。

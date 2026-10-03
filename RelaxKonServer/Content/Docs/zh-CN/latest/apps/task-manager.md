@@ -1,13 +1,13 @@
 ---
 title: 任务管理器
-description: 查看宿主 OS 的实时性能指标与进程列表。
+description: 查看服务器操作系统的实时性能指标与进程列表。
 category: 应用程序
 order: 26
 ---
 
 # 任务管理器
 
-任务管理器（RemoteTaskManager）参考 Windows 任务管理器与 GNOME 系统监视器，展示**服务端宿主 OS** 的真实状态。
+任务管理器（RemoteTaskManager）参考 Windows 任务管理器与 GNOME 系统监视器，展示**服务器操作系统** 的真实状态。
 
 ## 性能页
 
@@ -24,13 +24,13 @@ order: 26
 
 - 进程列表，可按名称 / PID / 用户过滤
 - 低频采样与分页查询
-- 结束进程（权限不足时会提示需在宿主 OS 提权）
+- 结束进程（权限不足时会提示需在服务器操作系统提权）
 
 ## 跨平台
 
 采集通过 `ISystemMetricsProvider` 抽象：Windows 使用 `GetSystemTimes` 与 `GlobalMemoryStatusEx`，Linux 读取 `/proc/stat`、`/proc/meminfo` 与 `/proc/[pid]/status`。
 
-> 宿主或服务身份不支持的能力会**明确降级**，而不是显示伪造数值。
+> 服务器平台或服务身份不支持的能力会**明确降级**，而不是显示伪造数值。
 
 ## 相关文档
 

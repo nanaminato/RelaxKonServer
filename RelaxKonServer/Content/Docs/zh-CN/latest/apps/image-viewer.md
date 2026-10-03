@@ -7,7 +7,7 @@ order: 22
 
 # 图片查看器
 
-图片查看器用于快速查看 RelaxKonOS Server 宿主机上的常见图片格式。在 SSH 桌面中，它也可通过 SFTP 打开已确认 SSH 主机上的图片。
+图片查看器用于快速查看 RelaxKonOS Server 所在服务器上的常见图片格式。在 SSH 桌面中，它也可通过 SFTP 打开已确认 SSH 主机上的图片。
 
 ## 功能
 

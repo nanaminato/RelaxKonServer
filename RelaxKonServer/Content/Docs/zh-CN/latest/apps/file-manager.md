@@ -1,6 +1,6 @@
 ---
 title: 文件管理器
-description: 基于服务端 REST API 与宿主 OS 权限的远端文件管理。
+description: 基于服务端 REST API 与服务器操作系统权限的远端文件管理。
 category: 应用程序
 order: 12
 ---
@@ -9,11 +9,11 @@ order: 12
 
 > 本页对照当前源码说明能力，不是某个发布包的功能清单。已发布产物与日期见[发行说明](/releases/0.1.2)，功能验收状态以所链接的实现记录为准。
 
-文件管理器（Explorer）让你像操作本地磁盘一样操作**服务端宿主系统**的文件，但它并不是远程桌面式的文件浏览。
+文件管理器（Explorer）让你像操作本地磁盘一样操作**服务器操作系统**的文件，但它并不是远程桌面式的文件浏览。
 
 ## 概述
 
-界面移植自 Jaya File Manager。在 RelaxKonOS Server 工作区中，所有文件操作都通过服务端 REST API（`/api/v1.0/files/*`）执行，并沿用已登录宿主用户的权限，不额外建立一套 ACL。SSH 桌面则使用专用 SFTP 文件浏览器；它只限于已确认的 SSH 连接，不会调用 RelaxKonOS Server API。
+界面移植自 Jaya File Manager。在 RelaxKonOS Server 工作区中，所有文件操作都通过服务端 REST API（`/api/v1.0/files/*`）执行，并沿用已登录服务器用户的权限，不额外建立一套 ACL。SSH 桌面则使用专用 SFTP 文件浏览器；它只限于已确认的 SSH 连接，不会调用 RelaxKonOS Server API。
 
 ## 功能
 
@@ -30,7 +30,7 @@ order: 12
 
 ## 权限与安全
 
-文件操作受宿主身份和路径权限约束；拒绝读取会显示无权访问，不作为空目录。系统模式中的受保护目录可通过精确文件授权与固定 Helper 访问，权限过期需要重新确认。用户模式限制在当前 Unix home，不能提权。不要通过把 Server 改为 root/管理员来解决权限问题。
+文件操作受服务器身份和路径权限约束；拒绝读取会显示无权访问，不作为空目录。系统模式中的受保护目录可通过精确文件授权与固定 Helper 访问，权限过期需要重新确认。用户模式限制在当前 Unix home，不能提权。不要通过把 Server 改为 root/管理员来解决权限问题。
 
 [上传进度、断点续传与取消](/docs/zh-CN/latest/apps/file-transfers)
 
@@ -43,7 +43,7 @@ Explorer UI (Client)
       |
 RelaxKonOS.Server
       |
-  System.IO 以宿主用户身份
+  System.IO 以服务器用户身份
 ```
 
 ## 相关文档

@@ -1,26 +1,26 @@
 ---
 title: Web Server 管理器
-description: 发现本机 Web Server，经管理员确认后集成或托管，并以可验证的事务方式管理站点。
+description: 发现服务器上的 Web Server，经管理员确认后接入管理或由 RelaxKonOS 安装，并以可验证的事务方式管理站点。
 category: 应用程序
 order: 41
 ---
 
 # Web Server 管理器
 
-Web Server 管理器是**入口与调度层**：它发现本机上的 Web Server 实例并按 Provider 路由，Nginx 是第一个完整实现的 Provider。新增其他 Provider 时，调用方不需要改变。
+Web Server 管理器是**入口与调度层**：它发现服务器上的 Web Server 实例并按 Provider 路由，Nginx 是第一个完整实现的 Provider。新增其他 Provider 时，调用方不需要改变。
 
 ## 概览
 
-RelaxKonOS 不被设计成「自带 Nginx」，也不是一个 Nginx 管理面板。它的定位是：**能够发现本机 Web Server，并根据用户授权选择监控、集成或托管。**
+RelaxKonOS 不被设计成「自带 Nginx」，也不是一个 Nginx 管理面板。它的定位是：**能够发现服务器上的 Web Server，并根据用户授权选择监控、接入管理或由 RelaxKonOS 安装。**
 
 ## 两种管理模式
 
 | 模式 | 含义 | 能力边界 |
 | --- | --- | --- |
-| 集成（Integrated） | 与现有 Web Server 集成，但不拥有它 | 只管理 RelaxKonOS 自己创建的配置片段，不负责安装、升级、卸载 |
-| 托管（Managed） | 由 RelaxKonOS 安装并完整管理 | 安装、升级、启停、配置、站点、卸载 |
+| 已接入管理（Integrated） | 与现有 Web Server 集成，但不拥有它 | 只管理 RelaxKonOS 自己创建的配置片段，不负责安装、升级、卸载 |
+| 由 RelaxKonOS 安装（Managed） | 由 RelaxKonOS 安装并完整管理 | 安装、升级、启停、配置、站点、卸载 |
 
-发现到未受管的 Web Server 时，它只是一个**候选项**：RelaxKonOS 不会自动修改其配置。只有管理员明确确认后才进入集成模式。
+发现到未接入 RelaxKonOS 管理的 Web Server 时，它只是一个**候选项**：RelaxKonOS 不会自动修改其配置。只有管理员明确确认后才接入站点配置管理。
 
 ## 适用场景
 
@@ -41,9 +41,9 @@ RelaxKonOS 不被设计成「自带 Nginx」，也不是一个 Nginx 管理面�
 
 ## 权限与安全
 
-- 这是面向单台服务器管理员的**管理员模式**功能，不使用细粒度的用户 / 工作区授权。实例、站点与配置快照都是宿主机全局资源。
+- 这是面向单台服务器管理员的**管理员模式**功能，不使用细粒度的用户 / 工作区授权。实例、站点与配置快照都是服务器全局资源。
 - 发现与只读状态在进程可读时即可运行；集成、安装、写配置、重载、启停与证书部署都要求 RelaxKonOS 以足够权限运行，否则返回稳定问题码。
-- 宿主授权使用统一管理员认证：系统认证管理员动态核验资格，普通用户与 Alias 显式认证所选管理员。不会把凭据写入日志或拼成任意 shell 命令；安装权限与日常操作授权分别判断，详见[登录与账户安全](/docs/zh-CN/latest/getting-started/login)。
+- 服务器授权使用统一管理员认证：系统认证管理员动态核验资格，普通用户与 Alias 显式认证所选管理员。不会把凭据写入日志或拼成任意 shell 命令；安装权限与日常操作授权分别判断，详见[登录与账户安全](/docs/zh-CN/latest/getting-started/login)。
 - 上游地址不是可任意写入的 URI：拒绝凭据、控制字符、未知协议与未声明端口，并在解析后再次校验地址，避免把站点表单变成内网探测接口。
 - 配置事务在每个实例上串行执行；外部修改与快照不一致时中止并要求重新读取，不覆盖用户变更。
 - 删除站点或卸载只删除带所有权标记且校验一致的文件，绝不递归删除用户目录。
@@ -51,7 +51,7 @@ RelaxKonOS 不被设计成「自带 Nginx」，也不是一个 Nginx 管理面�
 ## 平台差异
 
 - 目标平台为 **Ubuntu 24.04 LTS** 与 **Windows Server 2016 及以上**。
-- Linux 通过系统服务或原生命令控制 Nginx；Windows 下由 RelaxKonOS 服务负责受管 Nginx 的进程生命周期。
+- Linux 通过系统服务或原生命令控制 Nginx；Windows 下由 RelaxKonOS 服务管理其安装的 Nginx 的进程生命周期。
 
 ## 已知限制
 

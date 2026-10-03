@@ -11,7 +11,7 @@ order: 6
 
 ## 系统登录与 Alias
 
-系统登录由 Windows LogonUser 或 Linux PAM 验证。系统模式用户可先用真实系统账号登录，在设置中创建独立的 Alias 与密码；两种凭据绑定同一宿主身份、User 和 Workspace，Alias 不创建新 OS 用户或额外文件权限。
+系统登录由 Windows LogonUser 或 Linux PAM 验证。系统模式用户可先用真实系统账号登录，在设置中创建独立的 Alias 与密码；两种凭据绑定同一服务器身份、User 和 Workspace，Alias 不创建新 OS 用户或额外文件权限。
 
 Alias 密码只保存单向哈希。服务端不持久保存系统登录密码；用户显式选择记住凭据时，桌面使用 OS 安全存储，Android 使用本机保险箱。这些本机凭据不属于 Workspace 同步数据。
 
