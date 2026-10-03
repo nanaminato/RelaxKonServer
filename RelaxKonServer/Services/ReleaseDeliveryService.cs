@@ -21,10 +21,7 @@ public sealed class ReleaseDeliveryService : IReleaseDeliveryService
         [".msix"] = "application/msix",
         [".json"] = "application/json",
         [".sha256"] = "text/plain",
-        [".gz"] = "application/gzip",
-        [".ps1"] = "text/plain",
-        [".sh"] = "text/plain",
-        [""] = "text/plain"
+        [".gz"] = "application/gzip"
     };
 
     private readonly string _root;

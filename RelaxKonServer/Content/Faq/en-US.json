@@ -93,6 +93,6 @@
     "category": "Usage and Operations",
     "order": 16,
     "question": "Can I install without sudo?",
-    "answer": "Linux user mode needs no sudo but requires a verified user-server package rather than a system server bundle. The current catalog has no user-mode package. It listens on loopback and enforces capability restrictions."
+    "answer": "Linux user mode needs no sudo but requires a verified user-server package rather than a system server bundle. The current catalog has no user-mode package. It defaults to loopback, supports configuring 0.0.0.0, and enforces capability restrictions."
   }
 ]

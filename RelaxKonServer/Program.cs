@@ -63,63 +63,6 @@ app.Use(async (context, next) =>
 app.UseCors("development");
 app.UseAuthorization();
 
-app.MapGet("/relaxkonos/stable/latest/install.ps1", (HttpRequest request) =>
-{
-    if (!Uri.TryCreate($"{request.Scheme}://{request.Host}", UriKind.Absolute, out var publicBaseUri))
-        return Results.Problem(statusCode: StatusCodes.Status400BadRequest, title: "The request origin is invalid.");
-
-    var bootstrapUri = new Uri(publicBaseUri, "/relaxkonos/stable/latest/bootstrap/Install-RelaxKonOS.ps1").AbsoluteUri;
-    var loader = $$"""
-    # RelaxKonOS Windows bootstrap loader. It writes the installer to disk so UAC elevation can relaunch it safely.
-    [CmdletBinding()]
-    param(
-        [Parameter(ValueFromRemainingArguments = $true)]
-        [string[]] $InstallerArguments
-    )
-
-    $ErrorActionPreference = 'Stop'
-    $installerPath = Join-Path ([IO.Path]::GetTempPath()) ('Install-RelaxKonOS-' + [Guid]::NewGuid().ToString('N') + '.ps1')
-    try {
-        Invoke-WebRequest -Uri '{{bootstrapUri}}' -OutFile $installerPath
-        if ($InstallerArguments -notcontains '-ReleaseCatalogBaseUri') {
-            $InstallerArguments = @('-ReleaseCatalogBaseUri', '{{publicBaseUri.AbsoluteUri.TrimEnd('/')}}/relaxkonos/stable/latest') + $InstallerArguments
-        }
-        & $installerPath @InstallerArguments
-    }
-    finally {
-        if (Test-Path -LiteralPath $installerPath) { Remove-Item -LiteralPath $installerPath -Force }
-    }
-    """;
-    return Results.Text(loader, "text/plain; charset=utf-8");
-});
-
-app.MapGet("/relaxkonos/stable/latest/uninstall.ps1", (HttpRequest request) =>
-{
-    if (!Uri.TryCreate($"{request.Scheme}://{request.Host}", UriKind.Absolute, out var publicBaseUri))
-        return Results.Problem(statusCode: StatusCodes.Status400BadRequest, title: "The request origin is invalid.");
-
-    var bootstrapUri = new Uri(publicBaseUri, "/relaxkonos/stable/latest/bootstrap/Uninstall-RelaxKonOS.ps1").AbsoluteUri;
-    var loader = $$"""
-    # RelaxKonOS Windows uninstaller loader. The downloaded file is kept on disk for UAC elevation.
-    [CmdletBinding()]
-    param(
-        [Parameter(ValueFromRemainingArguments = $true)]
-        [string[]] $UninstallerArguments
-    )
-
-    $ErrorActionPreference = 'Stop'
-    $uninstallerPath = Join-Path ([IO.Path]::GetTempPath()) ('Uninstall-RelaxKonOS-' + [Guid]::NewGuid().ToString('N') + '.ps1')
-    try {
-        Invoke-WebRequest -Uri '{{bootstrapUri}}' -OutFile $uninstallerPath
-        & $uninstallerPath @UninstallerArguments
-    }
-    finally {
-        if (Test-Path -LiteralPath $uninstallerPath) { Remove-Item -LiteralPath $uninstallerPath -Force }
-    }
-    """;
-    return Results.Text(loader, "text/plain; charset=utf-8");
-});
-
 app.MapMethods("/relaxkonos/{**artifactPath}", [HttpMethods.Get, HttpMethods.Head], (HttpContext context, string artifactPath, IReleaseDeliveryService delivery) =>
 {
     if (!delivery.TryOpen($"relaxkonos/{artifactPath}", out var artifact)) return Results.NotFound();
@@ -148,9 +91,7 @@ app.MapGet("/swagger/v1/swagger.json", () => Results.Json(new
         ["/api/docs/{language}/{version}/{slug}"] = new { get = new { summary = "Get a Markdown document with previous/next links and headings", tags = new[] { "Documentation" } } },
         ["/api/docs/search"] = new { get = new { summary = "Search documentation titles and content", tags = new[] { "Documentation" } } },
         ["/api/downloads"] = new { get = new { summary = "List product downloads", tags = new[] { "Content" } } },
-        ["/relaxkonos/stable/latest/{runtime}.json"] = new { get = new { summary = "Get the current RelaxKonOS installer descriptor", tags = new[] { "Release delivery" } } },
-        ["/relaxkonos/stable/latest/install.ps1"] = new { get = new { summary = "Windows bootstrap loader", tags = new[] { "Release delivery" } } },
-        ["/relaxkonos/stable/latest/uninstall.ps1"] = new { get = new { summary = "Windows uninstaller loader", tags = new[] { "Release delivery" } } },
+        ["/relaxkonos/stable/latest/{runtime}.json"] = new { get = new { summary = "Get the current RelaxKonOS release descriptor", tags = new[] { "Release delivery" } } },
         ["/relaxkonos/stable/{version}/{runtime}/{file}"] = new { get = new { summary = "Download a versioned RelaxKonOS artifact", tags = new[] { "Release delivery" } } },
         ["/api/releases"] = new { get = new { summary = "List releases", tags = new[] { "Content" } } },
         ["/api/releases/{version}"] = new { get = new { summary = "Get a single release note", tags = new[] { "Content" } } },

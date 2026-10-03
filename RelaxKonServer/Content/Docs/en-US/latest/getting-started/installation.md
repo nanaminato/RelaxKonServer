@@ -46,7 +46,7 @@ Local and server files still receive package-kind, architecture, required-file a
 | Server port | 1–65535, default 5000; choose an available port |
 | Program and data directories | System Mode allows separate roots; User Mode stores programs under its data root. Blank uses defaults; existing installations retain recorded roots |
 | Configuration, state and cache directories | Linux User Mode allows all four XDG-related roots; use absolute paths that do not overlap |
-| Network | System Mode offers loopback or LAN; User Mode remains loopback-only. LAN does not open the firewall automatically |
+| Network | System Mode offers loopback or LAN; The User Mode wizard defaults to loopback; LAN can be enabled with `listen-host`. LAN does not open the firewall automatically |
 | TLS certificate | System Mode offers none, custom or self-signed. Select PFX/P12 with its password, or a PEM chain and private key. Self-signed names are comma-separated |
 | File access | System Mode offers restricted, whitelist or full. Enter one absolute host directory per line for a whitelist |
 | Administrator and root file access | Linux System Mode configures separate scopes and whitelists for both identities |

@@ -54,7 +54,7 @@ public sealed class PublisherService
         if (request.BuildClient && SelectedClientRuntimes(request).Count == 0) throw new InvalidOperationException("至少选择一个客户端运行时。");
         if (request.BuildServer && SelectedServerRuntimes(request).Count == 0) throw new InvalidOperationException("至少选择一个服务端运行时。");
         if (request.BuildServer && SelectedServerRuntimes(request).Any(runtime => runtime.StartsWith("osx-", StringComparison.OrdinalIgnoreCase))) throw new InvalidOperationException("macOS 目前仅支持客户端包，不能选择服务端目标运行时。");
-        if (!request.BuildClient && !request.BuildServer && !request.IncludeInstallers && !request.ImportAndroidApk && !request.ImportAndroidAab)
+        if (!request.BuildClient && !request.BuildServer && !request.ImportAndroidApk && !request.ImportAndroidAab)
             throw new InvalidOperationException("至少选择一项要生成的发布内容。");
     }
 
@@ -175,12 +175,6 @@ public sealed class PublisherService
                 entries.RemoveAll(entry => entry.PackageKind is "client" or "server");
 
             var affected = new List<string>();
-            if (request.IncludeInstallers)
-            {
-                SetStep(job, "复制发布安装器");
-                CopyDirectory(Path.Combine(paths.RelaxKonOSPath, "deployment", "bootstrap"), Path.Combine(stageDelivery, "relaxkonos", "stable", "latest", "bootstrap"));
-                affected.Add("ReleaseDelivery/relaxkonos/stable/latest/bootstrap");
-            }
             foreach (var runtime in runtimes)
             {
                 cancellationToken.ThrowIfCancellationRequested();

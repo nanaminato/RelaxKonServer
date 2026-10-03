@@ -93,6 +93,6 @@
     "category": "使用与运维",
     "order": 16,
     "question": "没有 sudo 可以安装吗？",
-    "answer": "Linux 用户模式不需要 sudo，但必须使用已验证的 user-server 包，不能使用系统服务端包。当前下载目录尚未列出用户模式包，运行后只监听 loopback 并受能力限制。"
+    "answer": "Linux 用户模式不需要 sudo，但必须使用已验证的 user-server 包，不能使用系统服务端包。当前下载目录尚未列出用户模式包，默认监听 loopback，可配置 0.0.0.0，特权功能仍受能力限制。"
   }
 ]

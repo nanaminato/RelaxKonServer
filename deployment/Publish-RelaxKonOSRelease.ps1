@@ -2,8 +2,6 @@
 param(
     [Parameter(Mandatory)]
     [string] $SourceDirectory,
-    [Parameter(Mandatory)]
-    [string] $BootstrapDirectory,
     [string] $DeliveryRoot = (Join-Path $PSScriptRoot '..\RelaxKonServer\Content\ReleaseDelivery'),
     [string] $WebsiteDownloadsPath = (Join-Path $PSScriptRoot '..\RelaxKonServer\Content\Downloads\downloads.json'),
     [string] $PublicBaseUri = 'https://downloads.relaxkon.com'
@@ -28,29 +26,11 @@ function Write-Utf8Atomically([string] $Path, [string] $Content) {
     }
 }
 
-function Copy-LinuxShellScriptAsLf([string] $Source, [string] $Destination) {
-    # Bootstrap scripts are served verbatim to Linux hosts. Copy-Item would retain
-    # CRLF from a Windows checkout, causing Bash to parse `pipefail\r` as an
-    # invalid option. Keep the public scripts UTF-8 (without BOM) with LF lines.
-    $content = [IO.File]::ReadAllText($Source)
-    $normalized = $content.Replace("`r`n", "`n").Replace("`r", "`n")
-    Write-Utf8Atomically $Destination $normalized
-}
-
 $source = Get-FullDirectory $SourceDirectory 'SourceDirectory'
-$bootstrap = Get-FullDirectory $BootstrapDirectory 'BootstrapDirectory'
 $delivery = [IO.Path]::GetFullPath($DeliveryRoot)
 $websiteDownloads = [IO.Path]::GetFullPath($WebsiteDownloadsPath)
 $publicBase = $PublicBaseUri.TrimEnd('/')
 if ($publicBase -notmatch '^https://[^/]+$') { throw 'PublicBaseUri must be an HTTPS origin without a path.' }
-
-$windowsBootstrap = Join-Path $bootstrap 'Install-RelaxKonOS.ps1'
-$linuxBootstrap = Join-Path $bootstrap 'install-relaxkonos.sh'
-$windowsUninstall = Join-Path $bootstrap 'Uninstall-RelaxKonOS.ps1'
-$linuxUninstall = Join-Path $bootstrap 'uninstall-relaxkonos.sh'
-foreach ($required in @($windowsBootstrap, $linuxBootstrap, $windowsUninstall, $linuxUninstall)) {
-    if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw "Bootstrap directory is incomplete: $required" }
-}
 
 $published = 0
 $downloadEntries = [System.Collections.Generic.List[object]]::new()
@@ -103,8 +83,8 @@ Get-ChildItem -LiteralPath $source -File -Filter '*.json' | ForEach-Object {
         architecture = $architecture
         version = [string] $descriptor.version
         # Browser download cards stay on the current website hostname. The
-        # installer descriptor above remains absolute because command-line
-        # installers cannot resolve a relative URL outside a browser context.
+        # release descriptor above remains absolute because the deployment
+        # launcher downloads artifacts outside a browser context.
         url = "/relaxkonos/stable/$($descriptor.version)/$($descriptor.runtime)/$($descriptor.packageKind)/$archiveName"
         size = ('{0:0.0} MB' -f ((Get-Item -LiteralPath $archive).Length / 1MB))
         checksum = $actualHash
@@ -129,10 +109,4 @@ foreach ($entry in $downloadEntries) {
 }
 New-Item -ItemType Directory -Path (Split-Path -Parent $websiteDownloads) -Force | Out-Null
 Write-Utf8Atomically $websiteDownloads (ConvertTo-Json -InputObject @($updatedEntries) -Depth 4)
-$latestBootstrap = Join-Path $delivery 'relaxkonos\stable\latest\bootstrap'
-New-Item -ItemType Directory -Path $latestBootstrap -Force | Out-Null
-Copy-Item -LiteralPath $windowsBootstrap -Destination (Join-Path $latestBootstrap 'Install-RelaxKonOS.ps1') -Force
-Copy-LinuxShellScriptAsLf $linuxBootstrap (Join-Path $latestBootstrap 'install-relaxkonos.sh')
-Copy-Item -LiteralPath $windowsUninstall -Destination (Join-Path $latestBootstrap 'Uninstall-RelaxKonOS.ps1') -Force
-Copy-LinuxShellScriptAsLf $linuxUninstall (Join-Path $latestBootstrap 'uninstall-relaxkonos.sh')
 Write-Host "Published $published runtime(s) to $delivery and updated $websiteDownloads"

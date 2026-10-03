@@ -27,7 +27,7 @@ Content/
 ├── Releases/{version}.md            # Markdown 发布说明（文件名即版本号）
 ├── Faq/{language}.json              # 各语言 FAQ
 ├── Downloads/downloads.json         # 下载描述文件
-└── ReleaseDelivery/…                # 已发布的 RelaxKonOS ZIP、校验和、描述与安装器（部署数据）
+└── ReleaseDelivery/…                # 已发布的 RelaxKonOS ZIP、校验和、描述符（部署数据）
 ```
 
 ### 文档
@@ -96,35 +96,20 @@ order: 14
 
 搜索细节：`q` 少于 2 个字符返回 400；正文命中时返回的 `snippet` 是剥离 Markdown 语法后的纯文本摘要，最多 20 条结果，标题命中的排在前面。
 
-## RelaxKonOS 下载与一键安装
+## RelaxKonOS 下载与客户端安装
 
-`Content/ReleaseDelivery/` 是现有 API 提供的部署数据，不是新的 Web 项目。版本 ZIP 缓存一年且不可变；`latest` 描述与安装器使用 `no-cache`；允许 GET、HEAD 和 Range 续传。发布维护者先执行：
+`Content/ReleaseDelivery/` 是现有 API 提供的部署数据，不是新的 Web 项目。版本 ZIP 缓存一年且不可变；`latest` 描述符使用 `no-cache`；允许 GET、HEAD 和 Range 续传。发布维护者先执行：
 
 ```powershell
 ./deployment/Publish-RelaxKonOSRelease.ps1 `
-  -SourceDirectory 'D:\artifacts\relaxkonos' `
-  -BootstrapDirectory '..\RelaxKonOS\deployment\bootstrap'
+  -SourceDirectory 'D:\artifacts\relaxkonos'
 ```
 
 它会验证 ZIP 的 SHA-256，将文件放到 `stable/{version}/{runtime}/`，生成 `latest/{runtime}.json`，并同步更新现有 `/api/downloads` 清单，所以官网的离线包卡片无需人工维护。`-PublicBaseUri https://relaxkon.com` 可让主站成为规范 URL；默认 URL 是 `https://downloads.relaxkon.com`。两者由同一个网站部署提供服务。
 
 部署 `deployment/nginx/relaxkon.com.conf` 后，让 `relaxkon.com`、`www.relaxkon.com`、`downloads.relaxkon.com` 指向同一台服务器，并配置覆盖全部名称的证书。`/api/`、`/relaxkonos/` 反向代理到本 API，其余请求继续由现有 Angular 构建产物处理。
 
-用户可任选其中一个域名，安装器会下载稳定版描述并验证 ZIP SHA-256：
-
-```bash
-# Linux：交互式 / 无人值守
-curl -fsSL https://downloads.relaxkon.com/relaxkonos/stable/latest/bootstrap/install-relaxkonos.sh | sudo bash
-curl -fsSL https://relaxkon.com/relaxkonos/stable/latest/bootstrap/install-relaxkonos.sh | sudo bash -s -- --non-interactive
-```
-
-```powershell
-# Windows PowerShell：交互式 / 无人值守
-irm https://downloads.relaxkon.com/relaxkonos/stable/latest/install.ps1 | iex
-& ([scriptblock]::Create((irm 'https://relaxkon.com/relaxkonos/stable/latest/install.ps1'))) -InstallerArguments '-NonInteractive'
-```
-
-Windows 的 `install.ps1` 会先把真正的安装器保存到临时目录，因而 UAC 提升可以安全地重新启动它。已有安装器仍支持离线 ZIP，或手工指定发布 URI 和 SHA-256。
+用户通过客户端服务器中心选择官方来源安装。客户端上传内嵌部署 launcher，目标主机下载稳定版描述符和 ZIP 并验证摘要，再调用 ZIP 内的部署引擎完成安装、升级或卸载。网站不再提供命令行安装或卸载脚本。
 
 ## 后端发布包
 

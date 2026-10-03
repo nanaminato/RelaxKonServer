@@ -98,33 +98,18 @@ Search details: a `q` shorter than two characters returns 400; content matches r
 
 ## RelaxKonOS delivery and one-command installation
 
-`Content/ReleaseDelivery/` is deployment data served by the existing API, not a new web project. Versioned ZIPs are immutable-cached for one year; `latest` descriptors and installers use `no-cache`; GET, HEAD and Range resumption are supported. A release maintainer first runs:
+`Content/ReleaseDelivery/` is deployment data served by the existing API, not a new web project. Versioned ZIPs are immutable-cached for one year; `latest` descriptors use `no-cache`; GET, HEAD and Range resumption are supported. A release maintainer first runs:
 
 ```powershell
 ./deployment/Publish-RelaxKonOSRelease.ps1 `
-  -SourceDirectory 'D:\artifacts\relaxkonos' `
-  -BootstrapDirectory '..\RelaxKonOS\deployment\bootstrap'
+  -SourceDirectory 'D:\artifacts\relaxkonos'
 ```
 
 It verifies ZIP SHA-256 values, places files under `stable/{version}/{runtime}/`, produces `latest/{runtime}.json`, and updates the existing `/api/downloads` list so the website's offline-package cards need no manual maintenance. `-PublicBaseUri https://relaxkon.com` makes the main site canonical; the default is `https://downloads.relaxkon.com`. Both names serve one deployment.
 
 Deploy `deployment/nginx/relaxkon.com.conf`, point `relaxkon.com`, `www.relaxkon.com`, and `downloads.relaxkon.com` at one server, and configure a certificate covering every name. `/api/` and `/relaxkonos/` are proxied to this API; the existing Angular build handles all other paths.
 
-Users can use either domain; the installer fetches the stable descriptor and verifies ZIP SHA-256:
-
-```bash
-# Linux: interactive / unattended
-curl -fsSL https://downloads.relaxkon.com/relaxkonos/stable/latest/bootstrap/install-relaxkonos.sh | sudo bash
-curl -fsSL https://relaxkon.com/relaxkonos/stable/latest/bootstrap/install-relaxkonos.sh | sudo bash -s -- --non-interactive
-```
-
-```powershell
-# Windows PowerShell: interactive / unattended
-irm https://downloads.relaxkon.com/relaxkonos/stable/latest/install.ps1 | iex
-& ([scriptblock]::Create((irm 'https://relaxkon.com/relaxkonos/stable/latest/install.ps1'))) -InstallerArguments '-NonInteractive'
-```
-
-`install.ps1` stages the real Windows installer on disk first, so it can safely restart during UAC elevation. Offline ZIPs and explicitly supplied release URI + SHA-256 remain supported.
+Users install through Server Center in the client with the official source selected. The client uploads its embedded deployment launcher; the host downloads the stable descriptor and ZIP, verifies checksums, and invokes the deployment engines inside the ZIP for installation, upgrades, and removal. The website no longer serves command-line installation or uninstallation scripts.
 
 ## Backend release package
 

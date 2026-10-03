@@ -98,31 +98,18 @@ order: 14
 
 ## RelaxKonOS の配布とワンコマンド インストール
 
-`Content/ReleaseDelivery/` は既存 API が配信する配置データであり、新しい Web プロジェクトではありません。バージョン付き ZIP は 1 年 immutable キャッシュ、`latest` の記述とインストーラーは `no-cache`、GET、HEAD、Range 再開に対応します。リリース担当者は先に次を実行します。
+`Content/ReleaseDelivery/` は既存 API が配信する配置データであり、新しい Web プロジェクトではありません。バージョン付き ZIP は 1 年 immutable キャッシュ、`latest` の記述子は `no-cache`、GET、HEAD、Range 再開に対応します。リリース担当者は先に次を実行します。
 
 ```powershell
 ./deployment/Publish-RelaxKonOSRelease.ps1 `
-  -SourceDirectory 'D:\artifacts\relaxkonos' `
-  -BootstrapDirectory '..\RelaxKonOS\deployment\bootstrap'
+  -SourceDirectory 'D:\artifacts\relaxkonos'
 ```
 
 ZIP の SHA-256 を検証し、`stable/{version}/{runtime}/` に置き、`latest/{runtime}.json` を作成し、既存の `/api/downloads` リストも更新します。そのため公式サイトのオフラインパッケージカードを手作業で保守する必要はありません。`-PublicBaseUri https://relaxkon.com` でメインサイトを正規 URL にでき、既定値は `https://downloads.relaxkon.com` です。両方の名前は一つのデプロイを提供します。
 
 `deployment/nginx/relaxkon.com.conf` を配置し、`relaxkon.com`、`www.relaxkon.com`、`downloads.relaxkon.com` を同じサーバーへ向け、全名前を含む証明書を設定します。`/api/` と `/relaxkonos/` はこの API にプロキシされ、その他は既存 Angular ビルドが処理します。
 
-利用者はどちらのドメインも使用でき、インストーラーは安定版記述を取得して ZIP SHA-256 を検証します。
-
-```bash
-curl -fsSL https://downloads.relaxkon.com/relaxkonos/stable/latest/bootstrap/install-relaxkonos.sh | sudo bash
-curl -fsSL https://relaxkon.com/relaxkonos/stable/latest/bootstrap/install-relaxkonos.sh | sudo bash -s -- --non-interactive
-```
-
-```powershell
-irm https://downloads.relaxkon.com/relaxkonos/stable/latest/install.ps1 | iex
-& ([scriptblock]::Create((irm 'https://relaxkon.com/relaxkonos/stable/latest/install.ps1'))) -InstallerArguments '-NonInteractive'
-```
-
-`install.ps1` は実際の Windows インストーラーを先にディスクへ保存するため、UAC 昇格時にも安全に再起動できます。オフライン ZIP と、リリース URI + SHA-256 の明示指定も引き続き利用可能です。
+クライアントのサーバーセンターで公式ソースを選択してインストールします。クライアントは内蔵 deployment launcher を転送し、対象ホストが安定版記述子と ZIP をダウンロードして摘要を検証します。インストール、更新、削除には ZIP 内の配置エンジンを使用します。公式サイトはコマンドライン用のインストール・アンインストールスクリプトを配信しません。
 
 ## バックエンドのリリースパッケージ
 

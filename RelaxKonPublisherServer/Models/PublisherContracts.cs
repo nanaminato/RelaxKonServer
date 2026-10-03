@@ -17,7 +17,6 @@ public sealed class PublisherPlanRequest
     public bool BuildServer { get; init; } = true;
     public bool IncludeChecksums { get; init; } = true;
     public bool IncludeDescriptors { get; init; } = true;
-    public bool IncludeInstallers { get; init; }
     /// <summary>Imports the fixed, locally verified Android APK from AndroidImport.ArtifactDirectory.</summary>
     public bool ImportAndroidApk { get; init; }
     /// <summary>Archives the fixed, locally verified Android App Bundle. AAB files are not website-downloadable.</summary>

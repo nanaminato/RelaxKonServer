@@ -7,7 +7,7 @@ order: 3
 
 # User Mode installation (Linux)
 
-Linux User Mode runs the server under your ordinary account, without sudo, system services or a privileged helper. It listens only on `127.0.0.1`; remote access uses a client-managed SSH tunnel.
+Linux User Mode runs the server under your ordinary account, without sudo, system services or a privileged helper. It defaults to `127.0.0.1`; remote access uses a client-managed SSH tunnel. To listen on `0.0.0.0`, write `0.0.0.0` to `listen-host` in the user configuration directory (normally `~/.config/relaxkonos`, respecting `XDG_CONFIG_HOME` or `RELAXKONOS_USER_CONFIG_ROOT`) and restart with the user launcher. The client installation wizard still defaults to loopback.
 
 ## Install through Server Center
 
@@ -30,7 +30,7 @@ Availability follows the download catalog. Obtain a suitable User Mode package i
 
 Use absolute directories that do not overlap. Private directories and files use `0700` / `0600`. Host-side directory discovery lets the client maintain the actual installation after reconnecting.
 
-User Mode installs no PAM or sudoers configuration, changes no system firewall and disables privileged host features such as Docker management. Networking is loopback-only; system TLS and privileged file scopes do not apply.
+User Mode installs no PAM or sudoers configuration, changes no system firewall and disables privileged host features such as Docker management. Networking defaults to loopback and can be configured for LAN; system TLS and privileged file scopes do not apply.
 
 ## Update and uninstall
 

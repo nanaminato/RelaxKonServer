@@ -12,7 +12,7 @@ public sealed class ReleaseDeliveryOptions
     public string RootPath { get; init; } = "Content/ReleaseDelivery";
 
     /// <summary>
-    /// Canonical public origin used by the Windows bootstrap loader. Additional DNS aliases may
+    /// Canonical public origin used by release descriptors. Additional DNS aliases may
     /// serve the same application, but should redirect here when a canonical URL is needed.
     /// </summary>
     public string PublicBaseUri { get; init; } = "https://downloads.relaxkon.com";
