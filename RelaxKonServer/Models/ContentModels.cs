@@ -17,7 +17,9 @@ public sealed record ReleaseSummary(
     string Title,
     string Summary,
     DateOnly ReleaseDate,
-    bool IsPrerelease);
+    bool IsPrerelease,
+    string Language,
+    bool IsFallback);
 
 public sealed record ReleaseDetails(
     string Version,
@@ -26,7 +28,9 @@ public sealed record ReleaseDetails(
     string Content,
     DateOnly ReleaseDate,
     bool IsPrerelease,
-    IReadOnlyList<string> Highlights);
+    IReadOnlyList<string> Highlights,
+    string Language,
+    bool IsFallback);
 
 public sealed record FaqItem(
     string Question,

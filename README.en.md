@@ -24,7 +24,8 @@ All website content is owned by the server and lives under `Content/`:
 ```text
 Content/
 ├── Docs/{language}/{version}/…      # Markdown documentation tree
-├── Releases/{version}.md            # Markdown release notes (file name is the version)
+├── Releases/{version}.md            # Shared release metadata and artifacts
+├── Releases/{language}/{version}.md # Localized release text
 ├── Faq/{language}.json              # FAQ entries per language
 ├── Downloads/downloads.json         # Download descriptor
 └── ReleaseDelivery/…                # Deployed RelaxKonOS ZIPs, checksums, descriptors and bootstrap scripts
@@ -55,7 +56,7 @@ order: 14
 
 ### Releases, FAQ and downloads
 
-- Release notes are Markdown files named after the version. Front matter supports `version`, `title`, `date`, `summary` and `prerelease`; when omitted, the file name is the version and the file's last write time is the date. The list is ordered by release date descending, and `highlights` in the detail response is the first six list items of the body.
+- Release notes use `Releases/{version}.md` for shared `version`, `date`, `prerelease` and artifact inventory, plus `Releases/{language}/{version}.md` for translated `title`, `summary` and body. Shared Markdown can use `{artifactsTitle}`, `{packageLabel}` and `{downloadsLabel}`, supplied by translation front matter. Version, date, download URLs, sizes and SHA-256 values are maintained only in the shared file. Both release endpoints accept `?language=zh-CN|en-US|ja-JP`, defaulting to English. Missing translations fall back to English and return the actual `language` and `isFallback`; every release requires an English file. Lists sort by date descending; `highlights` uses the first six list items of the translated body, excluding shared artifacts. After building, run `node tools/verify-release-localization.mjs` to verify localization, shared data and fallback.
 - `Faq/<language>.json` is an array of `{ question, answer, category, order }`. A missing or malformed language falls back to `en-US`, and an empty `category` becomes `General`.
 - `Downloads/downloads.json` is an array of `{ platform, architecture, version, url, size, checksum, releaseDate, isAvailable, fileName }`.
 

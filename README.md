@@ -24,7 +24,8 @@ OpenAPI 描述文件位于 `/swagger/v1/swagger.json`，Swagger UI 入口在 `/s
 ```text
 Content/
 ├── Docs/{language}/{version}/…      # Markdown 文档树
-├── Releases/{version}.md            # Markdown 发布说明（文件名即版本号）
+├── Releases/{version}.md            # Shared release metadata and artifacts
+├── Releases/{language}/{version}.md # Localized release text
 ├── Faq/{language}.json              # 各语言 FAQ
 ├── Downloads/downloads.json         # 下载描述文件
 └── ReleaseDelivery/…                # 已发布的 RelaxKonOS ZIP、校验和、描述符（部署数据）
@@ -55,7 +56,7 @@ order: 14
 
 ### 发布说明、FAQ 与下载
 
-- 发布说明是按版本命名的 Markdown 文件，front matter 支持 `version`、`title`、`date`、`summary`、`prerelease`；缺省时用文件名当版本号、文件修改时间当日期。列表按发布日期倒序，详情响应中的 `highlights` 取自正文的前 6 个列表项。
+- 发行说明分为 `Releases/{version}.md`（共享 `version`、`date`、`prerelease` 与包清单）和 `Releases/{language}/{version}.md`（翻译后的 `title`、`summary` 与正文）。共享正文可使用 `{artifactsTitle}`、`{packageLabel}`、`{downloadsLabel}`，对应文字由语言文件 front matter 提供。版本、日期、下载地址、大小与 SHA-256 只维护在共享文件中。两条发行 API 均接受 `?language=zh-CN|en-US|ja-JP`，默认英文；缺少翻译回退英文并返回实际 `language` 与 `isFallback`，每个版本必须有英文文件。列表按日期倒序，`highlights` 取语言正文的前 6 个列表项，不包含共享下载清单。构建后运行 `node tools/verify-release-localization.mjs` 验证三语、共享数据与回退行为。
 - `Faq/<language>.json` 是 `{ question, answer, category, order }` 数组；该语言文件缺失或语言代码非法时回退 `en-US`，`category` 为空时补 `General`。
 - `Downloads/downloads.json` 是 `{ platform, architecture, version, url, size, checksum, releaseDate, isAvailable, fileName }` 数组。
 

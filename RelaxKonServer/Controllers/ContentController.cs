@@ -15,12 +15,12 @@ public sealed class ContentController(
         Ok(await downloads.GetDownloadsAsync(cancellationToken));
 
     [HttpGet("releases")]
-    public async Task<IActionResult> ReleasesList(CancellationToken cancellationToken) =>
-        Ok(await releases.GetReleasesAsync(cancellationToken));
+    public async Task<IActionResult> ReleasesList([FromQuery] string language = "en-US", CancellationToken cancellationToken = default) =>
+        Ok(await releases.GetReleasesAsync(language, cancellationToken));
 
     [HttpGet("releases/{version}")]
-    public async Task<IActionResult> Release(string version, CancellationToken cancellationToken) =>
-        await releases.GetReleaseAsync(version, cancellationToken) is { } release ? Ok(release) : NotFound();
+    public async Task<IActionResult> Release(string version, [FromQuery] string language = "en-US", CancellationToken cancellationToken = default) =>
+        await releases.GetReleaseAsync(version, language, cancellationToken) is { } release ? Ok(release) : NotFound();
 
     [HttpGet("faq")]
     public async Task<IActionResult> FaqList([FromQuery] string language = "en-US", CancellationToken cancellationToken = default) =>

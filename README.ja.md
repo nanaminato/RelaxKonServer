@@ -24,7 +24,8 @@ OpenAPI 記述は `/swagger/v1/swagger.json`、Swagger UI の入口は `/swagger
 ```text
 Content/
 ├── Docs/{language}/{version}/…      # Markdown ドキュメントツリー
-├── Releases/{version}.md            # Markdown リリースノート（ファイル名がバージョン）
+├── Releases/{version}.md            # Shared release metadata and artifacts
+├── Releases/{language}/{version}.md # Localized release text
 ├── Faq/{language}.json              # 言語ごとの FAQ
 ├── Downloads/downloads.json         # ダウンロード記述ファイル
 └── ReleaseDelivery/…                # 配置済み RelaxKonOS ZIP、チェックサム、記述、ブートストラップ
@@ -55,7 +56,7 @@ order: 14
 
 ### リリースノート、FAQ、ダウンロード
 
-- リリースノートはバージョン名の Markdown ファイルです。フロントマターは `version`、`title`、`date`、`summary`、`prerelease` に対応します。省略時はファイル名がバージョン、ファイルの最終更新時刻が日付になります。一覧はリリース日の降順で、詳細レスポンスの `highlights` は本文の最初の 6 個のリスト項目です。
+- リリースノートは `Releases/{version}.md`（共通の `version`・`date`・`prerelease` とパッケージ一覧）と `Releases/{language}/{version}.md`（翻訳した `title`・`summary`・本文）で構成します。共通本文の `{artifactsTitle}`・`{packageLabel}`・`{downloadsLabel}` は言語ファイルのフロントマターから取得します。版、日付、URL、サイズ、SHA-256 は共通ファイルだけで管理します。両 API は `?language=zh-CN|en-US|ja-JP` に対応し、既定は英語です。翻訳がない場合は英語に戻り、実際の `language` と `isFallback` を返します。各版の英語ファイルは必須です。一覧は日付降順で、`highlights` は翻訳本文の先頭 6 個のリスト項目を使用し、共通パッケージ一覧は含めません。ビルド後に `node tools/verify-release-localization.mjs` で三言語、共通データ、フォールバックを検証します。
 - `Faq/<language>.json` は `{ question, answer, category, order }` の配列です。該当言語のファイルが無い、または言語コードが不正な場合は `en-US` へフォールバックし、`category` が空なら `General` になります。
 - `Downloads/downloads.json` は `{ platform, architecture, version, url, size, checksum, releaseDate, isAvailable, fileName }` の配列です。
 

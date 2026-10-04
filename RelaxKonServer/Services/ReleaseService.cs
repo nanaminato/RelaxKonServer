@@ -10,8 +10,8 @@ namespace RelaxKonServer.Services;
 
 public interface IReleaseService
 {
-    Task<IReadOnlyList<ReleaseSummary>> GetReleasesAsync(CancellationToken cancellationToken);
-    Task<ReleaseDetails?> GetReleaseAsync(string version, CancellationToken cancellationToken);
+    Task<IReadOnlyList<ReleaseSummary>> GetReleasesAsync(string language, CancellationToken cancellationToken);
+    Task<ReleaseDetails?> GetReleaseAsync(string version, string language, CancellationToken cancellationToken);
 }
 
 public sealed class ReleaseService : IReleaseService
@@ -30,9 +30,10 @@ public sealed class ReleaseService : IReleaseService
         _cacheDuration = TimeSpan.FromMinutes(Math.Clamp(options.Value.CacheMinutes, 1, 120));
     }
 
-    public async Task<IReadOnlyList<ReleaseSummary>> GetReleasesAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<ReleaseSummary>> GetReleasesAsync(string language, CancellationToken cancellationToken)
     {
-        var releases = await _cache.GetOrCreateAsync("releases:all", async entry =>
+        language = NormalizeLanguage(language);
+        var releases = await _cache.GetOrCreateAsync($"releases:all:{language}", async entry =>
         {
             entry.AbsoluteExpirationRelativeToNow = _cacheDuration;
             var loaded = new List<(ReleaseSummary Summary, string Path)>();
@@ -43,7 +44,8 @@ public sealed class ReleaseService : IReleaseService
             {
                 var source = await File.ReadAllTextAsync(file, cancellationToken);
                 var metadata = FrontMatter.Parse(source);
-                loaded.Add((ToSummary(metadata, file), file));
+                var localized = await ReadTranslationAsync(file, language, cancellationToken);
+                loaded.Add((ToSummary(metadata, localized.Metadata, file, localized.Language, localized.Language != language), file));
             }
 
             return loaded.OrderByDescending(item => item.Summary.ReleaseDate).ToList();
@@ -52,11 +54,12 @@ public sealed class ReleaseService : IReleaseService
         return releases!.Select(item => item.Summary).ToArray();
     }
 
-    public async Task<ReleaseDetails?> GetReleaseAsync(string version, CancellationToken cancellationToken)
+    public async Task<ReleaseDetails?> GetReleaseAsync(string version, string language, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(version) || version.Length > 64 || version.Contains("..")) return null;
 
-        var releases = await GetReleasesAsync(cancellationToken);
+        language = NormalizeLanguage(language);
+        var releases = await GetReleasesAsync(language, cancellationToken);
         var summary = releases.FirstOrDefault(item => item.Version.Equals(version, StringComparison.OrdinalIgnoreCase));
 
         var file = await _cache.GetOrCreateAsync($"releases:file:{version}", async entry =>
@@ -71,8 +74,12 @@ public sealed class ReleaseService : IReleaseService
 
         var source = await File.ReadAllTextAsync(file, cancellationToken);
         var metadata = FrontMatter.Parse(source);
-        var content = FrontMatter.Strip(source);
-        summary ??= ToSummary(metadata, file);
+        var localized = await ReadTranslationAsync(file, language, cancellationToken);
+        var shared = FrontMatter.Strip(source);
+        foreach (var key in new[] { "artifactsTitle", "packageLabel", "downloadsLabel" })
+            shared = shared.Replace("{" + key + "}", localized.Metadata.GetValueOrDefault(key) ?? key, StringComparison.Ordinal);
+        var content = localized.Content + "\n\n" + shared;
+        summary ??= ToSummary(metadata, localized.Metadata, file, localized.Language, localized.Language != language);
 
         return new ReleaseDetails(
             summary.Version,
@@ -81,20 +88,45 @@ public sealed class ReleaseService : IReleaseService
             content,
             summary.ReleaseDate,
             summary.IsPrerelease,
-            ExtractHighlights(content));
+            ExtractHighlights(localized.Content),
+            summary.Language,
+            summary.IsFallback);
     }
 
-    private static ReleaseSummary ToSummary(IReadOnlyDictionary<string, string> metadata, string path)
+    private static ReleaseSummary ToSummary(IReadOnlyDictionary<string, string> metadata, IReadOnlyDictionary<string, string> translation, string path, string language, bool isFallback)
     {
         var version = metadata.GetValueOrDefault("version") ?? Path.GetFileNameWithoutExtension(path);
-        var title = metadata.GetValueOrDefault("title") ?? version;
-        var summary = metadata.GetValueOrDefault("summary") ?? string.Empty;
+        var title = translation.GetValueOrDefault("title") ?? version;
+        var summary = translation.GetValueOrDefault("summary") ?? string.Empty;
         var date = DateTimeOffset.TryParse(metadata.GetValueOrDefault("date"), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var parsed)
             ? DateOnly.FromDateTime(parsed.UtcDateTime)
             : DateOnly.FromDateTime(File.GetLastWriteTimeUtc(path));
         var prerelease = bool.TryParse(metadata.GetValueOrDefault("prerelease"), out var isPre) && isPre;
 
-        return new ReleaseSummary(version, title, summary, date, prerelease);
+        return new ReleaseSummary(version, title, summary, date, prerelease, language, isFallback);
+    }
+
+    private static string NormalizeLanguage(string language) => language switch
+    {
+        "zh-CN" => "zh-CN",
+        "ja-JP" => "ja-JP",
+        _ => "en-US"
+    };
+
+    private async Task<(IReadOnlyDictionary<string, string> Metadata, string Content, string Language)> ReadTranslationAsync(
+        string sharedFile, string language, CancellationToken cancellationToken)
+    {
+        var name = Path.GetFileName(sharedFile);
+        var file = Path.Combine(_rootPath, language, name);
+        if (!File.Exists(file))
+        {
+            language = "en-US";
+            file = Path.Combine(_rootPath, language, name);
+        }
+        if (!File.Exists(file))
+            throw new InvalidDataException($"Release {name} requires an English translation.");
+        var source = await File.ReadAllTextAsync(file, cancellationToken);
+        return (FrontMatter.Parse(source), FrontMatter.Strip(source), language);
     }
 
     private static IReadOnlyList<string> ExtractHighlights(string content) =>
