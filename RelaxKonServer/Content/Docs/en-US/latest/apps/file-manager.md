@@ -11,6 +11,24 @@ order: 12
 
 File Manager (Explorer) lets you work with files on the **server host** as if they were local, but it is not a remote-desktop file browser.
 
+## Walkthrough: find a directory and upload a file
+
+1. Identify the connection: Server workspaces operate on host files; SSH desktops use SFTP. Check host/account before opening File Manager from Start.
+2. Use the navigation tree or address bar to enter an allowed target, and check its path/list. Start in a test directory, not a system directory.
+3. Create and enter a test folder. Check for same-name targets and confirm the offered conflict handling before uploading.
+4. Upload a small local file, wait for transfer and commit, then refresh and verify name/size. 100% progress alone is not a completed commit.
+5. Download the uploaded file and verify it opens with correct contents locally. Before rename, copy or move, check selected items and destination.
+
+![Screenshot placeholder：Capture: navigation tree, address bar and file list with a test path, names, sizes and selected item.](/assets/docs/screenshots/en-US/files-navigation.svg)
+
+> Capture: navigation tree, address bar and file list with a test path, names, sizes and selected item.
+
+![Screenshot placeholder：Capture: upload progress and the refreshed target file with completion state, name and size; redact sensitive paths.](/assets/docs/screenshots/en-US/files-transfer.svg)
+
+> Capture: upload progress and the refreshed target file with completion state, name and size; redact sensitive paths.
+
+If reading is denied, inspect identity/path authorization instead of treating it as an empty directory. Linux User Mode is limited to the current Unix home; Windows Personal helper access follows the reviewed scope. Recheck selected items before deletion; this guide promises neither a recycle bin nor recovery. See [transfers](/docs/en-US/latest/apps/file-transfers) for interrupted large uploads.
+
 ## Overview
 
 The interface is ported from Jaya File Manager. In a RelaxKonOS Server workspace, every file operation runs through the server REST API (`/api/v1.0/files/*`), which reuses the signed-in host user's permissions instead of introducing a second ACL. An SSH desktop instead uses its dedicated SFTP file browser; it is limited to the confirmed SSH connection and does not call the RelaxKonOS Server API.

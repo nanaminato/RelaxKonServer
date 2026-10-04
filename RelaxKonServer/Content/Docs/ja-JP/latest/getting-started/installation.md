@@ -81,3 +81,5 @@ Windows 10/11 個人モードでは正常性確認後に本機端末を認証し
 - [クイックスタート](/docs/ja-JP/latest/getting-started/quick-start)
 - [ログインとアカウントの安全性](/docs/ja-JP/latest/getting-started/login)
 - [Windows 10/11 の個人用 PC](/docs/ja-JP/latest/getting-started/windows)
+
+[リモート導入](/docs/ja-JP/latest/getting-started/remote-installation) · [更新・削除・保守](/docs/ja-JP/latest/apps/server-maintenance)

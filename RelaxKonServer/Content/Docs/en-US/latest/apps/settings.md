@@ -9,6 +9,19 @@ order: 24
 
 Settings is the Windows 11 / GNOME style hub for workspace preferences.
 
+## Walkthrough: change appearance and language
+
+1. Open Settings from Start in the intended Server workspace. SSH desktop preferences are not Server workspace preferences.
+2. Change supported theme/wallpaper options in Personalization and observe the desktop; no host file editing is needed.
+3. In Time and Language select Chinese, English, Japanese or follow-system, and verify navigation/page text changes immediately.
+4. Wait for preference persistence, sign out and back into the same workspace, and verify the selection. Check synchronization on another device in that workspace. Outbound proxy is shared Server configuration, not this kind of workspace preference.
+
+![Screenshot placeholder：Capture: Personalization and Time/Language choices, showing selected theme/language and applied desktop changes.](/assets/docs/screenshots/en-US/settings-preferences.svg)
+
+> Capture: Personalization and Time/Language choices, showing selected theme/language and applied desktop changes.
+
+Check scope before changing outbound proxy. Docker daemon proxy changes restart Docker and affect running containers; they are not merely appearance preferences.
+
 ## Categories
 
 | Category | Contents |

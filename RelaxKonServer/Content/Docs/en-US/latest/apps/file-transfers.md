@@ -9,6 +9,17 @@ order: 13
 
 > This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
 
+## Walkthrough: verify upload completion
+
+1. Confirm remote directory and local source in File Manager. Keep the source available and unchanged.
+2. Watch confirmed bytes, rate and stage. After interruption, check Server-confirmed offset/session state and use the client's resume entry. Expired sessions must restart.
+3. After commit succeeds, refresh the target and check name/size, then open or download to verify. 100% indicates only the byte-transfer stage.
+4. Cancel unwanted tasks using the client action and check its state. Do not start concurrent same-name uploads while the outcome is unknown.
+
+![Screenshot placeholder：Capture: transfer and final commit state with confirmed bytes, rate, stage, cancel entry and completed result.](/assets/docs/screenshots/en-US/transfer-progress.svg)
+
+> Capture: transfer and final commit state with confirmed bytes, rate, stage, cancel entry and completed result.
+
 ## Upload, resume and cancel
 
 Large desktop and Android uploads use chunked sessions instead of loading a whole file into memory. Clients show transferred bytes, progress, rate and cancellation; small files may use a single request with an explicit limit.

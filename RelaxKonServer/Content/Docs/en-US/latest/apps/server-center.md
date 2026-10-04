@@ -57,3 +57,5 @@ Uninstall keeps server data by default. Removing data is an explicit destructive
 - [Security model](/docs/en-US/latest/concepts/security)
 
 [Android server center and separate verification status](/docs/en-US/latest/getting-started/android)
+
+[Remote installation](/docs/en-US/latest/getting-started/remote-installation) · [Update, uninstall and maintenance](/docs/en-US/latest/apps/server-maintenance)

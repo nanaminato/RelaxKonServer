@@ -81,3 +81,5 @@ Windows 10/11 个人模式在健康检查后先完成本机设备授权，随后
 - [快速开始](/docs/zh-CN/latest/getting-started/quick-start)
 - [登录与账户安全](/docs/zh-CN/latest/getting-started/login)
 - [Windows 10/11 个人电脑](/docs/zh-CN/latest/getting-started/windows)
+
+[远程安装：逐步操作](/docs/zh-CN/latest/getting-started/remote-installation) · [更新、卸载与维护](/docs/zh-CN/latest/apps/server-maintenance)

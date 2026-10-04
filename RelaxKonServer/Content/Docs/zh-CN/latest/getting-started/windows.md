@@ -30,6 +30,10 @@ Windows 10/11 可以在同一台电脑运行 Server 和桌面 Client。本机管
 
 Windows 10/11 系统模式允许本机管理员通过回环 Negotiate 设置或恢复设备密钥；Windows Server 不开放此工作站授权入口。个人模式的所有者授权不适用于另一个系统模式安装。
 
+![截图占位 · 待替换：截图位置：管理本机入口与个人／系统模式选择，展示当前用户与目标模式。](/assets/docs/screenshots/zh-CN/windows-local-mode.svg)
+
+> 截图位置：管理本机入口与个人／系统模式选择，展示当前用户与目标模式。
+
 ## 权限、数据与日常运行
 
 个人模式的安装所有者默认具有该安装的 RelaxKonOS 管理员能力，无需加入 Windows Administrators。普通文件、终端和 Docker Desktop 使用所有者账户的环境与权限。个人模式不安装 Guardian 系统服务，也不提供跨用户 Guardian；应用能力仍以实际检测结果为准。
@@ -47,6 +51,10 @@ Windows 10/11 系统模式允许本机管理员通过回环 Negotiate 设置或�
 
 跨设备连接需让 Server 监听 LAN，使用其他设备可达的主机名或 IP，不能把 `127.0.0.1` 或 `localhost` 放入配对地址。配置 HTTPS，证书必须覆盖实际地址。个人模式安装和维护可显式添加防火墙规则，仅允许 Domain/Private 网络的 LocalSubnet 来源；其他范围由 Windows 管理员配置，LAN 不代表公网可达。
 
+![截图占位 · 待替换：截图位置：本机设备授权与配对入口，展示授权结果和设备管理，遮盖有效配对码。](/assets/docs/screenshots/zh-CN/windows-device-pairing.svg)
+
+> 截图位置：本机设备授权与配对入口，展示授权结果和设备管理，遮盖有效配对码。
+
 ## 更新、回退与卸载
 
 从本机管理入口维护对应安装，更新、修复、回退和卸载均核对安装标识并按需请求 UAC。刷新状态不请求 UAC。卸载默认保留数据，并移除个人助手与对应防火墙规则；永久删除数据需要单独确认。
@@ -58,3 +66,5 @@ Windows 10/11 系统模式允许本机管理员通过回环 Negotiate 设置或�
 - [安装](/docs/zh-CN/latest/getting-started/installation)
 - [登录与账户安全](/docs/zh-CN/latest/getting-started/login)
 - [服务器中心](/docs/zh-CN/latest/apps/server-center)
+
+[远程安装：逐步操作](/docs/zh-CN/latest/getting-started/remote-installation) · [更新、卸载与维护](/docs/zh-CN/latest/apps/server-maintenance)

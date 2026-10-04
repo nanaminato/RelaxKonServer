@@ -9,6 +9,19 @@ order: 14
 
 Terminal provides a remote PTY session over SignalR. The client renders terminal output locally; the server holds the PTY and preserves the session when the connection detaches.
 
+## Walkthrough: identify execution host and user
+
+1. Open Terminal in a signed-in Server workspace and check connection/session state. An SSH terminal targets the SSH host; a local terminal executes on the client.
+2. On Linux, try `hostname`, `id` and `pwd`. On Windows, use `hostname`, `whoami` and your shell's current-directory command. Identify host, user and directory before acting.
+3. Run ordinary commands in a test directory and inspect output/scrolling. With multiple sessions, identify the active session before typing.
+4. Reconnect after a brief Server connection loss and inspect restored session state. Persistence does not promise recovery across every restart/sign-out or in local terminals; Windows Personal Server stops at sign-out.
+
+![Screenshot placeholder：Capture: session state and host/user checks, explicitly showing Server, SSH or local mode; redact real accounts.](/assets/docs/screenshots/en-US/terminal-session.svg)
+
+> Capture: session state and host/user checks, explicitly showing Server, SSH or local mode; redact real accounts.
+
+Check authorization before using an administrator terminal. Windows Personal's explicit administrator terminal runs as LocalSystem without the user's mapped drives; do not choose it by default for ordinary commands. Diagnose deployment receipts through [maintenance](/docs/en-US/latest/apps/server-maintenance), rather than repeatedly running installers.
+
 ## Overview
 
 The terminal control is built on RoyalTerminal and embedded in a RemoteWindow. In remote mode the PTY runs on the server, the server is a **byte relay**, and VT rendering happens entirely on the client.

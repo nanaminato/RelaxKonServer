@@ -81,3 +81,5 @@ After health verification, sign in with a host system account or a configured Al
 - [Quick start](/docs/en-US/latest/getting-started/quick-start)
 - [Sign-in and account security](/docs/en-US/latest/getting-started/login)
 - [Windows 10/11 personal computers](/docs/en-US/latest/getting-started/windows)
+
+[Remote installation](/docs/en-US/latest/getting-started/remote-installation) · [Update, uninstall and maintenance](/docs/en-US/latest/apps/server-maintenance)

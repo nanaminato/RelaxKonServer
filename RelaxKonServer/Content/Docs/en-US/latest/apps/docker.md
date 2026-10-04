@@ -11,6 +11,22 @@ Docker Manager (RemoteDocker) manages the Docker Engine of the **server host** f
 
 It manages **one local engine only**: the client never connects to the Docker socket directly, stores no Docker credentials, and never exposes the daemon API to the network.
 
+## Walkthrough: inspect the engine and manage one container
+
+1. Open Docker Manager in a full Server workspace and read engine detection. This Server application is unavailable in the SSH desktop.
+2. If unavailable, check installation and authorization. Linux System Docker access needs explicit approval. On Windows 10/11, Docker Desktop should run as the same user as Personal Server; ownership does not override capability detection.
+3. In Containers, choose a test container that may be interrupted and verify name/state. Start, stop or restart only that container, confirm and refresh state.
+4. Distinguish container actions from whole-engine actions: stopping/restarting the engine affects all containers on the host. Do not use engine restart for single-container maintenance.
+5. Before pulling an image, check reference, registry source and proxy. Diagnose registry reachability, authentication, proxy or engine errors before retrying.
+
+![Screenshot placeholder：Capture: engine detection/platform state, showing runtime availability and explicit authorization/dependency problems.](/assets/docs/screenshots/en-US/docker-engine.svg)
+
+> Capture: engine detection/platform state, showing runtime availability and explicit authorization/dependency problems.
+
+![Screenshot placeholder：Capture: test container list, action confirmation and refreshed state with its name and single-container action.](/assets/docs/screenshots/en-US/docker-container.svg)
+
+> Capture: test container list, action confirmation and refreshed state with its name and single-container action.
+
 ## Features
 
 - Engine status detection and installation guidance

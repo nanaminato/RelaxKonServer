@@ -57,3 +57,5 @@ Linux 系统模式可以使用 root 或经验证的 sudo；Linux 用户模式使
 - [安全模型](/docs/zh-CN/latest/concepts/security)
 
 [Android 服务器中心与独立验收状态](/docs/zh-CN/latest/getting-started/android)
+
+[远程安装：逐步操作](/docs/zh-CN/latest/getting-started/remote-installation) · [更新、卸载与维护](/docs/zh-CN/latest/apps/server-maintenance)

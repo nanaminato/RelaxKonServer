@@ -57,3 +57,5 @@ Linux システムモードは root または認証済み sudo、ユーザーモ
 - [セキュリティモデル](/docs/ja-JP/latest/concepts/security)
 
 [Android サーバーセンターと個別検証状況](/docs/ja-JP/latest/getting-started/android)
+
+[リモート導入](/docs/ja-JP/latest/getting-started/remote-installation) · [更新・削除・保守](/docs/ja-JP/latest/apps/server-maintenance)

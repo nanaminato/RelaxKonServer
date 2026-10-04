@@ -30,6 +30,10 @@ Windows 10/11 では同じ PC で Server とデスクトップ Client を実行�
 
 Windows 10/11 システムモードでは本機管理者がループバック Negotiate で端末鍵を設定・復旧できます。Windows Server はこのワークステーション向け入口を提供しません。個人モードの所有権で別のシステムモード環境へアクセスすることはできません。
 
+![スクリーンショットの仮画像：撮影箇所：本機管理と個人／システム選択。現在ユーザーと対象モードを示します。](/assets/docs/screenshots/ja-JP/windows-local-mode.svg)
+
+> 撮影箇所：本機管理と個人／システム選択。現在ユーザーと対象モードを示します。
+
 ## 権限、データ、日常利用
 
 所有者は Windows Administrators に加入せず、そのインストールの RelaxKonOS 管理者機能を利用できます。通常のファイル、ターミナル、Docker Desktop は所有者の環境と権限を使います。個人モードは Guardian システムサービスやユーザーをまたぐ Guardian を提供しません。各アプリの機能は実際のプラットフォーム検出に従います。
@@ -47,6 +51,10 @@ Windows 10/11 システムモードでは本機管理者がループバック Ne
 
 他の端末から接続するには LAN で待ち受け、到達可能なホスト名または IP を使います。ペアリング先に `127.0.0.1` や `localhost` は使えません。実際のアドレスをカバーする証明書で HTTPS を設定します。個人モードの導入・保守で明示的に追加できるファイアウォール規則は Domain/Private ネットワークの LocalSubnet に限定されます。他の範囲は Windows 管理者が設定し、LAN 接続はインターネット公開を意味しません。
 
+![スクリーンショットの仮画像：撮影箇所：本機認証とペアリング。結果と端末管理を示し、有効なコードは隠します。](/assets/docs/screenshots/ja-JP/windows-device-pairing.svg)
+
+> 撮影箇所：本機認証とペアリング。結果と端末管理を示し、有効なコードは隠します。
+
 ## 更新、ロールバック、削除
 
 本機管理から対象のインストールを保守します。更新・修復・ロールバック・削除は識別子を確認し、必要に応じて UAC を要求します。状態の更新は UAC 不要です。削除は既定でデータを保持し、個人ヘルパーと対応するファイアウォール規則を削除します。データの完全削除は別途確認します。
@@ -58,3 +66,5 @@ Windows 10/11 システムモードでは本機管理者がループバック Ne
 - [インストール](/docs/ja-JP/latest/getting-started/installation)
 - [ログインとアカウントの安全性](/docs/ja-JP/latest/getting-started/login)
 - [サーバーセンター](/docs/ja-JP/latest/apps/server-center)
+
+[リモート導入](/docs/ja-JP/latest/getting-started/remote-installation) · [更新・削除・保守](/docs/ja-JP/latest/apps/server-maintenance)
