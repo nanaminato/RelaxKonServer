@@ -7,6 +7,12 @@ order: 4
 
 # 快速开始
 
+## 图文使用教程
+
+- [第一次连接服务器](/docs/zh-CN/latest/getting-started/tutorial-connect)
+- [熟悉桌面与窗口](/docs/zh-CN/latest/getting-started/tutorial-desktop)
+- [用文件管理器和终端完成第一次操作](/docs/zh-CN/latest/getting-started/tutorial-files-terminal)
+
 > 本页对照当前源码说明能力，不是某个发布包的功能清单。已发布产物与日期见[发行说明](/releases/0.1.2)，功能验收状态以所链接的实现记录为准。
 
 登录成功后你会看到 RelaxKonOS 桌面。下面是最常见的几件事。

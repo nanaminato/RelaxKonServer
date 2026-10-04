@@ -355,6 +355,11 @@ public sealed class PublisherService
                 var exists = relative.EndsWith(".csproj", StringComparison.Ordinal) ? File.Exists(path) : Directory.Exists(path);
                 checks.Add(new PublisherPreflightCheck($"服务端输入：{relative}", exists, exists ? "构建输入已找到" : $"找不到构建输入：{path}"));
             }
+            if (SelectedServerRuntimes(request).Any(runtime => RuntimePlatform(runtime) == "linux"))
+            {
+                var verifier = Path.Combine(paths.RelaxKonOSPath, "deployment", "verify-release-inventory.py");
+                checks.Add(new PublisherPreflightCheck("Linux 发布包校验器", File.Exists(verifier), File.Exists(verifier) ? "发布包校验器已找到" : $"找不到构建输入：{verifier}"));
+            }
             foreach (var platform in SelectedServerRuntimes(request).Select(RuntimePlatform).Distinct())
             {
                 var path = Path.Combine(paths.RelaxKonOSPath, "deployment", platform);
@@ -563,8 +568,8 @@ public sealed class PublisherService
             var target = Path.Combine(packageRoot, "payload", platform, "client");
             await DotnetPublishAsync(job, Path.Combine(osRoot, "Client", "RelaxKonOS.Client.Desktop", "RelaxKonOS.Client.Desktop.csproj"), target, runtime, cancellationToken);
             EnsureExecutable(target, $"RelaxKonOS{extension}");
-            await WriteManifestAsync(packageRoot, kind, request.Version, runtime, platform, new Dictionary<string, string> { ["client"] = $"payload/{platform}/client/RelaxKonOS{extension}" });
             if (platform == "macos") await WriteMacOsReadmeAsync(packageRoot, cancellationToken);
+            await WriteManifestAsync(packageRoot, kind, request.Version, runtime, platform, new Dictionary<string, string> { ["client"] = $"payload/{platform}/client/RelaxKonOS{extension}" });
         }
         else
         {
@@ -582,8 +587,7 @@ public sealed class PublisherService
                 EnsureExecutable(target, component.Item4);
                 payload[component.Item3] = $"payload/{platform}/{component.Item2}/{component.Item4}";
             }
-            CopyDirectory(Path.Combine(osRoot, "deployment", "bootstrap"), Path.Combine(packageRoot, "deployment", "bootstrap"));
-            CopyDirectory(Path.Combine(osRoot, "deployment", platform), Path.Combine(packageRoot, "deployment", platform));
+            CopyServerDeploymentFiles(osRoot, packageRoot, platform);
             await WriteManifestAsync(packageRoot, kind, request.Version, runtime, platform, payload);
         }
 
@@ -863,8 +867,37 @@ public sealed class PublisherService
         if (!File.Exists(Path.Combine(directory, executable))) throw new InvalidOperationException($"发布输出未包含 {executable}。");
     }
 
-    private static Task WriteManifestAsync(string packageRoot, string kind, string version, string runtime, string platform, Dictionary<string, string> payload) =>
-        File.WriteAllTextAsync(Path.Combine(packageRoot, "manifest.json"), JsonSerializer.Serialize(new { schemaVersion = 1, packageKind = kind, version, runtime, supportedSystems = SupportedSystems(platform), payload = new Dictionary<string, object> { [platform] = payload } }, Json));
+    private static void CopyServerDeploymentFiles(string osRoot, string packageRoot, string platform)
+    {
+        CopyDirectory(Path.Combine(osRoot, "deployment", "bootstrap"), Path.Combine(packageRoot, "deployment", "bootstrap"));
+        CopyDirectory(Path.Combine(osRoot, "deployment", platform), Path.Combine(packageRoot, "deployment", platform));
+        if (platform != "linux") return;
+
+        File.Copy(Path.Combine(osRoot, "deployment", "verify-release-inventory.py"), Path.Combine(packageRoot, "deployment", "verify-release-inventory.py"), overwrite: true);
+        // Windows checkouts may contain CRLF; hash the final Linux bytes after normalization.
+        foreach (var script in Directory.EnumerateFiles(Path.Combine(packageRoot, "deployment"), "*.sh", SearchOption.AllDirectories))
+        {
+            var original = File.ReadAllText(script);
+            var normalized = original.Replace("\r\n", "\n").Replace("\r", "\n");
+            if (normalized != original) File.WriteAllText(script, normalized, new UTF8Encoding(false));
+        }
+    }
+
+    private static async Task WriteManifestAsync(string packageRoot, string kind, string version, string runtime, string platform, Dictionary<string, string> payload)
+    {
+        var manifestPath = Path.Combine(packageRoot, "manifest.json");
+        var files = new List<object>();
+        foreach (var path in Directory.EnumerateFiles(packageRoot, "*", SearchOption.AllDirectories).Order(StringComparer.Ordinal))
+        {
+            if (string.Equals(path, manifestPath, StringComparison.OrdinalIgnoreCase)) continue;
+            var relative = Path.GetRelativePath(packageRoot, path).Replace('\\', '/');
+            if (!Regex.IsMatch(relative, @"^[A-Za-z0-9._/+\-]+$") || relative.Split('/').Any(part => part is "" or "." or ".."))
+                throw new InvalidOperationException($"发布包文件路径不受支持：{relative}");
+            files.Add(new { path = relative, length = new FileInfo(path).Length, sha256 = await ComputeHashAsync(path, CancellationToken.None) });
+        }
+        if (files.Count == 0) throw new InvalidOperationException("发布包没有有效载荷文件。");
+        await File.WriteAllTextAsync(manifestPath, JsonSerializer.Serialize(new { schemaVersion = 1, packageKind = kind, version, runtime, supportedSystems = SupportedSystems(platform), payload = new Dictionary<string, object> { [platform] = payload }, files }, Json));
+    }
 
     private static Task WriteMacOsReadmeAsync(string packageRoot, CancellationToken cancellationToken) =>
         File.WriteAllTextAsync(Path.Combine(packageRoot, "README-macOS.txt"), """

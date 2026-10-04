@@ -1,13 +1,13 @@
 ---
 title: Firewall
-description: Manage UFW state, default policies and rules on a Linux server host.
+description: Manage Linux UFW and Windows Defender Firewall state, default policies and rules.
 category: Applications
 order: 32
 ---
 
 # Firewall
 
-The Firewall application manages **UFW** on a **Linux server host**.
+The Firewall application supports Linux UFW and Windows Defender Firewall on Windows 10/11 and Windows Server. Windows System Mode and Windows 10/11 Personal Mode use the privileged Helper.
 
 ## Features
 
@@ -18,14 +18,25 @@ The Firewall application manages **UFW** on a **Linux server host**.
 
 ## How to use it
 
-Open it to inspect the current state. Changing the state, policies or rules requires non-root users to confirm once with **their own password** through PAM.
+Open it to inspect the current state. Changing the state, policies or rules uses shared host-administrator authorization. Verified administrators do not repeat authentication; other users authenticate an administrator in the elevation dialog.
 
 ## Permissions and security
 
-- Linux only; the application is not shown on Windows Server
+- Linux uses UFW; Windows uses native firewall interfaces
 - root sessions are not asked to re-authenticate
-- Other users confirm every change once through PAM
+- Other sessions use shared temporary host-administrator grants
 - Rules are structurally validated, so arbitrary command injection is not possible
+
+## Windows Firewall
+
+- Read status, enable or disable the firewall, and change default inbound and outbound policies.
+- State and default-policy changes apply to **Domain, Private and Public** profiles together. Differing profile defaults have no single displayed value.
+- Create, edit and delete rules managed by this application. System, other application, Group Policy and deployment-helper rules are excluded from this list.
+- Rules support allow/block, inbound/outbound, TCP/UDP/any, IP/CIDR addresses and port ranges. Any protocol requires any port; ports refer to the local port for inbound traffic and the remote port for outbound traffic.
+- UFW reject and limit actions are unavailable. Rules apply to all three profiles; choose the required source and destination scope.
+- Changes require shared host-administrator authorization and native Windows operations through the Helper. Missing Helper access or policy restrictions return an error.
+
+Changes can interrupt your management connection. Administrators can manage other Windows rules with `wf.msc`. Personal Mode's installation wizard creates a separate LAN rule limited to Domain/Private profiles and LocalSubnet sources.
 
 ## Related documentation
 

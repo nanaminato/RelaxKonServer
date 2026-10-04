@@ -7,6 +7,12 @@ order: 4
 
 # クイックスタート
 
+## 操作チュートリアル
+
+- [初めてサーバーに接続する](/docs/ja-JP/latest/getting-started/tutorial-connect)
+- [デスクトップとウィンドウを使う](/docs/ja-JP/latest/getting-started/tutorial-desktop)
+- [ファイル管理とターミナルの最初の操作](/docs/ja-JP/latest/getting-started/tutorial-files-terminal)
+
 > このページは現在のソース機能を説明し、特定パッケージの収録機能一覧ではありません。公開成果物と日付は[リリースノート](/releases/0.1.2)、検証状況はリンク先の実装記録で確認してください。
 
 サインインすると RelaxKonOS のデスクトップが表示されます。まずはよく使う操作から。
