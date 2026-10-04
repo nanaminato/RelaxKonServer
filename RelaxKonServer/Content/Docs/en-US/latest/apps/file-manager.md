@@ -32,6 +32,8 @@ Open File Manager from the start menu, double-click a folder to enter it, and do
 
 File operations follow host identity and path permissions. Refused reads are shown as inaccessible rather than empty. In system mode, protected directories use precise file authorization and a fixed Helper; renew expired authorization. User mode stays within the current Unix home and cannot elevate. Do not solve access failures by running Server as root/administrator.
 
+In system mode, read authorization for a protected folder lasts 5 minutes and is bound to the current sign-in token. It covers that folder and its descendants, so browsing subfolders or opening images within them does not require repeated administrator credentials during that period. A single-file grant covers only that file. Other folders are outside its scope; writes and deletions require separate authorization, and sign-out revokes the grant.
+
 [Upload progress, resumption and cancellation](/docs/en-US/latest/apps/file-transfers)
 
 ## Architecture
