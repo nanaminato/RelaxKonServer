@@ -9,16 +9,20 @@ order: 2
 
 RelaxKonOS consists of a client and a server. Install the client on your device, then use **Server Center** to install or maintain the server.
 
+## Local Windows 10/11 installation
+
+On your own Windows 10/11 PC, choose **Manage this PC** on the desktop sign-in page. Personal Mode is the default, with System Mode also available; SSH is unnecessary. The current user owns Personal Mode, while installation and maintenance use UAC to configure a privileged helper. Server starts at sign-in and stops at sign-out. Authorize this PC through loopback after installation, then pair other devices with a code. See [Windows 10/11 personal computers](/docs/en-US/latest/getting-started/windows) for steps, mode differences and permission scopes. Windows Server supports System Mode only.
+
 ## Before installation
 
 - Get the matching client from [Downloads](/downloads). Published packages require no .NET SDK. See [Android](/docs/en-US/latest/getting-started/android) for mobile installation.
-- Enable SSH on the target host and prepare a management account. Verify the host key fingerprint when connecting.
+- Remote installation requires SSH and a management account on the target host; verify the host key fingerprint. Local Windows 10/11 management requires no SSH.
 - Linux System Mode defaults to Debian 12 and Ubuntu 22.04/24.04/26.04; it requires root or approved sudo, systemd and Python 3. Other Linux systems require an explicit advanced-option choice.
 - Linux User Mode requires a non-root account, Bash, Python 3, curl, unzip, realpath, stat, find, sha256sum and flock. It needs no sudo or systemd.
-- Windows System Mode requires an elevated administrator SSH session and system PowerShell.
-- Check architecture, space, dependencies and port availability. First installation uses host SSH before a Server API exists.
+- Windows 10/11 supports Personal and System Modes; Windows Server supports System Mode only. Remote Windows System Mode installation requires an elevated administrator SSH session; local installation uses administrator privileges. Both require system PowerShell.
+- Check architecture, space, dependencies and ports. Remote first installation uses SSH; local Windows management invokes the local deployment engine.
 
-## Install from the client
+## Remote installation from the client (SSH)
 
 1. Open **Server Center / Install or manage a server**. Desktop users can also select SSH in the login window and open Server Center after connecting.
 2. Add the host with its SSH address, port and account; verify and trust its host key.
@@ -42,7 +46,7 @@ Local and server files still receive package-kind, architecture, required-file a
 
 | Option | Scope and meaning |
 | --- | --- |
-| Mode | Linux System, Linux User or Windows System; Automatic follows preflight recommendations |
+| Mode | Linux System/User and Windows System; local Windows 10/11 management also offers Personal Mode by default. Remote Automatic follows preflight recommendations |
 | Server port | 1–65535, default 5000; choose an available port |
 | Program and data directories | System Mode allows separate roots; User Mode stores programs under its data root. Blank uses defaults; existing installations retain recorded roots |
 | Configuration, state and cache directories | Linux User Mode allows all four XDG-related roots; use absolute paths that do not overlap |
@@ -56,6 +60,8 @@ Local and server files still receive package-kind, architecture, required-file a
 
 The client handles language, fixed actions, non-interactive execution, private staging paths, certificate password files and existing installation identity. No script arguments need to be entered. Certificate passwords are excluded from review.
 
+Windows 10/11 Personal Mode uses fixed per-user program, data and deployment-history directories. Review network, TLS and privileged file scopes during installation. LAN listening does not automatically open the firewall; an explicit personal rule permits only LocalSubnet sources on Domain/Private networks.
+
 ## Update, repair and uninstall
 
 Select an installed host in Server Center and open maintenance. Upgrade, repair and rollback continue with recorded directories; reinstalling retained data preserves installation identity. Ordinary upgrades and repairs retain TLS identity; certificate regeneration is an explicit choice.
@@ -63,6 +69,8 @@ Select an installed host in Server Center and open maintenance. Upgrade, repair 
 Uninstall retains data by default. Permanently deleting databases, configuration, keys and logs requires separate confirmation. The client verifies host state afterward. Use operation logs and repair when the privileged helper is unavailable.
 
 ## First sign-in
+
+After health verification, Windows 10/11 Personal Mode first authorizes the local device and then uses device-key sign-in. System-account and Alias sign-in apply to modes that support them. See [Windows 10/11 personal computers](/docs/en-US/latest/getting-started/windows).
 
 After health verification, sign in with a host system account or a configured Alias. System accounts use host authentication; Alias uses an independent password hash. The server does not persist system sign-in passwords. Remembering credentials is an explicit local secure-storage choice.
 
@@ -72,3 +80,4 @@ After health verification, sign in with a host system account or a configured Al
 - [Linux User Mode](/docs/en-US/latest/getting-started/user-mode)
 - [Quick start](/docs/en-US/latest/getting-started/quick-start)
 - [Sign-in and account security](/docs/en-US/latest/getting-started/login)
+- [Windows 10/11 personal computers](/docs/en-US/latest/getting-started/windows)

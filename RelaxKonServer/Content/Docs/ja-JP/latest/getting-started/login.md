@@ -9,6 +9,10 @@ order: 6
 
 > このページは現在のソース機能を説明し、特定パッケージの収録機能一覧ではありません。公開成果物と日付は[リリースノート](/releases/0.1.2)、検証状況はリンク先の実装記録で確認してください。
 
+## Windows 10/11 の個人用 PC
+
+Windows 10/11 個人モードの所有者は、同じ PC のループバック Negotiate で**この Windows 端末を設定**を実行できます。アカウントパスワードや Hello PIN は不要で、他の Windows 管理者は所有者を代替できません。以後は端末鍵でログインします。10 分間有効な 1 回限りのコードでデスクトップや Android を同じ所有者アカウントとワークスペースにペアリングできます。失効すると対象端末のトークンと Hub 接続が無効になります。Windows 10/11 システムモードでは本機管理者が端末鍵を設定・復旧できますが、Windows Server はこのワークステーション向け入口を提供しません。詳しくは[Windows 10/11 の個人用 PC](/docs/ja-JP/latest/getting-started/windows)を参照してください。
+
 ## システム認証と Alias
 
 システム認証は Windows LogonUser または Linux PAM が検証します。システムモードでは、実際のシステムアカウントで認証した後、設定で独立した Alias とパスワードを作成できます。両方の資格情報は同じホスト ID・User・Workspace に結び付き、Alias は新しい OS ユーザーや追加のファイル権限を作りません。
@@ -29,7 +33,7 @@ SSH と Server の資格情報は別々に入力・安全保存できます。�
 
 ## モードと認可
 
-ユーザーモードは Server を実行する Unix アカウントだけを受け付け、Alias と管理者認可を提供しません。システムモードでも、Alias はシステムパスワード認証による管理者の再入力免除を継承しません。一般ユーザーと Alias は選択した管理者を明示的に認証します。別アカウントの Guardian・スクリプト操作は今回の明示的承認が必要で、ファイル操作は別のパス認可に従います。
+Linux ユーザーモードは Server を実行する Unix アカウントだけを受け付け、Alias と管理者認可を提供しません。システムモードでも、Alias はシステムパスワード認証による管理者の再入力免除を継承しません。一般ユーザーと Alias は選択した管理者を明示的に認証します。別アカウントの Guardian・スクリプト操作は今回の明示的承認が必要で、ファイル操作は別のパス認可に従います。
 
 参考：[認証実装](https://github.com/nanaminato/RelaxKonOS/blob/master/RelaxKonOS.Server/Identity/LoginAuthenticationService.cs)、[Alias 管理](https://github.com/nanaminato/RelaxKonOS/blob/master/RelaxKonOS.Server/Identity/AliasCredentialService.cs)、[特権操作](https://github.com/nanaminato/RelaxKonOS/blob/master/docs/platform/RelaxKonOS.PrivilegedOperations.Operations.md)。
 

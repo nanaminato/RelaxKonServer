@@ -43,3 +43,4 @@ RelaxKonOS は**クロスプラットフォームのクラウドネイティブ�
 
 - [Android スマートフォンとタブレット](/docs/ja-JP/latest/getting-started/android)
 - [システムアカウント・Alias・資格情報](/docs/ja-JP/latest/getting-started/login)
+- [Windows 10/11 の個人用 PC](/docs/ja-JP/latest/getting-started/windows)

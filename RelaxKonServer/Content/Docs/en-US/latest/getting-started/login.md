@@ -9,6 +9,10 @@ order: 6
 
 > This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
 
+## Windows 10/11 personal computers
+
+The Windows 10/11 Personal Mode owner can select **Set up this Windows device** using loopback Negotiate on the same PC, without an account password or Hello PIN. Other Windows administrators cannot substitute for the owner. Subsequent sign-ins use device keys. Single-use pairing codes expire after 10 minutes and pair desktop or Android devices with the same owner account and workspace. Revocation invalidates that device’s tokens and Hub connections. Windows 10/11 System Mode permits local administrators to set up or recover device keys; Windows Server does not expose this workstation entry. See [Windows 10/11 personal computers](/docs/en-US/latest/getting-started/windows).
+
 ## System sign-in and Alias
 
 System sign-in is verified by Windows LogonUser or Linux PAM. In system mode, users first sign in with a real system account and can create an independent Alias and password in Settings. Both credentials bind to the same host identity, User and Workspace. An Alias creates neither a new OS user nor extra file permissions.
@@ -29,7 +33,7 @@ Account settings can query, create, rename, change the password of or delete an 
 
 ## Modes and authorization
 
-User mode accepts only the Unix account running Server, with no Alias or administrator authorization. In system mode, Alias sign-in does not inherit the administrator shortcut of system-password authentication. Ordinary users and Alias sessions explicitly authenticate a selected administrator. Cross-account Guardian and script actions still need explicit approval for that operation; file access follows separate path authorization.
+Linux User Mode accepts only the Unix account running Server, with no Alias or administrator authorization. In system mode, Alias sign-in does not inherit the administrator shortcut of system-password authentication. Ordinary users and Alias sessions explicitly authenticate a selected administrator. Cross-account Guardian and script actions still need explicit approval for that operation; file access follows separate path authorization.
 
 Sources: [authentication implementation](https://github.com/nanaminato/RelaxKonOS/blob/master/RelaxKonOS.Server/Identity/LoginAuthenticationService.cs), [Alias management](https://github.com/nanaminato/RelaxKonOS/blob/master/RelaxKonOS.Server/Identity/AliasCredentialService.cs), [privileged operations](https://github.com/nanaminato/RelaxKonOS/blob/master/docs/platform/RelaxKonOS.PrivilegedOperations.Operations.md).
 

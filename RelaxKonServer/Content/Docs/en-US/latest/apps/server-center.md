@@ -11,6 +11,10 @@ order: 51
 
 Server Center keeps the connection and deployment workflows for a remote machine in one place. It supports both a full RelaxKonOS Server connection and a direct SSH connection; these are deliberately different modes.
 
+## Windows 10/11 personal computers
+
+The Windows 10/11 desktop sign-in page also offers **Manage this PC**, without SSH or an existing Server sign-in. Personal Mode is the default; System Mode is also available. Installation, update, repair, rollback and uninstall verify the selected installation identity and use UAC when configuring the privileged helper. Refreshing status needs no UAC. Personal ownership stays with the initiating user even if another administrator approves UAC. See [Windows 10/11 personal computers](/docs/en-US/latest/getting-started/windows) for local management and device authorization.
+
 ## Choose the right connection
 
 | Connection | What it provides | What it does not provide |

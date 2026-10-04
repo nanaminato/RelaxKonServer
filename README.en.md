@@ -51,7 +51,7 @@ order: 14
 - **Add a language**: create `Content/Docs/<code>/latest`. Languages are returned in the fixed order `en-US`, `zh-CN`, `ja-JP`; display names for `zh-CN` and `ja-JP` are built in (简体中文 / 日本語) and any other code falls back to the code itself.
 - **Add a version**: create another directory next to `latest`. `latest` sorts first.
 - **Translation fallback**: if a slug is missing in the requested language it is served from `en-US`, and the response sets `isFallback` so the UI can say so. Fallback entries keep the requested language's category labels so the navigation tree stays uniformly grouped.
-- **Current state**: `en-US`, `zh-CN` and `ja-JP` each hold 43 documents (7 getting-started + 9 concepts + 27 applications) and are fully aligned. **Keep the three languages at the same document count when you add or remove files**, otherwise fallback entries appear in the navigation. Afterwards run `node tools/verify-doc-order.mjs` (counts, `order` uniqueness, language parity) and `node tools/verify-doc-links.mjs` (internal links and front matter).
+- **Current state**: `en-US`, `zh-CN` and `ja-JP` each hold 44 documents (8 getting-started + 9 concepts + 27 applications) and are fully aligned. **Keep the three languages at the same document count when you add or remove files**, otherwise fallback entries appear in the navigation. Afterwards run `node tools/verify-doc-order.mjs` (counts, `order` uniqueness, language parity) and `node tools/verify-doc-links.mjs` (internal links and front matter).
 - Language and version segments accept only `[A-Za-z0-9-]`; slugs additionally accept `/` and `_` up to 256 characters. Anything else returns 404.
 
 ### Releases, FAQ and downloads

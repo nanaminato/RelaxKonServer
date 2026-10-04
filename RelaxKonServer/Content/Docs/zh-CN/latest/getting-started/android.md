@@ -24,7 +24,7 @@ Android 客户端是独立的 Kotlin、Jetpack Compose 与 Material 3 应用，�
 1. 在[下载页](/downloads)查找已发布的 Android 签名 APK，核对 SHA-256；没有下载项就表示本站尚未提供该包。
 2. 在系统安装界面确认安装；更新必须保持同一签名证书。AAB 用于商店发布，不能作为直接安装包。
 3. 填入设备实际可访问的服务端地址，或添加 SSH 主机并核对指纹。真机不能把开发电脑的 localhost 当作远程地址。
-4. 选择系统账号或可用的 Alias 登录。连接用户模式服务端时遵守 SSH 转发与 loopback 边界。
+4. 选择系统账号或可用的 Alias 登录；连接 Windows 10/11 个人模式时，可使用本机已授权设备生成的授权码配对，再用设备密钥登录，见[Windows 10/11](/docs/zh-CN/latest/getting-started/windows)。连接 Linux 用户模式服务端时遵守 SSH 转发与 loopback 边界。
 
 ## 实现与验收
 

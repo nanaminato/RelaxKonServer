@@ -48,3 +48,4 @@ Click any application in the start menu. Most are single-window (Settings, Task 
 
 - [Android phones and tablets](/docs/en-US/latest/getting-started/android)
 - [System accounts, Alias and credential security](/docs/en-US/latest/getting-started/login)
+- [Windows 10/11 personal computers](/docs/en-US/latest/getting-started/windows)

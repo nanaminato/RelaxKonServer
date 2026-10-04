@@ -43,3 +43,4 @@ RelaxKonOS 是一个**跨平台的云原生桌面操作系统环境**。它把�
 
 - [Android 手机与平板](/docs/zh-CN/latest/getting-started/android)
 - [系统账号、Alias 与凭据安全](/docs/zh-CN/latest/getting-started/login)
+- [Windows 10/11 个人电脑](/docs/zh-CN/latest/getting-started/windows)
