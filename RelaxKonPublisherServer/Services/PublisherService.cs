@@ -669,9 +669,9 @@ public sealed class PublisherService
         }
         else
         {
-            var verification = await RunToolAsync(import.JarSignerPath, ["-verify", source], cancellationToken);
+            var verification = await RunToolAsync(import.JarSignerPath, ["-J-Duser.language=en", "-verify", source], cancellationToken);
             if (!verification.Contains("jar verified", StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("AAB 签名验证未确认 jar verified。");
-            var certificate = await RunToolAsync(import.KeytoolPath, ["-printcert", "-jarfile", source], cancellationToken);
+            var certificate = await RunToolAsync(import.KeytoolPath, ["-J-Duser.language=en", "-printcert", "-jarfile", source], cancellationToken);
             EnsureExpectedCertificate(certificate, import.ExpectedCertificateSha256, "AAB");
         }
 
