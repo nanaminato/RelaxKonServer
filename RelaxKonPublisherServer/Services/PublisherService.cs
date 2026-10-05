@@ -514,7 +514,7 @@ public sealed class PublisherService
     {
         "windows" => ["windows"],
         "macos" => ["macos"],
-        "linux" => ["debian-12", "ubuntu-22.04", "ubuntu-24.04", "ubuntu-26.04"],
+        "linux" => ["debian-12", "debian-13", "linuxmint-21", "linuxmint-21.1", "linuxmint-21.2", "linuxmint-21.3", "linuxmint-22", "linuxmint-22.1", "linuxmint-22.2", "linuxmint-22.3", "ubuntu-22.04", "ubuntu-24.04", "ubuntu-26.04"],
         _ => throw new InvalidOperationException($"不支持的平台：{platform}")
     };
 

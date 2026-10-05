@@ -70,6 +70,6 @@ RelaxKonOS 不被设计成「自带 Nginx」，也不是一个 Nginx 管理面�
 
 Windows 的受管 Nginx、Mihomo、FRPC/FRPS 使用独立 SCM 服务；Linux 的受管 FRPC/FRPS 使用独立 systemd 服务，每个 FRPC 配置对应独立实例。停止或卸载 Server、Guardian、Helper 不会自动停止保留的组件。重启 Server 后从持久化记录恢复管理状态，而不是依赖内存中的 PID。外部运行时仍须明确授权，不会自动转为受管服务。
 
-默认卸载保留组件运行、配置及所有权记录；按原数据位置重装后可重新管理。完整删除数据会先清理受管 SMB、Nginx、FRP、Mihomo；清理失败或所有权冲突时保留程序、Helper 和数据，先读取失败回执再处理。接入的系统 Nginx 及其他站点、共享文件受所有权边界保护。当前没有逐组件保留／删除界面，不能删除数据根后再假定组件仍可运行。
+默认卸载保留组件运行、配置及所有权记录；按原数据位置重装后可重新管理。完整删除数据会先清理受管 SMB、Nginx、FRP、Mihomo；清理失败或所有权冲突时保留程序、Helper 和数据，先读取失败回执再处理。接入的系统 Nginx 及其他站点、共享文件受所有权边界保护。卸载界面现可分别选择移除 SMB、Nginx、FRP、Mihomo，默认全部保留。保留任一组件时保留整个数据根与管理记录；勾选完整删除数据会选择移除全部四项，取消任一组件的移除会取消数据删除。Docker Engine、容器及卷不属于这四项清理范围。
 
 隔离 Windows/Linux 主机的服务生命周期、系统重启、保留数据卸载与重装已验证；GUI/API 全流程和跨版本升级仍需回归。详见[独立组件实现与验收](https://github.com/nanaminato/RelaxKonOS/blob/master/docs/services/RelaxKonOS.IndependentComponentServices.Progress.md)与[更新、卸载与维护](/docs/zh-CN/latest/apps/server-maintenance)。
