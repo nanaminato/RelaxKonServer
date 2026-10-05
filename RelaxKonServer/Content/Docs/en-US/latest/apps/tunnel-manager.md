@@ -57,3 +57,11 @@ Windows, Windows Server and Linux are supported. The differences lie mainly in r
 - [Port Forwarding](/docs/en-US/latest/apps/port-forwarding)
 - [Proxy Manager](/docs/en-US/latest/apps/proxy-manager)
 - [Security model](/docs/en-US/latest/concepts/security)
+
+## Independent component services and maintenance boundaries
+
+Managed Nginx, Mihomo and FRPC/FRPS use independent SCM services on Windows. Managed FRPC/FRPS use independent systemd services on Linux, with one instance per FRPC profile. Stopping or uninstalling Server, Guardian or Helper does not automatically stop retained components. Server restores management state from persistent records after restart rather than an in-memory PID. External runtimes still require explicit authorization and are not automatically converted into managed services.
+
+The default uninstall retains running components, configuration and ownership records; reinstalling at the original data location allows management to resume. Full data removal first cleans up managed SMB, Nginx, FRP and Mihomo. Cleanup failures or ownership conflicts preserve the program, Helper and data: inspect the failure receipt before proceeding. Integrated system Nginx, other sites and shared files remain protected by ownership checks. Per-component retain/remove controls are not implemented; deleting the data root cannot be combined with assuming components will remain usable.
+
+Service lifecycle, OS restart, retained-data uninstall and reinstall have been verified on isolated Windows/Linux hosts. Full GUI/API flows and upgrades between versions still require regression checks. See [implementation and acceptance](https://github.com/nanaminato/RelaxKonOS/blob/master/docs/services/RelaxKonOS.IndependentComponentServices.Progress.md) and [maintenance](/docs/en-US/latest/apps/server-maintenance).

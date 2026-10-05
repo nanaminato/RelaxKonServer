@@ -74,3 +74,11 @@ TUN を「高度な任意スイッチ」と扱うのは、本モジュールが�
 - [Docker マネージャー](/docs/ja-JP/latest/apps/docker)
 - [証明書マネージャー](/docs/ja-JP/latest/apps/certificate-manager)
 - [セキュリティモデル](/docs/ja-JP/latest/concepts/security)
+
+## 独立コンポーネントサービスと保守の範囲
+
+Windows の管理対象 Nginx、Mihomo、FRPC/FRPS は独立した SCM サービスを使用します。Linux の管理対象 FRPC/FRPS は独立した systemd サービスで、FRPC の設定ごとにインスタンスを分けます。Server、Guardian、Helper の停止やアンインストールだけでは保持したコンポーネントは停止しません。Server の再起動後はメモリ内の PID ではなく永続化した記録から管理状態を復元します。外部ランタイムには明示的な許可が必要で、自動的に管理対象サービスへ変換しません。
+
+既定のアンインストールはコンポーネントの稼働、設定、所有権記録を保持し、元のデータ位置へ再インストールすると管理を再開できます。データの完全削除では、先に管理対象 SMB、Nginx、FRP、Mihomo を整理します。整理の失敗や所有権の競合時はプログラム、Helper、データを保持するため、失敗の操作記録を確認してください。連携したシステム Nginx、他のサイト、共有ファイルは所有権確認で保護されます。コンポーネントごとの保持・削除画面は未実装で、データルートを削除して稼働継続を期待することはできません。
+
+隔離した Windows/Linux ホストでライフサイクル、OS 再起動、データ保持でのアンインストールと再インストールを検証済みです。GUI/API 全体とバージョン間更新の回帰確認は継続中です。[実装と検証](https://github.com/nanaminato/RelaxKonOS/blob/master/docs/services/RelaxKonOS.IndependentComponentServices.Progress.md)と[保守手順](/docs/ja-JP/latest/apps/server-maintenance)を参照してください。

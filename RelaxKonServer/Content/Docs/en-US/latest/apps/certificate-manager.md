@@ -32,12 +32,18 @@ Three principles shape the whole module:
 - Key algorithms: RSA and ECDSA.
 - Deployment target: RelaxKonOS' own HTTPS endpoint (Kestrel).
 - Automatic renewal driven by the renewal information (ARI) the ACME authority provides, with certificate expiry as a fallback.
-- Management UI with an overview and a certificate list; the overview shows managed count, refresh state and the issuance entry point, and the certificate page offers deploy, renew, revoke and delete for the current selection.
+- Management UI includes an overview and certificate list, with issuance, refresh, renewal, revocation and deletion. Server HTTPS certificate replacement is available in Settings.
 - Issuance dialog: domain, contact email, validation type, key algorithm and public reachability confirmation sit inside a scrollable content area together with the preflight result and issuance progress.
+
+## Change the server HTTPS certificate
+
+On desktop, use **Settings → System → Server HTTPS → Change server HTTPS certificate**. The certificate list no longer offers Deploy to Kestrel. Certificate replacement uses administrator authorization and restricted privileged execution; the entire Server does not need to run permanently as administrator. Windows service and personal modes have separate certificate directories and corresponding ACLs.
+
+The selected server certificate persists across restarts. Automatic renewal of other certificates does not change that selection. After replacement, check the certificate names and trust against the actual server address, then verify the connection. Certificate Manager continues to handle issuance, renewal, revocation and deletion; DNS-01 and third-party Web Server deployment limitations are listed below.
 
 ## Permissions and security
 
-- Operations that change host state (issue, renew, delete, import, deploy, listen on port 80, change the HTTPS binding) run only while RelaxKonOS has administrator rights, and report stable problem codes when it does not.
+- State-changing operations check authorization for the specific capability and resource. Server HTTPS certificate replacement uses administrator authorization without requiring the entire Server to run elevated; insufficient authorization returns stable problem codes.
 - Host authorization uses unified administrator authentication: system-authenticated administrators are checked dynamically; ordinary users and Alias sessions explicitly authenticate a selected administrator. Credentials never enter logs or arbitrary shell commands. Installation permissions and action authorization are separate; see [Sign-in and Account Security](/docs/en-US/latest/getting-started/login).
 - **Private keys, account keys, CSRs and full CA responses appear in no API response, log, audit record or error detail.** The normal API returns the domain, issuer, serial number, validity window, status, thumbprint and renewal state.
 - Preflight returns a structured result: domain normalization and duplicate SAN checks, A and AAAA resolution, port 80 listening rights and occupation, firewalls and upstream proxies. Preflight never fabricates a "publicly reachable" conclusion.

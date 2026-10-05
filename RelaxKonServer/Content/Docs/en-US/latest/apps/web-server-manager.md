@@ -51,7 +51,7 @@ A discovered unmanaged web server is only a **candidate**: RelaxKonOS does not t
 ## Platform differences
 
 - Target platforms are **Ubuntu 24.04 LTS** and **Windows Server 2016 or later**.
-- On Linux, Nginx is controlled through the system service or native commands; on Windows the RelaxKonOS service hosts the managed Nginx process lifecycle.
+- Linux controls Nginx through system services or native commands. Managed Nginx on Windows uses an independent SCM service that continues running when Server or Helper stops.
 
 ## Known limitations
 
@@ -65,3 +65,11 @@ A discovered unmanaged web server is only a **candidate**: RelaxKonOS does not t
 - [Certificate Manager](/docs/en-US/latest/apps/certificate-manager)
 - [Application Deployments](/docs/en-US/latest/apps/application-deployments)
 - [Security model](/docs/en-US/latest/concepts/security)
+
+## Independent component services and maintenance boundaries
+
+Managed Nginx, Mihomo and FRPC/FRPS use independent SCM services on Windows. Managed FRPC/FRPS use independent systemd services on Linux, with one instance per FRPC profile. Stopping or uninstalling Server, Guardian or Helper does not automatically stop retained components. Server restores management state from persistent records after restart rather than an in-memory PID. External runtimes still require explicit authorization and are not automatically converted into managed services.
+
+The default uninstall retains running components, configuration and ownership records; reinstalling at the original data location allows management to resume. Full data removal first cleans up managed SMB, Nginx, FRP and Mihomo. Cleanup failures or ownership conflicts preserve the program, Helper and data: inspect the failure receipt before proceeding. Integrated system Nginx, other sites and shared files remain protected by ownership checks. Per-component retain/remove controls are not implemented; deleting the data root cannot be combined with assuming components will remain usable.
+
+Service lifecycle, OS restart, retained-data uninstall and reinstall have been verified on isolated Windows/Linux hosts. Full GUI/API flows and upgrades between versions still require regression checks. See [implementation and acceptance](https://github.com/nanaminato/RelaxKonOS/blob/master/docs/services/RelaxKonOS.IndependentComponentServices.Progress.md) and [maintenance](/docs/en-US/latest/apps/server-maintenance).
