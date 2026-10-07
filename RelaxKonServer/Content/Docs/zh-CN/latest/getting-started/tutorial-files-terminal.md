@@ -15,15 +15,11 @@ order: 17
 
 ![截图位置：浏览服务器目录](/assets/tutorials/zh-CN/tutorial-files-terminal-1.svg)
 
-*截图位置：浏览服务器目录*
-
 ## 2. 创建练习文件夹
 
 在有写入权限的目录中新建文件夹，例如 relaxkon-tutorial，再试着重命名它。仅使用自己的练习文件；删除时仔细核对确认窗口中的目标。上传与下载操作见[文件传输](/docs/zh-CN/latest/apps/file-transfers)。
 
 ![截图位置：创建练习文件夹](/assets/tutorials/zh-CN/tutorial-files-terminal-2.svg)
-
-*截图位置：创建练习文件夹*
 
 ## 3. 确认终端运行位置
 
@@ -31,12 +27,8 @@ order: 17
 
 ![截图位置：确认终端运行位置](/assets/tutorials/zh-CN/tutorial-files-terminal-3.svg)
 
-*截图位置：确认终端运行位置*
-
 ## 4. 理解文件与会话
 
 文件管理器和终端操作的都是服务器资源，终端工作目录不会自动跟随文件管理器。短暂断线时 Server 终端可保留会话；服务端重启、主动结束会话等情况应另行检查，不能据此假定任务永久运行。详见[终端](/docs/zh-CN/latest/apps/terminal)。
 
 ![截图位置：理解文件与会话](/assets/tutorials/zh-CN/tutorial-files-terminal-4.svg)
-
-*截图位置：理解文件与会话*

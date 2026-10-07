@@ -33,8 +33,6 @@ Linux System Mode defaults to Debian 12 and Ubuntu 22.04/24.04/26.04. Other syst
 
 ![Screenshot placeholder：Capture: SSH host form and first-trust dialog. Show address, port, account and fingerprint; redact real addresses and credentials.](/assets/docs/screenshots/en-US/remote-host.svg)
 
-> Capture: SSH host form and first-trust dialog. Show address, port, account and fingerprint; redact real addresses and credentials.
-
 ## 3. Run preflight and select the mode
 
 Select the host and check its environment. Read OS, architecture, privileges, dependencies, installation state and port results; resolve failed checks first. Linux System Mode can use a normal SSH account with sudo; a blank sudo password tries the current SSH password. Windows System Mode requires an elevated SSH session. Linux User Mode rejects root.
@@ -42,8 +40,6 @@ Select the host and check its environment. Read OS, architecture, privileges, de
 If an installation exists, verify its identity, mode and directories and follow [maintenance](/docs/en-US/latest/apps/server-maintenance) instead of overwriting another installation as a first install.
 
 ![Screenshot placeholder：Capture: preflight results and mode selection, including OS, architecture, privileges, dependencies and existing installation state.](/assets/docs/screenshots/en-US/remote-preflight.svg)
-
-> Capture: preflight results and mode selection, including OS, architecture, privileges, dependencies and existing installation state.
 
 ## 4. Choose a package source
 
@@ -58,8 +54,6 @@ Use `*-server.zip` for Windows/Linux System Mode and `*-user-server.zip` for Lin
 
 ![Screenshot placeholder：Capture: the four sources and selected package. Show kind, version and architecture; hide URLs containing credentials.](/assets/docs/screenshots/en-US/remote-source.svg)
 
-> Capture: the four sources and selected package. Show kind, version and architecture; hide URLs containing credentials.
-
 ## 5. Configure directories, network, TLS and permissions
 
 1. Set program/data directories and Server port using absolute paths on the target. Linux User Mode also offers XDG configuration/state/cache roots; avoid overlaps.
@@ -70,21 +64,15 @@ Use `*-server.zip` for Windows/Linux System Mode and `*-user-server.zip` for Lin
 
 ![Screenshot placeholder：Capture: installation options with port, directories, listening scope, TLS and file permissions; redact certificate passwords.](/assets/docs/screenshots/en-US/remote-options.svg)
 
-> Capture: installation options with port, directories, listening scope, TLS and file permissions; redact certificate passwords.
-
 ## 6. Review, execute and verify
 
 Recheck host, mode, source, roots and port before submission. Perform one operation on this installation at a time; do not submit duplicates from another client. Observe transfer, execution and verification in order. Downloads with unknown totals may show no percentage.
 
 ![Screenshot placeholder：Capture: final review with host, mode, source, directories and port summary.](/assets/docs/screenshots/en-US/remote-review.svg)
 
-> Capture: final review with host, mode, source, directories and port summary.
-
 100% upload/download only completes transfer. Success requires a successful host receipt, installed state and an independent health check. Keep the operation ID. On failure, inspect its stage, problem code and logs; a closed window or launcher exit code is insufficient.
 
 ![Screenshot placeholder：Capture: result and health verification with operation ID, stage, receipt, installed state and health check.](/assets/docs/screenshots/en-US/remote-result.svg)
-
-> Capture: result and health verification with operation ID, stage, receipt, installed state and health check.
 
 ## 7. Connect to the installed Server
 

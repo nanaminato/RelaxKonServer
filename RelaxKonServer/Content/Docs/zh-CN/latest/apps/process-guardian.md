@@ -7,7 +7,7 @@ order: 30
 
 # 进程守护
 
-进程守护（Process Guardian）负责让关键程序「一直活着」。
+进程守护（Process Guardian）管理需要持续运行的程序。
 
 ## 概述
 

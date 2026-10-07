@@ -38,7 +38,9 @@ dotnet run --project RelaxKonOS.Server --launch-profile http
 dotnet run --project Client/RelaxKonOS.Client.Desktop
 ```
 
-本地客户端连接 `http://localhost:5090`。普通文件、终端和 Git 调试使用开发配置的 `local-identity` 后端，Server 与登录账户应为同一宿主身份。常规调试无需安装系统服务；受保护文件、真实防火墙或受管运行时需要单独配置特权 Helper，见源码中的[开发调试指南](https://github.com/nanaminato/RelaxKonOS/blob/master/docs/development/RelaxKonOS.Develop.md)。Android 是独立 Kotlin/Compose 工程，构建步骤见[移动端指南](/docs/zh-CN/latest/getting-started/android)。
+本地客户端连接 `http://localhost:5090`。普通文件、终端和 Git 调试使用开发配置的 `local-identity` 后端，Server 与登录账户应为同一宿主身份。常规调试无需安装系统服务；受保护文件、真实防火墙或受管运行时需要单独配置特权 Helper，见源码中的[开发调试指南](https://github.com/nanaminato/RelaxKonOS/blob/master/docs/development/RelaxKonOS.Develop.md)。
+
+Android 是独立 Kotlin/Compose 工程，构建步骤见[移动端指南](/docs/zh-CN/latest/getting-started/android)。
 
 ## 运行官网
 

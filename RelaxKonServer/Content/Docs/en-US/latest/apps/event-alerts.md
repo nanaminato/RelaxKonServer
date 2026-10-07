@@ -7,7 +7,7 @@ order: 53
 
 # Events and Alerts
 
-> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+> This page covers current source capabilities. See [release notes](/releases/0.1.2) for package contents and the linked implementation documents for verification status.
 
 The event and alert center has a persistent event ledger, aggregated alerts, cursor queries and basic action APIs. The desktop has a minimal read-only summary/list. Deployment and Compose terminal signals have initial integration; a center failure does not roll back a completed deployment.
 

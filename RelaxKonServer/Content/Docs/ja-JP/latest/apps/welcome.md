@@ -7,7 +7,7 @@ order: 10
 
 # ウェルカム
 
-Welcome は RelaxKonOS が最初に開くアプリです。案内と自己診断の両方の役割を持ちます。
+Welcome は RelaxKonOS の起動時に開き、使い方の案内とシステムの確認を行います。
 
 ## 機能
 

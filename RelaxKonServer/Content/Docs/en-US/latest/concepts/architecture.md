@@ -7,7 +7,7 @@ order: 52
 
 # Client / Server Architecture
 
-RelaxKonOS follows a **state-sync** model rather than a pixel-streaming model.
+RelaxKonOS synchronizes state, data and operations. The client renders the interface locally instead of receiving a desktop pixel stream.
 
 ## Responsibilities
 

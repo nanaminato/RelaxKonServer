@@ -7,7 +7,7 @@ order: 62
 
 # Window Manager
 
-The window manager simulates an operating-system level window system and is the foundation of the desktop experience.
+Window Manager manages application windows in the desktop shell.
 
 ## Structure
 

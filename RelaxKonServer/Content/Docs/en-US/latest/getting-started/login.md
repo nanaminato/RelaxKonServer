@@ -7,7 +7,7 @@ order: 6
 
 # Sign-in and Account Security
 
-> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+> This page covers current source capabilities. See [release notes](/releases/0.1.2) for package contents and the linked implementation documents for verification status.
 
 ## Windows 10/11 personal computers
 

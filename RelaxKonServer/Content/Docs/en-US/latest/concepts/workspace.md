@@ -7,7 +7,7 @@ order: 54
 
 # Workspace
 
-A workspace is the server-managed context for user preferences, application state, storage and devices. It lets an experience resume without making a single client device the source of truth.
+A workspace stores user preferences, application state, storage and device information on the server for use across client devices.
 
 ## What it contains
 

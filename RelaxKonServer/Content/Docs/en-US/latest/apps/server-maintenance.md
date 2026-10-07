@@ -18,8 +18,6 @@ Use this guide for an installed Server. Enter Server Center through a trusted SS
 
 ![Screenshot placeholder：Capture: installed-host state with identity, mode, current/previous versions, roots, port and health.](/assets/docs/screenshots/en-US/maintenance-status.svg)
 
-> Capture: installed-host state with identity, mode, current/previous versions, roots, port and health.
-
 | Goal | Action | Distinction |
 | --- | --- | --- |
 | Use a new Server bundle | Update/upgrade | Client is not updated at the same time |
@@ -38,8 +36,6 @@ Use this guide for an installed Server. Enter Server Center through a trusted SS
 
 ![Screenshot placeholder：Capture: update review and result showing existing identity, current/target versions, retained roots and verification.](/assets/docs/screenshots/en-US/maintenance-update.svg)
 
-> Capture: update review and result showing existing identity, current/target versions, retained roots and verification.
-
 ## 3. Repair and certificate maintenance
 
 Select the installed host and choose repair of the current installation after checking its roots and identity. Ordinary repair retains data and TLS. TLS identity changes only when explicitly regenerating the LAN self-signed certificate or supplying a new certificate. Certificate replacement restarts service; clients must verify and trust it again, and names must cover the real LAN IP or DNS name.
@@ -48,8 +44,6 @@ Windows Personal Mode maintenance uses UAC when configuring its separate helper;
 
 ![Screenshot placeholder：Capture: repair options and confirmation, including certificate regeneration, identities and optional firewall rules; hide secrets.](/assets/docs/screenshots/en-US/maintenance-repair.svg)
 
-> Capture: repair options and confirmation, including certificate regeneration, identities and optional firewall rules; hide secrets.
-
 ## 4. Restore the previous program version
 
 Refresh state and use restore-previous-version only if a previous version is recorded. The action is unavailable otherwise. Check the target version, complete backup and maintenance confirmation, then execute. Refresh receipt, version and health afterward and sign in to test everyday functions.
@@ -57,8 +51,6 @@ Refresh state and use restore-previous-version only if a previous version is rec
 Rollback uses recorded directories and the target version's deployment engine. It does not restore historical databases, configuration, files or container volumes. Confirm separately whether the older program can read data written by the newer version.
 
 ![Screenshot placeholder：Capture: rollback confirmation with current/recorded previous versions, target installation and maintenance impact.](/assets/docs/screenshots/en-US/maintenance-rollback.svg)
-
-> Capture: rollback confirmation with current/recorded previous versions, target installation and maintenance impact.
 
 ## 5. Uninstall and retain data
 
@@ -69,8 +61,6 @@ Rollback uses recorded directories and the target version's deployment engine. I
 5. Record retained directories and verify retained identity/data locations on reinstall. Do not delete state files to imitate uninstall. Windows Personal uninstall also removes its helper and associated firewall rules.
 
 ![Screenshot placeholder：Capture: uninstall confirmation and completion showing retain/delete selection, server-name confirmation, receipt and uninstalled state.](/assets/docs/screenshots/en-US/maintenance-uninstall.svg)
-
-> Capture: uninstall confirmation and completion showing retain/delete selection, server-name confirmation, receipt and uninstalled state.
 
 ## 6. Read operation history and failure logs
 

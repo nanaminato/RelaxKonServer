@@ -7,7 +7,7 @@ order: 10
 
 # Welcome app
 
-Welcome is the first application RelaxKonOS opens. It acts as both an introduction and a self-check.
+Welcome opens when RelaxKonOS starts and provides guidance and system checks.
 
 ## Overview
 

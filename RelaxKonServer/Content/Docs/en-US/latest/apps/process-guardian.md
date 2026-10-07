@@ -7,7 +7,7 @@ order: 30
 
 # Process Guardian
 
-Process Guardian keeps critical workloads alive.
+Process Guardian manages workloads that need to keep running.
 
 ## Overview
 

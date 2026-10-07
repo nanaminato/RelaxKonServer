@@ -7,9 +7,9 @@ order: 12
 
 # File Manager
 
-> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+> This page covers current source capabilities. See [release notes](/releases/0.1.2) for package contents and the linked implementation documents for verification status.
 
-File Manager (Explorer) lets you work with files on the **server host** as if they were local, but it is not a remote-desktop file browser.
+File Manager (Explorer) browses and manages files on the server host, within the permissions of the signed-in host account.
 
 ## Walkthrough: find a directory and upload a file
 
@@ -21,11 +21,7 @@ File Manager (Explorer) lets you work with files on the **server host** as if th
 
 ![Screenshot placeholder：Capture: navigation tree, address bar and file list with a test path, names, sizes and selected item.](/assets/docs/screenshots/en-US/files-navigation.svg)
 
-> Capture: navigation tree, address bar and file list with a test path, names, sizes and selected item.
-
 ![Screenshot placeholder：Capture: upload progress and the refreshed target file with completion state, name and size; redact sensitive paths.](/assets/docs/screenshots/en-US/files-transfer.svg)
-
-> Capture: upload progress and the refreshed target file with completion state, name and size; redact sensitive paths.
 
 If reading is denied, inspect identity/path authorization instead of treating it as an empty directory. Linux User Mode is limited to the current Unix home; Windows Personal helper access follows the reviewed scope. Recheck selected items before deletion; this guide promises neither a recycle bin nor recovery. See [transfers](/docs/en-US/latest/apps/file-transfers) for interrupted large uploads.
 

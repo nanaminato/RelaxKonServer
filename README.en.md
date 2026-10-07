@@ -4,7 +4,7 @@
 
 Website <https://relaxkon.com> · Product source repository <https://github.com/nanaminato/RelaxKonOS>
 
-`RelaxKonServer/RelaxKonServer` is a pure **ASP.NET Core 10** REST API for the RelaxKon website. It does not host Razor pages, MVC views, static website files or the Angular client: it is the single source of truth for documentation and website content. Controlled API endpoints also stream RelaxKonOS releases, so a separate download project is unnecessary.
+`RelaxKonServer/RelaxKonServer` provides the website REST API using **ASP.NET Core 10** and is the sole source of documentation and site content. The separate website project serves frontend pages and static assets; this server does not host Razor, MVC or Angular pages. Controlled download endpoints stream RelaxKonOS release packages.
 
 ## Run locally
 

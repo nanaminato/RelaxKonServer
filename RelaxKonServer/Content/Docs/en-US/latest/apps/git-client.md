@@ -7,7 +7,7 @@ order: 45
 
 # Git Client
 
-Git Client works with Git repositories that **already exist in the RelaxKonOS server filesystem**. The UI renders locally on the client, while repository state, commit history and branch lists come from the server calling `git` in real time.
+Git Client manages repositories that already exist on the server host. The UI renders on the client; the server calls `git` to read repository state, commit history and branches.
 
 ## Overview
 

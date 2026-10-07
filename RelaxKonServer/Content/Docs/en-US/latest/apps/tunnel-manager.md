@@ -7,7 +7,7 @@ order: 40
 
 # Tunnel Manager
 
-Tunnel Manager lets you expose local services to a remote endpoint without coupling the protocol implementation into the main process.
+Tunnel Manager exposes services on the server to remote endpoints through independent tunnel processes.
 
 The core trade-off: **RelaxKonOS manages tunnels natively, but `frpc` / `frps` always run as separate processes**. Traffic only ever flows between the FRP processes; RelaxKonOS takes no part in forwarding data and never depends on a tunnel being alive to stay available.
 

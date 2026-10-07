@@ -7,7 +7,7 @@ order: 41
 
 # Web Server Manager
 
-Web Server Manager is the **entry and dispatch layer**: it discovers the web server instances on this host and routes work by provider, with Nginx as the first complete provider. Adding another provider does not change any caller.
+Web Server Manager discovers web server instances on the current host and dispatches operations to their providers. Nginx is the first complete provider; callers do not need to change when another provider is added.
 
 ## Overview
 

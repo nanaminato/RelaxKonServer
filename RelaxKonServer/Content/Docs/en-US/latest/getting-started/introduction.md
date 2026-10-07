@@ -9,7 +9,7 @@ order: 1
 
 Developers can start with [Develop and debug from source](/docs/en-US/latest/getting-started/development) for current dependency versions, environment setup and build steps.
 
-> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+> This page covers current source capabilities. See [release notes](/releases/0.1.2) for package contents and the linked implementation documents for verification status.
 
 RelaxKonOS is a **cross-platform, cloud-native desktop operating environment**. It keeps the interface on the device in front of you and the workspace on the server, so the same workspace follows you across devices.
 

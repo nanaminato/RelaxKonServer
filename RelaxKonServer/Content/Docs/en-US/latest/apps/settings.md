@@ -18,8 +18,6 @@ Settings is the Windows 11 / GNOME style hub for workspace preferences.
 
 ![Screenshot placeholder：Capture: Personalization and Time/Language choices, showing selected theme/language and applied desktop changes.](/assets/docs/screenshots/en-US/settings-preferences.svg)
 
-> Capture: Personalization and Time/Language choices, showing selected theme/language and applied desktop changes.
-
 Check scope before changing outbound proxy. Docker daemon proxy changes restart Docker and affect running containers; they are not merely appearance preferences.
 
 ## Categories

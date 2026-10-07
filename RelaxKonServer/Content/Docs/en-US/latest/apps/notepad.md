@@ -7,7 +7,7 @@ order: 20
 
 # Notepad
 
-Notepad is a lightweight editor for plain text, built mainly to solve **cross-platform text encoding**.
+Notepad is a lightweight plain-text editor with cross-platform encoding support.
 
 ## Features
 

@@ -7,7 +7,7 @@ order: 49
 
 # Network Inspector
 
-Network Inspector is a **system debug window owned directly by the RelaxKonOS shell**. At very low resident cost it shows the calls that go from the **RelaxKonOS client to the RelaxKonOS server**. It follows the network panel of a developer tool but does not try to be a general packet capture tool.
+Network Inspector shows calls between the RelaxKonOS client and server. This shell-provided debug window has low resident overhead and helps diagnose application communication. It is not a general packet capture tool.
 
 It is **not a built-in application** and needs no installation, does not appear in the application list, and does not expose this capability to external applications.
 

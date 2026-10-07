@@ -18,8 +18,6 @@ Terminal は SignalR によるリモート PTY セッションを提供します
 
 ![スクリーンショットの仮画像：撮影箇所：接続・セッション状態とホスト／ユーザー確認。Server、SSH、ローカルを明示し、実際のアカウントを隠します。](/assets/docs/screenshots/ja-JP/terminal-session.svg)
 
-> 撮影箇所：接続・セッション状態とホスト／ユーザー確認。Server、SSH、ローカルを明示し、実際のアカウントを隠します。
-
 管理者端末は認可を先に確認します。Windows 個人モードでは LocalSystem を使い、ユーザーのネットワークドライブを継承しません。通常命令の既定にしないでください。配置失敗は[保守](/docs/ja-JP/latest/apps/server-maintenance)の操作結果で調べ、導入を繰り返して推測しません。
 
 ## 概要

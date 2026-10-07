@@ -7,7 +7,7 @@ order: 16
 
 # Browser
 
-The built-in browser (RemoteBrowser) is **not a remote browser**. Pages render through the client's own network and native engine.
+The built-in browser (RemoteBrowser) loads pages through the client network and native browser engine. Pages render on the client device.
 
 ## Overview
 

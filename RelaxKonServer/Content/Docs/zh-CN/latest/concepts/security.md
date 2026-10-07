@@ -7,13 +7,15 @@ order: 64
 
 # 安全模型
 
-> 本页对照当前源码说明能力，不是某个发布包的功能清单。已发布产物与日期见[发行说明](/releases/0.1.2)，功能验收状态以所链接的实现记录为准。
+> 本页说明当前源码能力；发布包内容见[发行说明](/releases/0.1.2)，验收状态见相关实现文档。
 
 系统身份和执行权限仍来自宿主 OS，但系统登录与 Alias 是不同的凭据入口。Windows 系统登录使用 LogonUser，Linux 使用 PAM/NSS；Alias 使用独立单向密码哈希，并绑定原有宿主用户和 Workspace。服务端不持久保存系统登录密码，用户主动记住的本机凭据另由 OS 安全存储或 Android 保险箱管理。
 
 ## 文件与应用授权
 
-Windows 10/11 个人模式绑定发起安装用户的 SID；所有者具有本安装的 RelaxKonOS 管理员能力，但 Server 仍以非提升令牌运行。安装与维护通过 UAC 设置独立 LocalSystem 助手，使用另一管理员批准 UAC 不改变所有者。文件提权受安装审阅的范围限制；显式管理员终端则授予所有者及配对设备 LocalSystem 命令执行能力。本机授权仅允许所有者，设备私钥留在设备，撤销设备会失效其令牌并断开 Hub。个人模式不提供跨用户 Guardian，Windows Server 不支持个人模式。详见[Windows 10/11](/docs/zh-CN/latest/getting-started/windows)。
+Windows 10/11 个人模式绑定发起安装用户的 SID；所有者具有本安装的 RelaxKonOS 管理员能力，但 Server 仍以非提升令牌运行。安装与维护通过 UAC 设置独立 LocalSystem 助手，使用另一管理员批准 UAC 不改变所有者。文件提权受安装审阅的范围限制；显式管理员终端则授予所有者及配对设备 LocalSystem 命令执行能力。
+
+本机授权仅允许所有者，设备私钥留在设备，撤销设备会失效其令牌并断开 Hub。个人模式不提供跨用户 Guardian，Windows Server 不支持个人模式。详见[Windows 10/11](/docs/zh-CN/latest/getting-started/windows)。
 
 普通文件操作受绑定宿主身份、路径与 OS 权限约束；应用权限不能代替 OS 权限。受保护目录使用独立的文件授权与窄 Helper 契约。拒绝读取会明确显示无权访问，而不是空目录。Linux 用户模式只访问当前 Unix home，不提供文件提权。
 

@@ -7,9 +7,9 @@ order: 37
 
 # Application Deployments
 
-> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+> This page covers current source capabilities. See [release notes](/releases/0.1.2) for package contents and the linked implementation documents for verification status.
 
-Application Deployments is a built-in application **separate from Docker Manager**: Docker Manager operates the engine and container primitives, while Application Deployments treats an application as a long-lived entity to publish, observe and roll back.
+Application Deployments publishes, monitors and rolls back long-running applications. Docker Manager handles the engine and container resources. Each application has a separate role.
 
 ## Overview
 

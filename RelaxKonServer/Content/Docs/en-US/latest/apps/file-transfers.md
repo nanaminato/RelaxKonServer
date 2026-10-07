@@ -7,7 +7,7 @@ order: 13
 
 # File Uploads and Resumption
 
-> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+> This page covers current source capabilities. See [release notes](/releases/0.1.2) for package contents and the linked implementation documents for verification status.
 
 ## Walkthrough: verify upload completion
 
@@ -17,8 +17,6 @@ order: 13
 4. Cancel unwanted tasks using the client action and check its state. Do not start concurrent same-name uploads while the outcome is unknown.
 
 ![Screenshot placeholder：Capture: transfer and final commit state with confirmed bytes, rate, stage, cancel entry and completed result.](/assets/docs/screenshots/en-US/transfer-progress.svg)
-
-> Capture: transfer and final commit state with confirmed bytes, rate, stage, cancel entry and completed result.
 
 ## Upload, resume and cancel
 

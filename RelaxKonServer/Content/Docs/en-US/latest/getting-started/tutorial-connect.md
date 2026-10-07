@@ -15,15 +15,11 @@ Get a suitable client from [Downloads](/downloads). Have your server address and
 
 ![Screenshot: Prepare the client and server](/assets/tutorials/en-US/tutorial-connect-1.svg)
 
-*Screenshot: Prepare the client and server*
-
 ## 2. Choose a connection
 
 Open the client and choose RelaxKonOS Server for a full workspace. A standalone SSH connection opens a compact desktop for terminal, SFTP, and server maintenance. Choose the mode that fits your task.
 
 ![Screenshot: Choose a connection](/assets/tutorials/en-US/tutorial-connect-2.svg)
-
-*Screenshot: Choose a connection*
 
 ## 3. Enter connection details
 
@@ -31,14 +27,10 @@ Enter the Server address and credentials. Linux user mode listens on loopback by
 
 ![Screenshot: Enter connection details](/assets/tutorials/en-US/tutorial-connect-3.svg)
 
-*Screenshot: Enter connection details*
-
 ## 4. Sign in and confirm the desktop
 
 Confirm that the desktop and Start menu appear. SSH and Server credentials are separate; sharing credentials requires an explicit choice and password authentication. If login fails, check the address, port, account, and server status. See [Login and account security](/docs/en-US/latest/getting-started/login).
 
 ![Screenshot: Sign in and confirm the desktop](/assets/tutorials/en-US/tutorial-connect-4.svg)
-
-*Screenshot: Sign in and confirm the desktop*
 
 [Next tutorial：Get to know the desktop and windows](/docs/en-US/latest/getting-started/tutorial-desktop)

@@ -18,8 +18,6 @@ Terminal 通过 SignalR 提供远程 PTY 会话。客户端在本地渲染终端
 
 ![截图占位 · 待替换：截图位置：终端会话状态和主机／身份检查输出；明确 Server、SSH 或本地模式，遮盖真实账号。](/assets/docs/screenshots/zh-CN/terminal-session.svg)
 
-> 截图位置：终端会话状态和主机／身份检查输出；明确 Server、SSH 或本地模式，遮盖真实账号。
-
 需要管理员终端时先确认授权范围。Windows 个人模式的显式管理员终端以 LocalSystem 运行，不继承用户网络盘；不能为了普通命令方便而默认使用该身份。部署失败的回执请到[服务器维护](/docs/zh-CN/latest/apps/server-maintenance)查看，不用重复运行安装命令猜测结果。
 
 ## 概述

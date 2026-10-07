@@ -32,8 +32,6 @@ Windows 10/11 System Mode allows a local administrator to set up or recover a de
 
 ![Screenshot placeholder：Capture: Manage this PC and Personal/System selection, showing current user and mode.](/assets/docs/screenshots/en-US/windows-local-mode.svg)
 
-> Capture: Manage this PC and Personal/System selection, showing current user and mode.
-
 ## Permissions, data and daily use
 
 The owner has RelaxKonOS administrator capabilities for this installation without joining Windows Administrators. Ordinary files, terminals and Docker Desktop use the owner's environment and permissions. Personal Mode installs no Guardian system service and provides no cross-user Guardian. Application capabilities remain subject to actual platform detection.
@@ -52,8 +50,6 @@ File operations lacking ordinary permissions may use the helper, but remain limi
 For other devices, Server must listen on LAN and pairing addresses must use a reachable hostname or IP, rather than `127.0.0.1` or `localhost`. Configure HTTPS with a certificate covering that address. Personal installation and maintenance can explicitly add a firewall rule limited to LocalSubnet sources on Domain/Private networks. A Windows administrator configures other scopes. LAN access does not imply public Internet access.
 
 ![Screenshot placeholder：Capture: local authorization and pairing entry, showing result and device management; hide active codes.](/assets/docs/screenshots/en-US/windows-device-pairing.svg)
-
-> Capture: local authorization and pairing entry, showing result and device management; hide active codes.
 
 ## Update, rollback and uninstall
 

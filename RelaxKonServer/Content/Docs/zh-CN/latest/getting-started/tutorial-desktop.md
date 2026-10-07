@@ -15,15 +15,11 @@ order: 15
 
 ![截图位置：打开第一个应用](/assets/tutorials/zh-CN/tutorial-desktop-1.svg)
 
-*截图位置：打开第一个应用*
-
 ## 2. 调整窗口
 
 按住标题栏移动窗口，拖动窗口边缘调整大小。使用标题栏右侧按钮最小化、最大化或关闭窗口；最小化后从任务栏恢复。
 
 ![截图位置：调整窗口](/assets/tutorials/zh-CN/tutorial-desktop-2.svg)
-
-*截图位置：调整窗口*
 
 ## 3. 同时使用两个应用
 
@@ -31,14 +27,10 @@ order: 15
 
 ![截图位置：同时使用两个应用](/assets/tutorials/zh-CN/tutorial-desktop-3.svg)
 
-*截图位置：同时使用两个应用*
-
 ## 4. 设置自己的桌面
 
 从开始菜单打开设置，选择可用的外观或工作区偏好。修改后确认效果；登录凭据保存在设备的安全存储中，不随工作区同步。更多选项见[设置](/docs/zh-CN/latest/apps/settings)。
 
 ![截图位置：设置自己的桌面](/assets/tutorials/zh-CN/tutorial-desktop-4.svg)
-
-*截图位置：设置自己的桌面*
 
 [下一篇教程：用文件管理器和终端完成第一次操作](/docs/zh-CN/latest/getting-started/tutorial-files-terminal)

@@ -7,7 +7,7 @@ order: 64
 
 # Security Model
 
-> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+> This page covers current source capabilities. See [release notes](/releases/0.1.2) for package contents and the linked implementation documents for verification status.
 
 Host OS identity and execution permissions remain authoritative, but system sign-in and Alias are different credential entry points. Windows system sign-in uses LogonUser; Linux uses PAM/NSS. Alias verifies an independent one-way password hash bound to the existing host user and Workspace. The server does not persist system sign-in passwords; explicitly remembered local credentials use OS secure storage or Android vaults.
 

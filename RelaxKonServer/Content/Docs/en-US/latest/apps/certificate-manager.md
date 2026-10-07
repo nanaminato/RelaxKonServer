@@ -7,7 +7,7 @@ order: 43
 
 # Certificate Manager
 
-Certificate Manager is a **local certificate lifecycle manager**. RelaxKonOS is itself the ACME client and does not use controller/agent architectures, multi-server scheduling or cross-server private key distribution.
+Certificate Manager manages certificates on the current server. RelaxKonOS acts directly as the ACME client to request and renew certificates. It does not coordinate multiple servers or distribute private keys between them.
 
 ## Overview
 

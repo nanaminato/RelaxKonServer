@@ -7,7 +7,7 @@ order: 47
 
 # Configuration Registry
 
-Configuration Registry is a built-in application for browsing the **configuration-shaped desired state the server schema explicitly allows** together with its sync state.
+Configuration Registry displays managed configuration and its sync state. The server schema defines which configuration can be managed.
 
 **It is not the host operating system registry.** It offers no entry point to the host Windows registry, arbitrary database tables, secrets, sessions or high-risk commands; paths are governed by a schema allowlist in code.
 

@@ -13,9 +13,9 @@ order: 4
 - [Get to know the desktop and windows](/docs/en-US/latest/getting-started/tutorial-desktop)
 - [Your first file and terminal workflow](/docs/en-US/latest/getting-started/tutorial-files-terminal)
 
-> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+> This page covers current source capabilities. See [release notes](/releases/0.1.2) for package contents and the linked implementation documents for verification status.
 
-Once you are signed in you will see the RelaxKonOS desktop. Here is what people do first.
+After signing in, use the RelaxKonOS desktop to try these common tasks.
 
 ## Pick a connection mode
 

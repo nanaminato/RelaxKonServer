@@ -7,7 +7,7 @@ order: 41
 
 # Web Server 管理器
 
-Web Server 管理器是**入口与调度层**：它发现服务器上的 Web Server 实例并按 Provider 路由，Nginx 是第一个完整实现的 Provider。新增其他 Provider 时，调用方不需要改变。
+Web Server 管理器发现当前主机上的 Web Server 实例，并将操作交给对应的 Provider（服务提供方）处理。Nginx 是首个完整实现；新增 Provider 无需改动调用方。
 
 ## 概览
 
@@ -55,7 +55,7 @@ RelaxKonOS 不被设计成「自带 Nginx」，也不是一个 Nginx 管理面�
 
 ## 已知限制
 
-- **Nginx 集成当前是第一阶段范围**：安装、升级、卸载以及配置事务与站点管理已落地，其余 Provider 尚未实现。
+- **Nginx 集成当前是第一阶段范围**：安装、升级、卸载以及配置事务与站点管理已实现，其余 Provider 尚未实现。
 - IIS、Apache、Caddy 只保留了抽象边界，**没有实现**，界面不会宣称可用。
 - 证书的签发与自动续期后触发重载仍可在后续阶段进一步自动化；当前不承诺未实现的 Provider 能力。
 - 复合站点配置、目录授权与敏感路径限制都按当前实现如实呈现，不提前承诺。

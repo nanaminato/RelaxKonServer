@@ -4,7 +4,7 @@
 
 官网 <https://relaxkon.com> · 产品源码仓库 <https://github.com/nanaminato/RelaxKonOS>
 
-`RelaxKonServer/RelaxKonServer` 是 RelaxKon 官方网站的纯 **ASP.NET Core 10** REST API。它不托管 Razor 页面、MVC 视图、静态网站文件，也不托管 Angular 客户端 —— 它是文档与站点内容的唯一来源。RelaxKonOS 发布物也由受控 API 下载端点流式返回，无需新建下载项目。
+`RelaxKonServer/RelaxKonServer` 使用 **ASP.NET Core 10** 提供官网 REST API，是文档与站点内容的唯一来源。前端页面和静态资源由独立官网项目提供；服务端不托管 Razor、MVC 或 Angular 页面。RelaxKonOS 发布包通过受控下载 API 流式返回。
 
 ## 本地运行
 
@@ -145,7 +145,7 @@ order: 14
 
 ## 内容更新与验证
 
-官网指南区分当前源码能力、实际验收和已发布包。Android 详细规范以产品工程 `Client/RelaxKonOS.Client.Android/docs/` 为准；官网只保留用户向摘要与链接。当前新增 Android、账户登录、上传续传、事件告警、备份恢复指南，FAQ 共 16 项。0.1.2 发行记录来自现有四个发布包的清单，不推断该包包含近期源码功能。
+官网指南区分当前源码能力、实际验收和已发布包。Android 详细规范以产品工程 `Client/RelaxKonOS.Client.Android/docs/` 为准；官网只保留用户向摘要与链接。指南涵盖 Android、账户登录、上传续传、事件告警和备份恢复，FAQ 共 16 项。0.1.2 发行记录来自现有四个发布包的清单，不推断该包包含近期源码功能。
 
 ```bash
 node tools/verify-doc-order.mjs

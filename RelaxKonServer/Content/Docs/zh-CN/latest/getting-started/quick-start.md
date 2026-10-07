@@ -13,9 +13,9 @@ order: 4
 - [熟悉桌面与窗口](/docs/zh-CN/latest/getting-started/tutorial-desktop)
 - [用文件管理器和终端完成第一次操作](/docs/zh-CN/latest/getting-started/tutorial-files-terminal)
 
-> 本页对照当前源码说明能力，不是某个发布包的功能清单。已发布产物与日期见[发行说明](/releases/0.1.2)，功能验收状态以所链接的实现记录为准。
+> 本页说明当前源码能力；发布包内容见[发行说明](/releases/0.1.2)，验收状态见相关实现文档。
 
-登录成功后你会看到 RelaxKonOS 桌面。下面是最常见的几件事。
+登录后即可进入 RelaxKonOS 桌面。以下介绍常用操作。
 
 ## 选择连接模式
 

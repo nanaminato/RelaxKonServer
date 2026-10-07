@@ -7,9 +7,9 @@ order: 51
 
 # Server Center
 
-> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+> This page covers current source capabilities. See [release notes](/releases/0.1.2) for package contents and the linked implementation documents for verification status.
 
-Server Center keeps the connection and deployment workflows for a remote machine in one place. It supports both a full RelaxKonOS Server connection and a direct SSH connection; these are deliberately different modes.
+Server Center connects to and deploys remote hosts through either RelaxKonOS Server or direct SSH connections.
 
 ## Windows 10/11 personal computers
 

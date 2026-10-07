@@ -21,11 +21,7 @@ It manages **one local engine only**: the client never connects to the Docker so
 
 ![Screenshot placeholder：Capture: engine detection/platform state, showing runtime availability and explicit authorization/dependency problems.](/assets/docs/screenshots/en-US/docker-engine.svg)
 
-> Capture: engine detection/platform state, showing runtime availability and explicit authorization/dependency problems.
-
 ![Screenshot placeholder：Capture: test container list, action confirmation and refreshed state with its name and single-container action.](/assets/docs/screenshots/en-US/docker-container.svg)
-
-> Capture: test container list, action confirmation and refreshed state with its name and single-container action.
 
 ## Features
 

@@ -15,15 +15,11 @@ order: 11
 
 ![スクリーンショット：クライアントとサーバーを準備する](/assets/tutorials/ja-JP/tutorial-connect-1.svg)
 
-*スクリーンショット：クライアントとサーバーを準備する*
-
 ## 2. 接続方法を選ぶ
 
 クライアントで RelaxKonOS Server を選ぶと完全なワークスペースが開きます。単独の SSH 接続ではターミナル、SFTP、サーバー管理向けの簡易デスクトップが開きます。目的に応じて選択してください。
 
 ![スクリーンショット：接続方法を選ぶ](/assets/tutorials/ja-JP/tutorial-connect-2.svg)
-
-*スクリーンショット：接続方法を選ぶ*
 
 ## 3. 接続情報を入力する
 
@@ -31,14 +27,10 @@ Server のアドレスと認証情報を入力します。Linux ユーザーモ�
 
 ![スクリーンショット：接続情報を入力する](/assets/tutorials/ja-JP/tutorial-connect-3.svg)
 
-*スクリーンショット：接続情報を入力する*
-
 ## 4. ログインして確認する
 
 デスクトップとスタートメニューが表示されることを確認します。SSH と Server の認証情報は別々で、明示的に選択したパスワード認証の場合に共用できます。失敗した場合はアドレス、ポート、アカウント、サーバー状態を確認し、[ログインとセキュリティ](/docs/ja-JP/latest/getting-started/login)を参照してください。
 
 ![スクリーンショット：ログインして確認する](/assets/tutorials/ja-JP/tutorial-connect-4.svg)
-
-*スクリーンショット：ログインして確認する*
 
 [次のチュートリアル：デスクトップとウィンドウを使う](/docs/ja-JP/latest/getting-started/tutorial-desktop)

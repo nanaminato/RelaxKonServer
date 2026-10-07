@@ -7,7 +7,7 @@ order: 58
 
 # Protocol and Communication
 
-Client and server communicate through an **explicit protocol**. Business code never issues raw HTTP or WebSocket calls; every exchange goes through a contract.
+Client and server communicate through a shared protocol. Business code uses its contracts rather than calling HTTP or WebSocket directly.
 
 ## What the contract contains
 

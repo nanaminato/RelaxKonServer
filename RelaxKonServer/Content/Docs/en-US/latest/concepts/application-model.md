@@ -7,9 +7,9 @@ order: 60
 
 # Application Model
 
-> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+> This page covers current source capabilities. See [release notes](/releases/0.1.2) for package contents and the linked implementation documents for verification status.
 
-Applications in RelaxKonOS are **not ordinary executables**. The runtime assembles them and wires them into window management and lifecycle handling.
+The RelaxKonOS runtime loads applications and manages their windows and lifecycle.
 
 ## Structure
 

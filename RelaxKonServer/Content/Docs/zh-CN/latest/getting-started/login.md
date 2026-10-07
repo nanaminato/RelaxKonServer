@@ -7,11 +7,13 @@ order: 6
 
 # 登录与账户安全
 
-> 本页对照当前源码说明能力，不是某个发布包的功能清单。已发布产物与日期见[发行说明](/releases/0.1.2)，功能验收状态以所链接的实现记录为准。
+> 本页说明当前源码能力；发布包内容见[发行说明](/releases/0.1.2)，验收状态见相关实现文档。
 
 ## Windows 10/11 个人电脑
 
-Windows 10/11 个人模式的安装所有者可在同一台电脑通过回环 Negotiate 完成**设置此 Windows 设备**，无需账户密码或 Hello PIN；其他 Windows 管理员不能替代所有者。之后使用设备密钥登录，并可生成 10 分钟有效、只能使用一次的授权码来配对桌面或 Android 设备。配对设备共享所有者账户和工作区，撤销会使该设备的令牌与 Hub 连接失效。Windows 10/11 系统模式的本机管理员可设置或恢复设备密钥，Windows Server 不开放这一工作站入口。详见[Windows 10/11 个人电脑](/docs/zh-CN/latest/getting-started/windows)。
+Windows 10/11 个人模式的安装所有者可在同一台电脑通过回环 Negotiate 完成**设置此 Windows 设备**，无需账户密码或 Hello PIN；其他 Windows 管理员不能替代所有者。之后使用设备密钥登录，并可生成 10 分钟有效、只能使用一次的授权码来配对桌面或 Android 设备。
+
+配对设备共享所有者账户和工作区，撤销会使该设备的令牌与 Hub 连接失效。Windows 10/11 系统模式的本机管理员可设置或恢复设备密钥，Windows Server 不开放这一工作站入口。详见[Windows 10/11 个人电脑](/docs/zh-CN/latest/getting-started/windows)。
 
 ## 系统登录与 Alias
 

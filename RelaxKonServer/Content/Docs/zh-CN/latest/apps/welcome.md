@@ -7,7 +7,7 @@ order: 10
 
 # 欢迎页
 
-Welcome 是 RelaxKonOS 启动后最先打开的应用。它同时承担「引导」与「自检」两个职责。
+欢迎页（Welcome）在 RelaxKonOS 启动后打开，提供使用引导和系统自检。
 
 ## 概述
 

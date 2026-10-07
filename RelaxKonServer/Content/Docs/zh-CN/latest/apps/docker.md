@@ -21,11 +21,7 @@ Docker 管理器（RemoteDocker）在桌面里管理**服务器**的 Docker Engi
 
 ![截图占位 · 待替换：截图位置：Docker 引擎检测与平台状态；展示运行时是否可用及明确的授权／依赖问题。](/assets/docs/screenshots/zh-CN/docker-engine.svg)
 
-> 截图位置：Docker 引擎检测与平台状态；展示运行时是否可用及明确的授权／依赖问题。
-
 ![截图占位 · 待替换：截图位置：测试容器的列表、操作确认和刷新后的状态；展示名称、状态及单容器动作。](/assets/docs/screenshots/zh-CN/docker-container.svg)
-
-> 截图位置：测试容器的列表、操作确认和刷新后的状态；展示名称、状态及单容器动作。
 
 ## 功能
 

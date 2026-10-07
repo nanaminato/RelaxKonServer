@@ -18,8 +18,6 @@ Terminal provides a remote PTY session over SignalR. The client renders terminal
 
 ![Screenshot placeholder：Capture: session state and host/user checks, explicitly showing Server, SSH or local mode; redact real accounts.](/assets/docs/screenshots/en-US/terminal-session.svg)
 
-> Capture: session state and host/user checks, explicitly showing Server, SSH or local mode; redact real accounts.
-
 Check authorization before using an administrator terminal. Windows Personal's explicit administrator terminal runs as LocalSystem without the user's mapped drives; do not choose it by default for ordinary commands. Diagnose deployment receipts through [maintenance](/docs/en-US/latest/apps/server-maintenance), rather than repeatedly running installers.
 
 ## Overview

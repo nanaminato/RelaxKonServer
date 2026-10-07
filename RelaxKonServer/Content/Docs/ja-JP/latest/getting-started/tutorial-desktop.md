@@ -15,15 +15,11 @@ order: 15
 
 ![スクリーンショット：最初のアプリを開く](/assets/tutorials/ja-JP/tutorial-desktop-1.svg)
 
-*スクリーンショット：最初のアプリを開く*
-
 ## 2. ウィンドウを調整する
 
 タイトルバーをドラッグして移動し、端をドラッグしてサイズを変更します。右上のボタンで最小化、最大化、終了ができます。最小化したウィンドウはタスクバーから戻せます。
 
 ![スクリーンショット：ウィンドウを調整する](/assets/tutorials/ja-JP/tutorial-desktop-2.svg)
-
-*スクリーンショット：ウィンドウを調整する*
 
 ## 3. 二つのアプリを使う
 
@@ -31,14 +27,10 @@ order: 15
 
 ![スクリーンショット：二つのアプリを使う](/assets/tutorials/ja-JP/tutorial-desktop-3.svg)
 
-*スクリーンショット：二つのアプリを使う*
-
 ## 4. 好みの設定に変更する
 
 スタートから設定を開き、利用可能な外観やワークスペース設定を変更して結果を確認します。ログイン情報は端末の安全なストレージに保存され、ワークスペース同期の対象にはなりません。[設定](/docs/ja-JP/latest/apps/settings)も参照してください。
 
 ![スクリーンショット：好みの設定に変更する](/assets/tutorials/ja-JP/tutorial-desktop-4.svg)
-
-*スクリーンショット：好みの設定に変更する*
 
 [次のチュートリアル：ファイル管理とターミナルの最初の操作](/docs/ja-JP/latest/getting-started/tutorial-files-terminal)

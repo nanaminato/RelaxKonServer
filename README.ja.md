@@ -4,7 +4,7 @@
 
 ウェブサイト <https://relaxkon.com> · 製品ソースリポジトリ <https://github.com/nanaminato/RelaxKonOS>
 
-`RelaxKonServer/RelaxKonServer` は RelaxKon 公式サイト向けの純粋な **ASP.NET Core 10** REST API です。Razor ページ、MVC ビュー、静的サイトファイル、Angular クライアントのいずれもホストしません。ドキュメントとサイトコンテンツの唯一の情報源であり、管理された API エンドポイントから RelaxKonOS リリースも配信するため、別のダウンロード プロジェクトは不要です。
+`RelaxKonServer/RelaxKonServer` は **ASP.NET Core 10** で公式サイトの REST API を提供し、ドキュメントとサイトコンテンツを管理します。ページと静的リソースは独立したフロントエンドプロジェクトが配信し、このサーバーは Razor・MVC・Angular のページをホストしません。RelaxKonOS の公開パッケージは、管理されたダウンロード API からストリーミング配信します。
 
 ## ローカルでの実行
 

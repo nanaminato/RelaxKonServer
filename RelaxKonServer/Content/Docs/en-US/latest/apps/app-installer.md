@@ -7,7 +7,7 @@ order: 38
 
 # App Installer
 
-App Installer installs and updates RelaxKonOS application packages. It brings external applications into the same runtime, window management and permission model as built-in applications while **keeping the user's review step**.
+App Installer installs and updates RelaxKonOS application packages. External and built-in applications share the runtime, window management and permission model. Users review packages before installation.
 
 ## Overview
 

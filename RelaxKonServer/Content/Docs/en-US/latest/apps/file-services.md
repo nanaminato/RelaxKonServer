@@ -7,7 +7,7 @@ order: 36
 
 # File Services
 
-File Services brings host file-sharing capabilities (SMB first) into a single managed installation and operations flow.
+File Services manages installation and operation of host file sharing, starting with SMB.
 
 ## Goals
 

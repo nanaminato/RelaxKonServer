@@ -7,9 +7,9 @@ order: 5
 
 # Android Phones and Tablets
 
-> This page describes current source capabilities, not the feature inventory of a particular package. See [release notes](/releases/0.1.2) for published artifacts and dates; linked implementation records track verification.
+> This page covers current source capabilities. See [release notes](/releases/0.1.2) for package contents and the linked implementation documents for verification status.
 
-Android is a separate Kotlin, Jetpack Compose and Material 3 application for phones and tablets. It does not use Avalonia or .NET Android. The minimum supported version is Android 10 (API 29); this does not establish verification of every feature on every OS version or device.
+The Android client uses Kotlin, Jetpack Compose and Material 3 for phones and tablets, with Android 10 (API 29) as the minimum version. It is independent of Avalonia and .NET Android. Verification varies by feature, OS version and device.
 
 ## Connections and features
 

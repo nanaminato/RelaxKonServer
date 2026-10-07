@@ -17,7 +17,9 @@ order: 7
 | 公式サイトと Publisher のフロントエンド | Angular 22.2.1、TypeScript 6.0.3、RxJS 7.8.2、Vitest 5.0.3、jsdom 30.1.2 |
 | 公式サイトと Publisher の API | .NET 10 SDK |
 
-Node.js は 22.x の 22.22.3 以降、24.x の 24.15.0 以降、または 26 以降を使用します。パッケージマネージャーの基準は npm 11.19.1 です。Angular ビルダーは TypeScript `>=6.0 <6.1` を要求するため、TypeScript 7 へ直接更新しないでください。Angular 関連パッケージは揃え、リポジトリの `package.json` と `package-lock.json` に従います。[Angular 互換性表](https://angular.dev/reference/versions)も参照してください。
+Node.js は 22.x の 22.22.3 以降、24.x の 24.15.0 以降、または 26 以降を使用します。パッケージマネージャーの基準は npm 11.19.1 です。Angular ビルダーは TypeScript `>=6.0 <6.1` を要求するため、TypeScript 7 へ直接更新しないでください。
+
+Angular 関連パッケージは揃え、リポジトリの `package.json` と `package-lock.json` に従います。[Angular 互換性表](https://angular.dev/reference/versions)も参照してください。
 
 ## RelaxKonOS の起動
 
@@ -38,7 +40,11 @@ dotnet run --project RelaxKonOS.Server --launch-profile http
 dotnet run --project Client/RelaxKonOS.Client.Desktop
 ```
 
-ローカルでは `http://localhost:5090` に接続します。通常のファイル、ターミナル、Git のデバッグには開発設定の `local-identity` を使用し、Server とログインアカウントを同じホストユーザーにします。通常のデバッグにシステムサービスの導入は不要です。保護ファイル、実際のファイアウォール、管理対象ランタイムには特権 Helper の別途設定が必要です。ソースの[開発ガイド](https://github.com/nanaminato/RelaxKonOS/blob/master/docs/development/RelaxKonOS.Develop.md)を参照してください。Android は独立した Kotlin/Compose プロジェクトです。[モバイルガイド](/docs/ja-JP/latest/getting-started/android)に従ってください。
+ローカルでは `http://localhost:5090` に接続します。通常のファイル、ターミナル、Git のデバッグには開発設定の `local-identity` を使用し、Server とログインアカウントを同じホストユーザーにします。通常のデバッグにシステムサービスの導入は不要です。
+
+保護ファイル、実際のファイアウォール、管理対象ランタイムには特権 Helper の別途設定が必要です。ソースの[開発ガイド](https://github.com/nanaminato/RelaxKonOS/blob/master/docs/development/RelaxKonOS.Develop.md)を参照してください。
+
+Android は独立した Kotlin/Compose プロジェクトです。[モバイルガイド](/docs/ja-JP/latest/getting-started/android)に従ってください。
 
 ## 公式サイトの起動
 

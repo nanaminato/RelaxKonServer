@@ -15,15 +15,11 @@ order: 11
 
 ![截图位置：准备客户端和服务器](/assets/tutorials/zh-CN/tutorial-connect-1.svg)
 
-*截图位置：准备客户端和服务器*
-
 ## 2. 选择连接方式
 
 打开客户端，选择 RelaxKonOS Server 连接以进入完整工作区。独立 SSH 连接提供精简桌面，适合终端、SFTP 与服务器维护；请根据自己的目标选择。
 
 ![截图位置：选择连接方式](/assets/tutorials/zh-CN/tutorial-connect-2.svg)
-
-*截图位置：选择连接方式*
 
 ## 3. 填写连接信息
 
@@ -31,14 +27,10 @@ order: 11
 
 ![截图位置：填写连接信息](/assets/tutorials/zh-CN/tutorial-connect-3.svg)
 
-*截图位置：填写连接信息*
-
 ## 4. 登录并确认桌面
 
 连接成功后确认桌面和开始菜单已显示。SSH 凭据与 Server 凭据是两组信息，只有明确选择复用且采用密码认证时才共用。登录失败时检查地址、端口、账户和服务端状态，详细说明见[登录与账户安全](/docs/zh-CN/latest/getting-started/login)。
 
 ![截图位置：登录并确认桌面](/assets/tutorials/zh-CN/tutorial-connect-4.svg)
-
-*截图位置：登录并确认桌面*
 
 [下一篇教程：熟悉桌面与窗口](/docs/zh-CN/latest/getting-started/tutorial-desktop)
