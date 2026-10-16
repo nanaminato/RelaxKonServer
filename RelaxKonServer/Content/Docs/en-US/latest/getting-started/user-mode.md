@@ -13,7 +13,7 @@ Linux User Mode runs the server under your ordinary account, without sudo, syste
 
 1. Get the client from [Downloads](/downloads), connect to the Linux host through Server Center and verify its host key.
 2. Use a non-root account for preflight and explicitly choose **Linux User Mode** in the wizard.
-3. Choose official stable, a local ZIP, a server-side ZIP or a custom HTTPS download. User Mode requires `*-user-server.zip`; a system package cannot substitute.
+3. Choose official stable, a local ZIP, a server-side ZIP or a custom HTTPS download. User Mode shares the `*-server.zip` for the target architecture with System Mode; select Linux User Mode during installation.
 4. Set the port (default 5000) and optionally the data, configuration, state and cache directories. Blank uses the XDG defaults below.
 5. Review and confirm. Wait for `/ready` verification and the final receipt, then sign in through the client-managed SSH tunnel.
 

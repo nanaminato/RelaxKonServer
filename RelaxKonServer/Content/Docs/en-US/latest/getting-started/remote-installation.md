@@ -50,7 +50,7 @@ If an installation exists, verify its identity, mode and directories and follow 
 | Bundle on server | Absolute ZIP path on the target | Target reads its own file without a client upload |
 | Custom HTTPS | ZIP HTTPS URL and full SHA-256 | Target downloads and verifies the supplied digest |
 
-Use `*-server.zip` for Windows/Linux System Mode and `*-user-server.zip` for Linux User Mode. A `*-client.zip` cannot install Server. Every source retains package-kind and architecture checks. Local/server ZIPs still require necessary files, safe extraction and valid manifest structure. Available versions follow the catalog; source documentation does not prove a feature exists in an older artifact.
+Windows/Linux System Mode and Linux User Mode share the `*-server.zip` for the target platform and architecture. A `*-client.zip` cannot install Server. Every source retains package-kind and architecture checks. Local/server ZIPs still require necessary files, safe extraction and valid manifest structure. Available versions follow the catalog; source documentation does not prove a feature exists in an older artifact.
 
 ![Screenshot placeholder：Capture: the four sources and selected package. Show kind, version and architecture; hide URLs containing credentials.](/assets/docs/screenshots/en-US/remote-source.svg)
 

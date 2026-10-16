@@ -40,7 +40,7 @@ On your own Windows 10/11 PC, choose **Manage this PC** on the desktop sign-in p
 | Bundle on the server | Browse or enter an absolute server ZIP path; the host reads that file directly |
 | Custom HTTPS download | Supply the release ZIP HTTPS URL and its full 64-character hexadecimal SHA-256; the download digest is verified |
 
-Local and server files still receive package-kind, architecture, required-file and extraction-safety checks. System Mode uses `*-server.zip`; User Mode uses `*-user-server.zip`. A client package cannot replace a server package. Actual availability follows the download catalog.
+Local and server files still receive package-kind, architecture, required-file and extraction-safety checks. System Mode and User Mode share the `*-server.zip` for the target platform and architecture. A client package cannot replace a server package. Actual availability follows the download catalog.
 
 ## Installation options
 
