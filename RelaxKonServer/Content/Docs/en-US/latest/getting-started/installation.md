@@ -50,7 +50,7 @@ Local and server files still receive package-kind, architecture, required-file a
 | Server port | 1–65535, default 5000; choose an available port |
 | Program and data directories | System Mode allows separate roots; User Mode stores programs under its data root. Blank uses defaults; existing installations retain recorded roots |
 | Configuration, state and cache directories | Linux User Mode allows all four XDG-related roots; use absolute paths that do not overlap |
-| Network | System Mode offers loopback or LAN; The User Mode wizard defaults to loopback; LAN can be enabled with `listen-host`. LAN does not open the firewall automatically |
+| Network | System Mode offers loopback or LAN. The User Mode wizard defaults to loopback; `listen-host` enables LAN. Listening on the LAN does not open the firewall automatically |
 | TLS certificate | System Mode offers none, custom or self-signed. Select PFX/P12 with its password, or a PEM chain and private key. Self-signed names are comma-separated |
 | File access | System Mode offers restricted, whitelist or full. Enter one absolute host directory per line for a whitelist |
 | Administrator and root file access | Linux System Mode configures separate scopes and whitelists for both identities |
@@ -64,9 +64,14 @@ Windows 10/11 Personal Mode uses fixed per-user program, data and deployment-his
 
 ## Update, repair and uninstall
 
-Select an installed host in Server Center and open maintenance. Upgrade, repair and rollback continue with recorded directories; reinstalling retained data preserves installation identity. Ordinary upgrades and repairs retain TLS identity; certificate regeneration is an explicit choice.
+Maintenance actions run against an installed host in Server Center; the first-install flow does not repeat:
 
-Uninstall retains data by default. Permanently deleting databases, configuration, keys and logs requires separate confirmation. The client verifies host state afterward. Use operation logs and repair when the privileged helper is unavailable.
+- **Update:** install a newer server package. Recorded program and data directories, installation identity and TLS identity carry over, and an ordinary update never mints a certificate implicitly.
+- **Repair:** restore the programs and components of the current installation. It changes neither the target version nor the data.
+- **Rollback:** return to the previous program version recorded for this installation. Programs are the only thing restored; databases, configuration and container volumes are outside its scope.
+- **Uninstall:** retains data and deployment records by default so a reinstall can pick up where it left off. Permanently deleting databases, configuration, keys and logs requires separate confirmation.
+
+Client and server update separately: upgrading the server does not update the client. The client verifies host state once the action completes; when the privileged helper is unavailable, read the operation history before running repair. See [Update, uninstall and maintenance](/docs/en-US/latest/apps/server-maintenance) for per-action steps, receipts and failure handling.
 
 ## First sign-in
 

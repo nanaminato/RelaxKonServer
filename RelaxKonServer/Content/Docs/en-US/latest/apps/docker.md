@@ -19,9 +19,9 @@ It manages **one local engine only**: the client never connects to the Docker so
 4. Distinguish container actions from whole-engine actions: stopping/restarting the engine affects all containers on the host. Do not use engine restart for single-container maintenance.
 5. Before pulling an image, check reference, registry source and proxy. Diagnose registry reachability, authentication, proxy or engine errors before retrying.
 
-![Screenshot placeholder：Capture: engine detection/platform state, showing runtime availability and explicit authorization/dependency problems.](/assets/docs/screenshots/en-US/docker-engine.svg)
+![Screenshot placeholder — Capture: engine detection/platform state, showing runtime availability and explicit authorization/dependency problems.](/assets/docs/screenshots/en-US/docker-engine.svg)
 
-![Screenshot placeholder：Capture: test container list, action confirmation and refreshed state with its name and single-container action.](/assets/docs/screenshots/en-US/docker-container.svg)
+![Screenshot placeholder — Capture: test container list, action confirmation and refreshed state with its name and single-container action.](/assets/docs/screenshots/en-US/docker-container.svg)
 
 ## Features
 

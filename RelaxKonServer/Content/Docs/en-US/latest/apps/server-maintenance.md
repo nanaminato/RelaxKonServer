@@ -1,6 +1,6 @@
 ---
 title: Update, uninstall and maintenance
-description: Update, uninstall and maintenance
+description: Update, repair, roll back or uninstall an installed Server — what each action changes, what it keeps, what counts as proof, and how to handle failures.
 category: Applications
 order: 57
 ---
@@ -13,10 +13,10 @@ Use this guide for an installed Server. Enter Server Center through a trusted SS
 
 1. Select the correct host and refresh preflight/state. Check installation identity, mode, current version, program/data roots, port and health.
 2. Inform other users: update, repair and rollback may restart services and disconnect clients. Keep a recoverable SSH or local management route.
-3. Back up important files, configuration and databases, and verify the backup can be read. Program rollback does not promise data or schema rollback.
+3. Back up important files, configuration and databases, and verify the backup can be read — rollback restores the program only, never the data (see section 4).
 4. Inspect unfinished operations and their receipts before submitting anything new. Run one maintenance action per installation at a time.
 
-![Screenshot placeholder：Capture: installed-host state with identity, mode, current/previous versions, roots, port and health.](/assets/docs/screenshots/en-US/maintenance-status.svg)
+![Screenshot placeholder — Capture: installed-host state with identity, mode, current/previous versions, roots, port and health.](/assets/docs/screenshots/en-US/maintenance-status.svg)
 
 | Goal | Action | Distinction |
 | --- | --- | --- |
@@ -34,15 +34,18 @@ Use this guide for an installed Server. Enter Server Center through a trusted SS
 4. Confirm maintenance and observe transfer, execution and verification. A disconnect during restart does not by itself mean failure.
 5. Reconnect or refresh the same host. Check a successful receipt, target version and health, then test sign-in, files and terminal. Update the Client separately when new client features are needed.
 
-![Screenshot placeholder：Capture: update review and result showing existing identity, current/target versions, retained roots and verification.](/assets/docs/screenshots/en-US/maintenance-update.svg)
+![Screenshot placeholder — Capture: update review and result showing existing identity, current/target versions, retained roots and verification.](/assets/docs/screenshots/en-US/maintenance-update.svg)
 
 ## 3. Repair and certificate maintenance
 
-Select the installed host and choose repair of the current installation after checking its roots and identity. Ordinary repair retains data and TLS. TLS identity changes only when explicitly regenerating the LAN self-signed certificate or supplying a new certificate. Certificate replacement restarts service; clients must verify and trust it again, and names must cover the real LAN IP or DNS name.
+Select the installed host and choose repair of the current installation after checking its roots and identity. Repair completes the program and components of the current installation; it does not change the target version and normally leaves data alone.
 
-Windows Personal Mode maintenance uses UAC when configuring its separate helper; refreshing status does not. Linux System repair still needs root or usable sudo. Verify the target port and scope before opting into extra firewall rules. Network inaccessibility alone does not prove installation corruption.
+- **TLS identity**: ordinary repair keeps the existing certificate. Identity changes only when you explicitly regenerate the LAN self-signed certificate or supply a new one. Certificate replacement restarts service, so clients must verify and trust it again, and the name must cover the real LAN IP or DNS name.
+- **Privileges**: Windows Personal Mode maintenance uses UAC when configuring its separate helper, while refreshing status does not; Linux System repair still needs root or usable sudo.
+- **Extra firewall rules**: verify the target port and scope before opting in.
+- **Where to look instead**: network inaccessibility alone does not prove corruption — read the failure receipt as described in section 6.
 
-![Screenshot placeholder：Capture: repair options and confirmation, including certificate regeneration, identities and optional firewall rules; hide secrets.](/assets/docs/screenshots/en-US/maintenance-repair.svg)
+![Screenshot placeholder — Capture: repair options and confirmation, including certificate regeneration, identities and optional firewall rules; hide secrets.](/assets/docs/screenshots/en-US/maintenance-repair.svg)
 
 ## 4. Restore the previous program version
 
@@ -50,7 +53,7 @@ Refresh state and use restore-previous-version only if a previous version is rec
 
 Rollback uses recorded directories and the target version's deployment engine. It does not restore historical databases, configuration, files or container volumes. Confirm separately whether the older program can read data written by the newer version.
 
-![Screenshot placeholder：Capture: rollback confirmation with current/recorded previous versions, target installation and maintenance impact.](/assets/docs/screenshots/en-US/maintenance-rollback.svg)
+![Screenshot placeholder — Capture: rollback confirmation with current/recorded previous versions, target installation and maintenance impact.](/assets/docs/screenshots/en-US/maintenance-rollback.svg)
 
 ## 5. Uninstall and retain data
 
@@ -60,7 +63,7 @@ Rollback uses recorded directories and the target version's deployment engine. I
 4. Read the final receipt and refresh host state to confirm no installation remains. A lost connection does not prove uninstall succeeded.
 5. Record retained directories and verify retained identity/data locations on reinstall. Do not delete state files to imitate uninstall. Windows Personal uninstall also removes its helper and associated firewall rules.
 
-![Screenshot placeholder：Capture: uninstall confirmation and completion showing retain/delete selection, server-name confirmation, receipt and uninstalled state.](/assets/docs/screenshots/en-US/maintenance-uninstall.svg)
+![Screenshot placeholder — Capture: uninstall confirmation and completion showing retain/delete selection, server-name confirmation, receipt and uninstalled state.](/assets/docs/screenshots/en-US/maintenance-uninstall.svg)
 
 ## 6. Read operation history and failure logs
 
@@ -74,16 +77,18 @@ Select the matching record and inspect operation ID, action, stage, state and pr
 | TLS error or unreachable LAN | Check address, names, listening and firewall; explicitly choose certificate repair if needed |
 | Receipt/state disagreement | Keep operation ID and refresh host results; do not declare success before health verification |
 
-Redact accounts, addresses, passwords, private keys, tokens, pairing codes and sensitive paths before sharing logs/screenshots. Placeholder images specify capture requirements and do not represent device acceptance evidence.
+Redact accounts, addresses, passwords, private keys, tokens, pairing codes and sensitive paths before sharing logs or screenshots.
 
-## Routine maintenance order
+> Placeholder images in this guide only specify what a capture must show; they are not evidence that these screens have been accepted on real hardware.
+
+## 7. Routine maintenance order
 
 Check installation and health, then failed operations. For changes, schedule maintenance, back up, review and submit once. Verify receipt, version and health afterward, then test sign-in, [files](/docs/en-US/latest/apps/file-manager), [terminal](/docs/en-US/latest/apps/terminal) and required host-management capabilities.
 
-## Independent component services and maintenance boundaries
+## 8. Independent component services and maintenance boundaries
 
 Managed Nginx, Mihomo and FRPC/FRPS use independent SCM services on Windows. Managed FRPC/FRPS use independent systemd services on Linux, with one instance per FRPC profile. Stopping or uninstalling Server, Guardian or Helper does not automatically stop retained components. Server restores management state from persistent records after restart rather than an in-memory PID. External runtimes still require explicit authorization and are not automatically converted into managed services.
 
 The default uninstall retains running components, configuration and ownership records; reinstalling at the original data location allows management to resume. Full data removal first cleans up managed SMB, Nginx, FRP and Mihomo. Cleanup failures or ownership conflicts preserve the program, Helper and data: inspect the failure receipt before proceeding. Integrated system Nginx, other sites and shared files remain protected by ownership checks. The uninstall interface now lets you select managed SMB, Nginx, FRP and Mihomo for removal, retaining all by default. Retaining any component keeps the entire data root and management records. Selecting full data deletion selects all four components; deselecting one cancels data deletion. Docker Engine, containers and volumes are outside these four cleanup options.
 
-Service lifecycle, OS restart, retained-data uninstall and reinstall have been verified on isolated Windows/Linux hosts. Full GUI/API flows and upgrades between versions still require regression checks. See [implementation and acceptance](https://github.com/nanaminato/RelaxKonOS/blob/master/docs/services/RelaxKonOS.IndependentComponentServices.Progress.md) and [maintenance](/docs/en-US/latest/apps/server-maintenance).
+Service lifecycle, OS restart, retained-data uninstall and reinstall have been verified on isolated Windows/Linux hosts. Full GUI/API flows and upgrades between versions still require regression checks. See [implementation and acceptance](https://github.com/nanaminato/RelaxKonOS/blob/master/docs/services/RelaxKonOS.IndependentComponentServices.Progress.md) and the [installation guide](/docs/en-US/latest/getting-started/installation).

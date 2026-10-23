@@ -31,7 +31,7 @@ Linux System Mode defaults to Debian 12 and Ubuntu 22.04/24.04/26.04. Other syst
 3. Compare the displayed fingerprint, then trust and connect only after identifying the host. Do not bypass verification for a changed key.
 4. When saving a connection, check whether credentials are being saved. Secrets use local secure storage and are not workspace-synced.
 
-![Screenshot placeholder：Capture: SSH host form and first-trust dialog. Show address, port, account and fingerprint; redact real addresses and credentials.](/assets/docs/screenshots/en-US/remote-host.svg)
+![Screenshot placeholder — Capture: SSH host form and first-trust dialog. Show address, port, account and fingerprint; redact real addresses and credentials.](/assets/docs/screenshots/en-US/remote-host.svg)
 
 ## 3. Run preflight and select the mode
 
@@ -39,7 +39,7 @@ Select the host and check its environment. Read OS, architecture, privileges, de
 
 If an installation exists, verify its identity, mode and directories and follow [maintenance](/docs/en-US/latest/apps/server-maintenance) instead of overwriting another installation as a first install.
 
-![Screenshot placeholder：Capture: preflight results and mode selection, including OS, architecture, privileges, dependencies and existing installation state.](/assets/docs/screenshots/en-US/remote-preflight.svg)
+![Screenshot placeholder — Capture: preflight results and mode selection, including OS, architecture, privileges, dependencies and existing installation state.](/assets/docs/screenshots/en-US/remote-preflight.svg)
 
 ## 4. Choose a package source
 
@@ -52,7 +52,7 @@ If an installation exists, verify its identity, mode and directories and follow 
 
 Windows/Linux System Mode and Linux User Mode share the `*-server.zip` for the target platform and architecture. A `*-client.zip` cannot install Server. Every source retains package-kind and architecture checks. Local/server ZIPs still require necessary files, safe extraction and valid manifest structure. Available versions follow the catalog; source documentation does not prove a feature exists in an older artifact.
 
-![Screenshot placeholder：Capture: the four sources and selected package. Show kind, version and architecture; hide URLs containing credentials.](/assets/docs/screenshots/en-US/remote-source.svg)
+![Screenshot placeholder — Capture: the four sources and selected package. Show kind, version and architecture; hide URLs containing credentials.](/assets/docs/screenshots/en-US/remote-source.svg)
 
 ## 5. Configure directories, network, TLS and permissions
 
@@ -62,17 +62,17 @@ Windows/Linux System Mode and Linux User Mode share the `*-server.zip` for the t
 4. Review file scopes and grant only needed paths. Linux administrator/root scopes are configured separately. Docker authorization is off by default and requires opt-in.
 5. Linux User Mode defaults to loopback and can use a client-managed SSH tunnel. See [User Mode](/docs/en-US/latest/getting-started/user-mode) for boundaries.
 
-![Screenshot placeholder：Capture: installation options with port, directories, listening scope, TLS and file permissions; redact certificate passwords.](/assets/docs/screenshots/en-US/remote-options.svg)
+![Screenshot placeholder — Capture: installation options with port, directories, listening scope, TLS and file permissions; redact certificate passwords.](/assets/docs/screenshots/en-US/remote-options.svg)
 
 ## 6. Review, execute and verify
 
 Recheck host, mode, source, roots and port before submission. Perform one operation on this installation at a time; do not submit duplicates from another client. Observe transfer, execution and verification in order. Downloads with unknown totals may show no percentage.
 
-![Screenshot placeholder：Capture: final review with host, mode, source, directories and port summary.](/assets/docs/screenshots/en-US/remote-review.svg)
+![Screenshot placeholder — Capture: final review with host, mode, source, directories and port summary.](/assets/docs/screenshots/en-US/remote-review.svg)
 
 100% upload/download only completes transfer. Success requires a successful host receipt, installed state and an independent health check. Keep the operation ID. On failure, inspect its stage, problem code and logs; a closed window or launcher exit code is insufficient.
 
-![Screenshot placeholder：Capture: result and health verification with operation ID, stage, receipt, installed state and health check.](/assets/docs/screenshots/en-US/remote-result.svg)
+![Screenshot placeholder — Capture: result and health verification with operation ID, stage, receipt, installed state and health check.](/assets/docs/screenshots/en-US/remote-result.svg)
 
 ## 7. Connect to the installed Server
 

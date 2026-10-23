@@ -33,4 +33,4 @@ Confirm that the desktop and Start menu appear. SSH and Server credentials are s
 
 ![Screenshot: Sign in and confirm the desktop](/assets/tutorials/en-US/tutorial-connect-4.svg)
 
-[Next tutorial：Get to know the desktop and windows](/docs/en-US/latest/getting-started/tutorial-desktop)
+[Next tutorial: Get to know the desktop and windows](/docs/en-US/latest/getting-started/tutorial-desktop)

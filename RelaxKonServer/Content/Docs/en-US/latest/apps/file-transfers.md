@@ -16,7 +16,7 @@ order: 13
 3. After commit succeeds, refresh the target and check name/size, then open or download to verify. 100% indicates only the byte-transfer stage.
 4. Cancel unwanted tasks using the client action and check its state. Do not start concurrent same-name uploads while the outcome is unknown.
 
-![Screenshot placeholder：Capture: transfer and final commit state with confirmed bytes, rate, stage, cancel entry and completed result.](/assets/docs/screenshots/en-US/transfer-progress.svg)
+![Screenshot placeholder — Capture: transfer and final commit state with confirmed bytes, rate, stage, cancel entry and completed result.](/assets/docs/screenshots/en-US/transfer-progress.svg)
 
 ## Upload, resume and cancel
 

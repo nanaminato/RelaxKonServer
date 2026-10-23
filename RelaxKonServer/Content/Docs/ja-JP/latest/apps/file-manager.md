@@ -50,6 +50,18 @@ UI は Jaya File Manager から移植されています。RelaxKonOS Server の�
 
 [進捗・再開・中止](/docs/ja-JP/latest/apps/file-transfers)
 
+## アーキテクチャ
+
+```text
+Explorer UI (Client)
+      |
+  REST /api/v1.0/files/*
+      |
+RelaxKonOS.Server
+      |
+  System.IO をサーバーユーザーとして実行
+```
+
 ## 関連ドキュメント
 
 - [ファイルサービス](/docs/ja-JP/latest/apps/file-services)

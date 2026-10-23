@@ -16,7 +16,7 @@ Terminal provides a remote PTY session over SignalR. The client renders terminal
 3. Run ordinary commands in a test directory and inspect output/scrolling. With multiple sessions, identify the active session before typing.
 4. Reconnect after a brief Server connection loss and inspect restored session state. Persistence does not promise recovery across every restart/sign-out or in local terminals; Windows Personal Server stops at sign-out.
 
-![Screenshot placeholder：Capture: session state and host/user checks, explicitly showing Server, SSH or local mode; redact real accounts.](/assets/docs/screenshots/en-US/terminal-session.svg)
+![Screenshot placeholder — Capture: session state and host/user checks, explicitly showing Server, SSH or local mode; redact real accounts.](/assets/docs/screenshots/en-US/terminal-session.svg)
 
 Check authorization before using an administrator terminal. Windows Personal's explicit administrator terminal runs as LocalSystem without the user's mapped drives; do not choose it by default for ordinary commands. Diagnose deployment receipts through [maintenance](/docs/en-US/latest/apps/server-maintenance), rather than repeatedly running installers.
 
@@ -59,4 +59,4 @@ Shell
 ## Related documentation
 
 - [Protocol and communication](/docs/en-US/latest/concepts/protocol)
-- [Reconnect](/docs/en-US/latest/concepts/session)
+- [Sessions and devices](/docs/en-US/latest/concepts/session)

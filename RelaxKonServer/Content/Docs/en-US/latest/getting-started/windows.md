@@ -30,7 +30,7 @@ The modes have independent programs, databases, installation identities and oper
 
 Windows 10/11 System Mode allows a local administrator to set up or recover a device key through loopback Negotiate. Windows Server does not expose this workstation authorization entry. Personal Mode ownership does not grant access to a separate System Mode installation.
 
-![Screenshot placeholder：Capture: Manage this PC and Personal/System selection, showing current user and mode.](/assets/docs/screenshots/en-US/windows-local-mode.svg)
+![Screenshot placeholder — Capture: Manage this PC and Personal/System selection, showing current user and mode.](/assets/docs/screenshots/en-US/windows-local-mode.svg)
 
 ## Permissions, data and daily use
 
@@ -49,7 +49,7 @@ File operations lacking ordinary permissions may use the helper, but remain limi
 
 For other devices, Server must listen on LAN and pairing addresses must use a reachable hostname or IP, rather than `127.0.0.1` or `localhost`. Configure HTTPS with a certificate covering that address. Personal installation and maintenance can explicitly add a firewall rule limited to LocalSubnet sources on Domain/Private networks. A Windows administrator configures other scopes. LAN access does not imply public Internet access.
 
-![Screenshot placeholder：Capture: local authorization and pairing entry, showing result and device management; hide active codes.](/assets/docs/screenshots/en-US/windows-device-pairing.svg)
+![Screenshot placeholder — Capture: local authorization and pairing entry, showing result and device management; hide active codes.](/assets/docs/screenshots/en-US/windows-device-pairing.svg)
 
 ## Update, rollback and uninstall
 

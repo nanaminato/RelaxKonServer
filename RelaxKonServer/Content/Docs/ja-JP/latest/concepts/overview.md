@@ -41,3 +41,4 @@ UI はデバイスに、ワークスペースはサーバーに。
 
 - [クライアント / サーバー アーキテクチャ](/docs/ja-JP/latest/concepts/architecture)
 - [ワークスペース](/docs/ja-JP/latest/concepts/workspace)
+- [プロトコルと通信](/docs/ja-JP/latest/concepts/protocol)

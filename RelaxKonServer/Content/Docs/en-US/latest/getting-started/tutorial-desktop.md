@@ -33,4 +33,4 @@ Open Settings from Start and choose an available appearance or workspace prefere
 
 ![Screenshot: Personalize the desktop](/assets/tutorials/en-US/tutorial-desktop-4.svg)
 
-[Next tutorial：Your first file and terminal workflow](/docs/en-US/latest/getting-started/tutorial-files-terminal)
+[Next tutorial: Your first file and terminal workflow](/docs/en-US/latest/getting-started/tutorial-files-terminal)
