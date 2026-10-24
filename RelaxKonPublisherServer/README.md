@@ -4,6 +4,8 @@
 
 API 不提供网页、不写入所选官网 `Content/`，也不接收命令行参数。它只在独立输出目录中生成 `Downloads/`、`ReleaseDelivery/` 和 `publisher-manifest.json`。运行前端时默认调用 `http://127.0.0.1:5112/api/publisher`。
 
+替换独立输出时，旧内容先整目录改名到 `artifacts/recovery/<时间戳>-<任务号>/`，再移入已校验的暂存输出；成功后保留最近 5 份恢复副本。整目录改名若被其它进程短暂占用（资源管理器、杀毒软件、索引服务或正在删除的目录）会按退避重试约 14 秒，仍失败则以改名的原名回滚到替换前内容，不会递归删除新旧任一侧。错误信息会指出被占用的路径。
+
 Android 发布采用“签名发布机 + 导入”模式：发布机在仓库外持有 keystore 和口令，生成已签名的 APK、AAB 及其 `release.json`；Publisher 只从 `appsettings.Local.json` 中配置的固定导入目录读取这些文件。导入时会验证 APK/AAB 签名、证书 SHA-256、APK 应用 ID/版本、发布清单和 SHA-256。
 
 `AndroidImport` 配置只能包含公开证书指纹、受控路径和验签工具路径，绝不能包含 keystore、alias 或口令。APK 才会加入公开下载清单；AAB 只归档以供 Play Console 上传。

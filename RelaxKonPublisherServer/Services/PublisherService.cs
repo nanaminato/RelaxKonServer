@@ -18,6 +18,22 @@ public sealed class PublisherService
     private static readonly HashSet<string> Runtimes = ["win-x64", "win-arm64", "linux-x64", "linux-arm64", "osx-arm64"];
     private static readonly SemaphoreSlim GenerationLock = new(1, 1);
     private static readonly JsonSerializerOptions Json = new() { WriteIndented = true, PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+    /// <summary>Subdirectories of the standalone output that are replaced as whole directories.</summary>
+    private static readonly string[] ManagedOutputEntries = ["Downloads", "ReleaseDelivery"];
+    private const string OutputManifestName = "publisher-manifest.json";
+    /// <summary>
+    /// Renaming a directory needs a handle on the directory and on every child. An antivirus scan, the search
+    /// indexer, a file-manager preview or a folder that is still being deleted therefore makes Move fail with
+    /// "Access to the path … is denied" even though nothing is wrong with the destination. Back off and retry so
+    /// those transient holders can release; the same commit is retried in-process instead of failing the job.
+    /// </summary>
+    private static readonly TimeSpan[] MoveRetryDelays =
+    [
+        TimeSpan.FromMilliseconds(200), TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(1),
+        TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(4), TimeSpan.FromSeconds(6)
+    ];
+    /// <summary>Recovery copies kept after a successful commit (the current one included).</summary>
+    private const int RetainedRecoveryCopies = 5;
     private readonly ConcurrentDictionary<Guid, PublisherJob> jobs = new();
     private readonly ConcurrentDictionary<Guid, CancellationTokenSource> jobCancellation = new();
     private readonly PublisherPathsOptions configuredPaths;
@@ -255,7 +271,7 @@ public sealed class PublisherService
             affected.Add("publisher-manifest.json");
 
             SetStep(job, "以可恢复方式替换独立输出");
-            CommitManagedOutput(stagingRoot, paths.ContentOutputPath, job.Id);
+            await CommitManagedOutputAsync(job, stagingRoot, paths.ContentOutputPath, cancellationToken);
             job.ProgressCurrent = job.ProgressTotal;
             job.AffectedFiles = affected;
             job.State = "succeeded";
@@ -974,35 +990,166 @@ public sealed class PublisherService
         return Path.Combine(delivery, relative);
     }
 
-    private void CommitManagedOutput(string stagingRoot, string output, Guid jobId)
+    /// <summary>
+    /// Replaces the managed output subtrees with the verified staging copy. The previous content is moved into
+    /// <c>artifacts/recovery</c> first so a failed replacement can be renamed back instead of deleted.
+    /// </summary>
+    private async Task CommitManagedOutputAsync(PublisherJob job, string stagingRoot, string output, CancellationToken cancellationToken)
     {
-        var backup = Path.Combine(toolRoot, "artifacts", "recovery", $"{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{jobId:N}");
+        var backup = Path.Combine(toolRoot, "artifacts", "recovery", $"{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{job.Id:N}");
         Directory.CreateDirectory(output);
         Directory.CreateDirectory(backup);
+        CleanupStaleTombstones(job, output);
+
         var moved = new List<string>();
+        var committed = new List<string>();
         try
         {
-            foreach (var name in new[] { "Downloads", "ReleaseDelivery" })
+            foreach (var name in ManagedOutputEntries)
             {
                 var destination = Path.Combine(output, name);
-                if (Directory.Exists(destination)) { Directory.Move(destination, Path.Combine(backup, name)); moved.Add(name); }
-                Directory.Move(Path.Combine(stagingRoot, name), destination);
+                if (Directory.Exists(destination))
+                {
+                    await MovePathAsync(job, destination, Path.Combine(backup, name), $"备份独立输出中的 {name}", cancellationToken);
+                    moved.Add(name);
+                }
+                await MovePathAsync(job, Path.Combine(stagingRoot, name), destination, $"提交暂存区中的 {name}", cancellationToken);
+                committed.Add(name);
             }
-            var manifest = Path.Combine(output, "publisher-manifest.json");
-            if (File.Exists(manifest)) File.Move(manifest, Path.Combine(backup, "publisher-manifest.json"), overwrite: true);
-            File.Move(Path.Combine(stagingRoot, "publisher-manifest.json"), manifest, overwrite: true);
+
+            var manifest = Path.Combine(output, OutputManifestName);
+            if (File.Exists(manifest))
+            {
+                await MovePathAsync(job, manifest, Path.Combine(backup, OutputManifestName), $"备份独立输出中的 {OutputManifestName}", cancellationToken);
+                moved.Add(OutputManifestName);
+            }
+            await MovePathAsync(job, Path.Combine(stagingRoot, OutputManifestName), manifest, $"提交暂存区中的 {OutputManifestName}", cancellationToken, overwrite: true);
+            committed.Add(OutputManifestName);
         }
-        catch
+        catch (OperationCanceledException)
         {
-            foreach (var name in new[] { "Downloads", "ReleaseDelivery" })
-            {
-                var destination = Path.Combine(output, name);
-                if (Directory.Exists(destination)) Directory.Delete(destination, recursive: true);
-                if (moved.Contains(name) && Directory.Exists(Path.Combine(backup, name))) Directory.Move(Path.Combine(backup, name), destination);
-            }
+            await RollbackManagedOutputAsync(job, output, backup, committed, moved);
             throw;
         }
+        catch (Exception exception)
+        {
+            var failures = await RollbackManagedOutputAsync(job, output, backup, committed, moved);
+            var suffix = failures.Count == 0
+                ? "已回滚到替换前的独立输出。"
+                : $"回滚未能完全恢复：{string.Join("；", failures)}。请人工检查 {output} 与备份 {backup}。";
+            throw new InvalidOperationException($"替换独立输出失败：{TrimSentence(exception.Message)}。{suffix}", exception);
+        }
+
+        Log(job, "info", $"替换前的独立输出已备份到 {backup}。");
+        PruneRecoveryCopies(job, backup);
     }
+
+    /// <summary>
+    /// Renames one directory or file, retrying the transient Windows failures (access denied / sharing
+    /// violation) caused by another process briefly holding a handle inside the moved directory.
+    /// </summary>
+    private async Task MovePathAsync(PublisherJob job, string source, string destination, string description, CancellationToken cancellationToken, bool overwrite = false)
+    {
+        var isDirectory = Directory.Exists(source);
+        if (!isDirectory && !File.Exists(source)) throw new FileNotFoundException($"{description}失败：找不到 {source}。", source);
+        for (var attempt = 0; ; attempt++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                if (isDirectory) Directory.Move(source, destination);
+                else File.Move(source, destination, overwrite);
+                return;
+            }
+            catch (Exception exception) when (IsTransientFileSystemFailure(exception))
+            {
+                if (attempt >= MoveRetryDelays.Length)
+                    throw new IOException($"{description}失败：{TrimSentence(exception.Message)}。该目录中的文件可能正被资源管理器、杀毒软件、索引服务或另一个进程占用；关闭占用该目录的程序后重试即可。", exception);
+                if (attempt == 0) Log(job, "warning", $"{description}被拒绝（{exception.Message}），正在等待占用释放……");
+                await Task.Delay(MoveRetryDelays[attempt], cancellationToken);
+            }
+        }
+    }
+
+    /// <summary>Only the Windows errors that a competing handle can produce are worth retrying.</summary>
+    private static bool IsTransientFileSystemFailure(Exception exception) =>
+        exception is UnauthorizedAccessException
+        || exception.HResult is unchecked((int)0x80070005) or unchecked((int)0x80070020) or unchecked((int)0x80070021);
+
+    /// <summary>
+    /// Restores the previous output by renaming, never by recursive deletion: the freshly committed copy is moved
+    /// aside first so a half-finished restore can no longer destroy both the new and the old content.
+    /// </summary>
+    private async Task<IReadOnlyList<string>> RollbackManagedOutputAsync(PublisherJob job, string output, string backup, IReadOnlyList<string> committed, IReadOnlyList<string> moved)
+    {
+        var failures = new List<string>();
+        foreach (var name in ManagedOutputEntries.Append(OutputManifestName).Reverse())
+        {
+            var destination = Path.Combine(output, name);
+            var rejected = Path.Combine(output, $"{name}.__failed-{job.Id:N}");
+            if (committed.Contains(name) && PathExists(destination))
+            {
+                try { await MovePathAsync(job, destination, rejected, $"回滚时移开新的 {name}", CancellationToken.None); }
+                catch (Exception exception) { failures.Add($"{name} 的新内容无法移开（{exception.Message}）"); }
+            }
+            var stored = Path.Combine(backup, name);
+            if (moved.Contains(name) && PathExists(stored) && !PathExists(destination))
+            {
+                try { await MovePathAsync(job, stored, destination, $"回滚时恢复 {name}", CancellationToken.None); }
+                catch (Exception exception) { failures.Add($"{name} 的备份无法恢复（{exception.Message}）"); }
+            }
+            TryDeletePath(job, rejected);
+        }
+        return failures;
+    }
+
+    /// <summary>Removes the <c>*.__failed-*</c> leftovers of an earlier interrupted rollback.</summary>
+    private void CleanupStaleTombstones(PublisherJob job, string output)
+    {
+        foreach (var path in Directory.EnumerateFileSystemEntries(output, "*.__failed-*").ToList())
+            TryDeletePath(job, path);
+    }
+
+    private void TryDeletePath(PublisherJob job, string path)
+    {
+        try
+        {
+            if (Directory.Exists(path)) Directory.Delete(path, recursive: true);
+            else if (File.Exists(path)) File.Delete(path);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            Log(job, "warning", $"无法删除 {path}：{exception.Message}。可在占用释放后手动清理。");
+        }
+    }
+
+    private void PruneRecoveryCopies(PublisherJob job, string current)
+    {
+        var root = Path.Combine(toolRoot, "artifacts", "recovery");
+        if (!Directory.Exists(root)) return;
+        var stale = Directory.EnumerateDirectories(root)
+            .Where(path => !string.Equals(path, current, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(path => Path.GetFileName(path), StringComparer.Ordinal)
+            .Skip(RetainedRecoveryCopies - 1)
+            .ToList();
+        foreach (var path in stale)
+        {
+            try
+            {
+                Directory.Delete(path, recursive: true);
+                Log(job, "info", $"已清理旧恢复副本：{Path.GetFileName(path)}。");
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                Log(job, "warning", $"无法清理旧恢复副本 {Path.GetFileName(path)}：{exception.Message}。");
+            }
+        }
+    }
+
+    private static bool PathExists(string path) => Directory.Exists(path) || File.Exists(path);
+
+    /// <summary>Drops the trailing terminator so composed messages do not end up with "。。" or ".。" 。</summary>
+    private static string TrimSentence(string text) => text.TrimEnd('。', '.', ' ');
 
     private static void CopyDirectory(string source, string destination)
     {
