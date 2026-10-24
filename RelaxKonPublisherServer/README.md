@@ -8,7 +8,7 @@ Android 发布采用“签名发布机 + 导入”模式：发布机在仓库外
 
 `AndroidImport` 配置只能包含公开证书指纹、受控路径和验签工具路径，绝不能包含 keystore、alias 或口令。APK 才会加入公开下载清单；AAB 只归档以供 Play Console 上传。
 
-Linux 服务端打包必须复制 `deployment/verify-release-inventory.py`，并在将部署 Shell 脚本规范为 LF 后生成 `manifest.json.files`（相对路径、长度及 SHA-256）。预检会检查校验器存在。客户端包同样生成文件清单，macOS 说明文件在清单生成前写入。修复发布者后须重新生成旧发布包；此前漏打校验器或文件清单的 ZIP 不能直接部署。
+Linux 服务端打包必须复制 `deployment/user/` 用户模式入口和 `deployment/verify-release-inventory.py`，在 payload 中声明 `launcher`，并在将部署 Shell 脚本规范为 LF 后生成 `manifest.json.files`（相对路径、长度及 SHA-256）。预检及清单生成前会检查用户入口、校验器和必需安装/卸载脚本是否存在。无扩展名的 `relaxkon` 同样规范为 LF。客户端包同样生成文件清单，macOS 说明文件在清单生成前写入。修复发布者后须重新生成旧发布包；此前漏打校验器或文件清单的 ZIP 不能直接部署。
 
 独立组件服务沿用当前服务端打包流程：Server、Guardian、Helper 分别自包含发布，完整发布目录和平台部署脚本一起进入 ZIP。Windows 的 `--component-service` 宿主编译在 Helper 中，安装组件时将完整 Helper 发布目录复制到独立且受保护的宿主目录；Linux FRP 的 systemd 服务由 Helper 注册，部署脚本写入受保护的包来源策略。
 

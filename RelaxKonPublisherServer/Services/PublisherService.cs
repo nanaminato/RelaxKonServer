@@ -357,8 +357,11 @@ public sealed class PublisherService
             }
             if (SelectedServerRuntimes(request).Any(runtime => RuntimePlatform(runtime) == "linux"))
             {
-                var verifier = Path.Combine(paths.RelaxKonOSPath, "deployment", "verify-release-inventory.py");
-                checks.Add(new PublisherPreflightCheck("Linux 发布包校验器", File.Exists(verifier), File.Exists(verifier) ? "发布包校验器已找到" : $"找不到构建输入：{verifier}"));
+                foreach (var relative in LinuxServerDeploymentFiles)
+                {
+                    var input = Path.Combine(paths.RelaxKonOSPath, relative);
+                    checks.Add(new PublisherPreflightCheck($"Linux 部署文件：{relative}", File.Exists(input), File.Exists(input) ? "部署文件已找到" : $"找不到构建输入：{input}"));
+                }
             }
             foreach (var platform in SelectedServerRuntimes(request).Select(RuntimePlatform).Distinct())
             {
@@ -588,6 +591,7 @@ public sealed class PublisherService
                 payload[component.Item3] = $"payload/{platform}/{component.Item2}/{component.Item4}";
             }
             CopyServerDeploymentFiles(osRoot, packageRoot, platform);
+            if (platform == "linux") payload["launcher"] = "deployment/user/relaxkon";
             await WriteManifestAsync(packageRoot, kind, request.Version, runtime, platform, payload);
         }
 
@@ -867,15 +871,29 @@ public sealed class PublisherService
         if (!File.Exists(Path.Combine(directory, executable))) throw new InvalidOperationException($"发布输出未包含 {executable}。");
     }
 
+    private static readonly string[] LinuxServerDeploymentFiles =
+    [
+        "deployment/user/relaxkon",
+        "deployment/verify-release-inventory.py",
+        "deployment/bootstrap/install-relaxkonos.sh",
+        "deployment/bootstrap/uninstall-relaxkonos.sh",
+        "deployment/linux/install-relaxkonos-services.sh"
+    ];
+
     private static void CopyServerDeploymentFiles(string osRoot, string packageRoot, string platform)
     {
         CopyDirectory(Path.Combine(osRoot, "deployment", "bootstrap"), Path.Combine(packageRoot, "deployment", "bootstrap"));
         CopyDirectory(Path.Combine(osRoot, "deployment", platform), Path.Combine(packageRoot, "deployment", platform));
         if (platform != "linux") return;
 
+        foreach (var relative in LinuxServerDeploymentFiles)
+            if (!File.Exists(Path.Combine(osRoot, relative)))
+                throw new FileNotFoundException($"发布包缺少必需文件：{relative}", Path.Combine(osRoot, relative));
+        CopyDirectory(Path.Combine(osRoot, "deployment", "user"), Path.Combine(packageRoot, "deployment", "user"));
         File.Copy(Path.Combine(osRoot, "deployment", "verify-release-inventory.py"), Path.Combine(packageRoot, "deployment", "verify-release-inventory.py"), overwrite: true);
         // Windows checkouts may contain CRLF; hash the final Linux bytes after normalization.
-        foreach (var script in Directory.EnumerateFiles(Path.Combine(packageRoot, "deployment"), "*.sh", SearchOption.AllDirectories))
+        foreach (var script in Directory.EnumerateFiles(Path.Combine(packageRoot, "deployment"), "*", SearchOption.AllDirectories)
+                     .Where(path => Path.GetExtension(path) == ".sh" || Path.GetFileName(path) == "relaxkon"))
         {
             var original = File.ReadAllText(script);
             var normalized = original.Replace("\r\n", "\n").Replace("\r", "\n");
@@ -885,6 +903,11 @@ public sealed class PublisherService
 
     private static async Task WriteManifestAsync(string packageRoot, string kind, string version, string runtime, string platform, Dictionary<string, string> payload)
     {
+        var required = payload.Values.AsEnumerable();
+        if (kind == "server" && platform == "linux") required = required.Concat(LinuxServerDeploymentFiles);
+        foreach (var relative in required)
+            if (!File.Exists(Path.Combine(packageRoot, relative)))
+                throw new FileNotFoundException($"发布包缺少必需文件：{relative}", Path.Combine(packageRoot, relative));
         var manifestPath = Path.Combine(packageRoot, "manifest.json");
         var files = new List<object>();
         foreach (var path in Directory.EnumerateFiles(packageRoot, "*", SearchOption.AllDirectories).Order(StringComparer.Ordinal))

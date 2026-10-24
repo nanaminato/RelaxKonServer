@@ -11,6 +11,8 @@ try
     Write("deployment/bootstrap/install-relaxkonos.sh", "#!/bin/bash\r\nexit 0\r\n");
     Write("deployment/linux/install-relaxkonos-services.sh", "#!/bin/bash\r\nexit 0\r\n");
     Write("deployment/windows/Install-RelaxKonOSServices.ps1", "Write-Host OK\r\n");
+    Write("deployment/user/relaxkon", "#!/bin/bash\r\nexit 0\r\n");
+    Write("deployment/bootstrap/uninstall-relaxkonos.sh", "#!/bin/bash\r\nexit 0\r\n");
     Write("deployment/verify-release-inventory.py", "# verifier\n");
     foreach (var platform in new[] { "linux", "windows" })
     {
@@ -19,6 +21,11 @@ try
         Invoke("CopyServerDeploymentFiles", source, package, platform);
         var verifier = Path.Combine(package, "deployment", "verify-release-inventory.py");
         Check(File.Exists(verifier) == (platform == "linux"), "Linux verifier must be packaged");
+        if (platform == "linux")
+        {
+            var launcher = Path.Combine(package, "deployment", "user", "relaxkon");
+            Check(File.Exists(launcher) && !File.ReadAllText(launcher).Contains('\r'), "User launcher must be packaged with LF");
+        }
         var script = Path.Combine(package, "deployment", "bootstrap", "install-relaxkonos.sh");
         Check(File.ReadAllText(script).Contains('\r') == (platform == "windows"), "Linux scripts must use LF");
         await Manifest(package, "server", platform == "linux" ? "linux-x64" : "win-x64", platform);
@@ -35,6 +42,22 @@ try
     VerifyInventory(mac);
     using (var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(mac, "manifest.json"))))
         Check(manifest.RootElement.GetProperty("files").EnumerateArray().Any(item => item.GetProperty("path").GetString() == "README-macOS.txt"), "macOS README must be inventoried");
+    File.Delete(Path.Combine(source, "deployment", "user", "relaxkon"));
+    try
+    {
+        Invoke("CopyServerDeploymentFiles", source, Path.Combine(root, "missing-launcher"), "linux");
+        throw new Exception("Missing user launcher must fail packaging");
+    }
+    catch (TargetInvocationException error) when (error.InnerException is FileNotFoundException missing && missing.Message.Contains("deployment/user/relaxkon")) { }
+    var linuxPackage = Path.Combine(root, "linux");
+    File.Delete(Path.Combine(linuxPackage, "deployment", "user", "relaxkon"));
+    try
+    {
+        await Manifest(linuxPackage, "server", "linux-x64", "linux");
+        throw new Exception("Incomplete staged package must fail manifest generation");
+    }
+    catch (FileNotFoundException) { }
+    Write("deployment/user/relaxkon", "#!/bin/bash\nexit 0\n");
     File.Delete(Path.Combine(source, "deployment", "verify-release-inventory.py"));
     try
     {
@@ -42,7 +65,7 @@ try
         throw new Exception("Missing verifier must fail packaging");
     }
     catch (TargetInvocationException error) when (error.InnerException is FileNotFoundException) { }
-    Console.WriteLine("PASS: Linux verifier, LF conversion, complete inventories, repeat generation, macOS README, missing verifier rejection.");
+    Console.WriteLine("PASS: user launcher, missing launcher and incomplete staging rejection, Linux verifier, LF conversion, complete inventories, repeat generation, macOS README, missing verifier rejection.");
 
     void Write(string relative, string content)
     {
