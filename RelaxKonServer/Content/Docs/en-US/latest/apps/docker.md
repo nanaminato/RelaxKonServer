@@ -14,7 +14,7 @@ It manages **one local engine only**: the client never connects to the Docker so
 ## Walkthrough: inspect the engine and manage one container
 
 1. Open Docker Manager in a full Server workspace and read engine detection. This Server application is unavailable in the SSH desktop.
-2. If unavailable, check installation and authorization. Linux System Docker access needs explicit approval. On Windows 10/11, Docker Desktop should run as the same user as Personal Server; ownership does not override capability detection.
+2. If unavailable, check install ownership and version in the [Component Center](/docs/en-US/latest/apps/component-center) first, then check access authorization. Linux System Docker access needs explicit approval. On Windows 10/11, Docker Desktop should run as the same user as Personal Server; ownership does not override capability detection.
 3. In Containers, choose a test container that may be interrupted and verify name/state. Start, stop or restart only that container, confirm and refresh state.
 4. Distinguish container actions from whole-engine actions: stopping/restarting the engine affects all containers on the host. Do not use engine restart for single-container maintenance.
 5. Before pulling an image, check reference, registry source and proxy. Diagnose registry reachability, authentication, proxy or engine errors before retrying.
@@ -25,7 +25,7 @@ It manages **one local engine only**: the client never connects to the Docker so
 
 ## Features
 
-- Engine status detection and installation guidance
+- Engine status detection; Linux installs are handled by the Component Center, while Windows keeps the Docker Desktop guidance
 - Containers: view, start, stop, restart
 - Images: list and pull
 - Stacks: validate, deploy and stop Compose projects
@@ -90,7 +90,8 @@ The Windows desktop path suits development, personal self-hosting and verificati
 ## Known limitations
 
 - Only one local engine is managed; container orchestration clusters, multi-node proxies and the remote daemon API are not implemented.
-- Installation, persisted stack history, the container terminal and streaming resource statistics are still in design; the UI does not claim they are available.
+- Linux engine installs are handled by the Component Center (system package, or an official repository the host has registered and authorized); Windows still only manages a runtime that is installed and passes capability detection.
+- Persisted stack history, the container terminal and streaming resource statistics are still in design; the UI does not claim they are available.
 - This application is designed as a **single-instance tool for an administrator**: authorization is currently bounded by the signed-in user, and there is no server-side Docker read/write role separation for a shared deployment. Do not expose it as a multi-tenant container control plane, and do not distribute its sign-in credentials to untrusted users.
 
 ## Related documentation

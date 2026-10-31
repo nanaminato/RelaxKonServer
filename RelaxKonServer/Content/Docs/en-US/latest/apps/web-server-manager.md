@@ -39,6 +39,17 @@ A discovered unmanaged web server is only a **candidate**: RelaxKonOS does not t
 - HTTP-01 integration: when an existing web server already holds port 80, it merely exposes the challenge path, and RelaxKonOS does not take the port over.
 - Permission granting: on Linux the worker can be granted read access to a static directory explicitly (read and traverse only, without changing ownership or granting write access).
 
+## Current Nginx and install entry points
+
+The manager itself only presents running state and site operations. Instance selection, discovery, integrating an external instance, install and uninstall now live in the [Component Center](/docs/en-US/latest/apps/component-center).
+
+- The Component Center stores "current Nginx" through `GET/PUT /api/v1.0/webservers/current-nginx` in host-global storage, so every client on that host shares one selection.
+- Only an instance that is already managed or integrated can be selected. With no explicit selection and a single instance, that instance is used; with several instances a selection is required.
+- If the saved instance disappears the selection stays unavailable and points at the Component Center; it **never** falls back to another instance.
+- The selection is read when the window opens and on refresh, and checked for changes every three seconds; on change the old site target is cleared and re-read.
+
+An external instance still needs explicit confirmation before integration; an un-integrated instance is only a candidate and RelaxKonOS will not modify its configuration.
+
 ## Permissions and security
 
 - This is an **administrator-mode** feature for a single server's administrator and does not use fine-grained user or workspace authorization. Instances, sites and configuration snapshots are host-global resources.
@@ -55,13 +66,15 @@ A discovered unmanaged web server is only a **candidate**: RelaxKonOS does not t
 
 ## Known limitations
 
-- **The Nginx integration is the current first-stage scope**: installation, upgrade, uninstall and the configuration transaction and site management have landed; the remaining providers have not.
+- **The Nginx integration is the current first-stage scope**: the configuration transaction and site management have landed, and install and uninstall belong to the Component Center; the remaining providers have not.
+- Available actions depend on platform and verified ownership: Linux uses a system package, Windows uses a managed archive. Neither offers an arbitrary version, and upgrade and rollback are accepted per platform.
 - IIS, Apache and Caddy have an abstraction boundary only and are **not implemented**; the UI does not claim they are available.
 - Issuance and the reload triggered after automatic renewal can still be automated further in later stages; capabilities that are not implemented are not promised.
 - Combined site configuration, directory authorization and sensitive path restrictions are described exactly as implemented, with nothing promised ahead of time.
 
 ## Related documentation
 
+- [Component Center](/docs/en-US/latest/apps/component-center)
 - [Certificate Manager](/docs/en-US/latest/apps/certificate-manager)
 - [Application Deployments](/docs/en-US/latest/apps/application-deployments)
 - [Security model](/docs/en-US/latest/concepts/security)

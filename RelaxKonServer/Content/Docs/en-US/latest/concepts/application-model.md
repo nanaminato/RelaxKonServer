@@ -75,6 +75,16 @@ RemoteWindow (Avalonia control)
 - Capabilities and private settings: `/api/v1.0/capabilities` and App Settings
 - Launch URIs through validated `relaxkonos://` routes
 
+## Component dependencies and launch gating
+
+Some built-in applications need a host component: Web Server needs Nginx, Docker Manager needs a container engine, Tunnels needs frpc or frps, Proxy needs its runtime core, File Services needs Samba, and Git work needs Git.
+
+- Dependencies are declared by the **component catalog**, not guessed by each application: an application states which components it relates to, and the launch check reads their state through one route.
+- When one application relates to several components, they are **alternatives**; Tunnel Manager opens with either frpc or frps installed.
+- When a component is missing, awaiting recovery or busy, the application warns before opening and offers a jump to the Component Center. An unknown state or a missing permission is never treated as "not installed" and never used to push an install.
+- If the host declares a component unsupported on that platform, the application treats it as "not required" and opens, so a platform difference is not mistaken for a missing dependency.
+- Install, update and uninstall only happen in the [Component Center](/docs/en-US/latest/apps/component-center); applications keep business configuration and service operations.
+
 ## Related documentation
 
 - [Window manager](/docs/en-US/latest/concepts/window-manager)

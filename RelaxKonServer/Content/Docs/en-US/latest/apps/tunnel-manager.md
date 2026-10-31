@@ -27,7 +27,7 @@ The core trade-off: **RelaxKonOS manages tunnels natively, but `frpc` / `frps` a
 
 - Tunnel definitions stored as desired state and validated before being applied.
 - Server profiles: host, port, authentication and transport details for the non-secret part; secret material is referenced inside the server only.
-- Runtime management: download, verify, versioned install, start, stop, status, logs, upgrade and rollback. An upgrade switches a version directory pointer instead of overwriting an existing binary.
+- Runtime management: the first install belongs to the [Component Center](/docs/en-US/latest/apps/component-center); this application handles start, stop, status, logs, upgrade, repair, rollback and uninstall. An upgrade switches a version directory pointer instead of overwriting an existing binary.
 - External runtimes: detection plus an explicitly managed start, and **never taking over an unauthorised configuration or process**.
 - Tunnel types: `tcp`, `udp`, `http` and `https` in the first version.
 - Managed servers: a server hosted by RelaxKonOS, with configuration and diagnostics pages.
@@ -49,7 +49,7 @@ Windows, Windows Server and Linux are supported. The differences lie mainly in r
 - This version **excludes** `STCP`, `XTCP`, P2P visitors, plugins, custom configuration fragments, arbitrary environment variables and arbitrary command-line pass-through; each needs its own secret, network-exposure and input model first.
 - It **does not automatically expose RelaxKonOS itself to the internet.** That capability belongs to a separate remote-access / TLS / identity review and should be implemented as an explicit, revocable system tunnel.
 - It **does not install or force-enable the server-side binary**; that is an optional later goal and does not block the client-side main path.
-- Cloudflare Tunnel, Tailscale and others have an abstraction boundary only and are not implemented.
+- Cloudflare Tunnel and other products have an abstraction boundary only and are not implemented; Tailscale ships as its own application and has nothing to do with this FRP tunnel model.
 - The tunnel protocol is neither embedded nor rewritten, and RelaxKonOS takes no part in forwarding data.
 
 ## Related documentation

@@ -7,7 +7,7 @@ order: 39
 
 # Proxy Manager
 
-Proxy Manager installs, configures, starts, stops, monitors and upgrades a proxy core on the **current host** that RelaxKonOS manages.
+Proxy Manager configures, starts, stops, monitors and upgrades a proxy core on the **current host** that RelaxKonOS manages. Installing, versioning and removing the core itself belong to the [Component Center](/docs/en-US/latest/apps/component-center).
 
 The first officially supported engine is **Mihomo**. The module is built around an engine abstraction so other headless proxy cores can be added later, instead of being written as a manager for one specific engine.
 
@@ -33,7 +33,7 @@ Treating TUN as an optional advanced switch is the desktop-GUI approach this mod
 
 ## Current capabilities
 
-- Runtime management: install, update, rollback, uninstall and integrity verification, with both managed and external runtimes.
+- Runtime management: this application starts, stops, publishes configuration to and observes the runtime, including network recovery. Install, update, repair, rollback and uninstall happen in the Component Center. Both managed and external runtimes are supported, and an external runtime must be authorized explicitly — it is never adopted silently.
 - Configuration and profiles: raw configuration and a managed overlay are kept separate instead of forcing complex configuration into a structure.
 - Subscriptions: validated and backed up before an update, rolled back on failure, and never echoed back as a full URL.
 - Proxy groups and nodes: list groups and switch the selected node.
@@ -69,8 +69,18 @@ The UI shows options based on the platform capabilities the server reports, and 
 - A set of TUN scenarios is skipped where no suitable host environment exists; skipped runs do not count as passing, and platform evidence still has to be produced on the target hosts.
 - Enabling TUN on Windows requires the privileged helper to be in place. It is not a plain switch, and the UI states the reason explicitly when it is unavailable.
 
+## Component dependencies
+
+Proxy Manager depends on the mihomo runtime. **Settings → Component dependencies** only shows that component's ownership and measured version on the current server, plus a jump to the Component Center; it offers no install button.
+
+- **Linux**: the source is the host's already-configured APT repository (package `mihomo`). The Component Center never adds a repository on its own, and says so plainly when the repository has no candidate.
+- **Windows**: the official download and file-install entries remain, and the result is written to the same ledger.
+
+When the runtime is missing, the subscription page only explains the situation and points at the Component Center instead of opening a second install path. An externally installed runtime is observed as external and never adopted automatically.
+
 ## Related documentation
 
+- [Component Center](/docs/en-US/latest/apps/component-center)
 - [Docker Manager](/docs/en-US/latest/apps/docker)
 - [Certificate Manager](/docs/en-US/latest/apps/certificate-manager)
 - [Security model](/docs/en-US/latest/concepts/security)
