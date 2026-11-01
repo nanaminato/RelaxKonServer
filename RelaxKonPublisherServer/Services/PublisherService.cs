@@ -365,7 +365,7 @@ public sealed class PublisherService
         }
         if (request.BuildServer)
         {
-            foreach (var relative in new[] { "RelaxKonOS.Server/RelaxKonOS.Server.csproj", "RelaxKonOS.Guardian.Agent/RelaxKonOS.Guardian.Agent.csproj", "RelaxKonOS.PrivilegedHelper/RelaxKonOS.PrivilegedHelper.csproj", "deployment/bootstrap" })
+            foreach (var relative in new[] { "RelaxKonOS.Server/RelaxKonOS.Server.csproj", "RelaxKonOS.Guardian.Agent/RelaxKonOS.Guardian.Agent.csproj", "RelaxKonOS.PrivilegedHelper/RelaxKonOS.PrivilegedHelper.csproj", "RelaxKonOS.ServerModuleHost/RelaxKonOS.ServerModuleHost.csproj", "deployment/bootstrap" })
             {
                 var path = Path.Combine(paths.RelaxKonOSPath, relative.Replace('/', Path.DirectorySeparatorChar));
                 var exists = relative.EndsWith(".csproj", StringComparison.Ordinal) ? File.Exists(path) : Directory.Exists(path);
@@ -596,7 +596,10 @@ public sealed class PublisherService
             {
                 ("RelaxKonOS.Server/RelaxKonOS.Server.csproj", "server", "server", $"RelaxKonOS.Server{extension}"),
                 ("RelaxKonOS.Guardian.Agent/RelaxKonOS.Guardian.Agent.csproj", "guardian", "guardian", $"RelaxKonOS.Guardian.Agent{extension}"),
-                ("RelaxKonOS.PrivilegedHelper/RelaxKonOS.PrivilegedHelper.csproj", "privileged-helper", "privilegedHelper", $"RelaxKonOS.PrivilegedHelper{extension}")
+                ("RelaxKonOS.PrivilegedHelper/RelaxKonOS.PrivilegedHelper.csproj", "privileged-helper", "privilegedHelper", $"RelaxKonOS.PrivilegedHelper{extension}"),
+                // The installers require this self-contained runtime beside the Server payload;
+                // without it personal and system mode fail while installing the Helper.
+                ("RelaxKonOS.ServerModuleHost/RelaxKonOS.ServerModuleHost.csproj", "server/module-host", "moduleHost", $"RelaxKonOS.ServerModuleHost{extension}")
             };
             var payload = new Dictionary<string, string>();
             foreach (var component in components)
