@@ -51,3 +51,4 @@ RelaxKonOS synchronizes state, data and operations. The client renders the inter
 
 - [Protocol and communication](/docs/en-US/latest/concepts/protocol)
 - [Window manager](/docs/en-US/latest/concepts/window-manager)
+- [Server modules](/docs/en-US/latest/concepts/server-modules)

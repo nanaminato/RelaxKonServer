@@ -51,3 +51,4 @@ RelaxKonOS は状態・データ・操作を同期し、画面はクライアン
 
 - [プロトコルと通信](/docs/ja-JP/latest/concepts/protocol)
 - [ウィンドウマネージャー](/docs/ja-JP/latest/concepts/window-manager)
+- [サーバーモジュール](/docs/ja-JP/latest/concepts/server-modules)

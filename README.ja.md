@@ -6,10 +6,12 @@
 
 `RelaxKonServer/RelaxKonServer` は **ASP.NET Core 10** で公式サイトの REST API を提供し、ドキュメントとサイトコンテンツを管理します。ページと静的リソースは独立したフロントエンドプロジェクトが配信し、このサーバーは Razor・MVC・Angular のページをホストしません。RelaxKonOS の公開パッケージは、管理されたダウンロード API からストリーミング配信します。
 
+同じソリューションには `RelaxKonPublisherServer` も含まれます。ループバックのみに束縛するローカル公開 API で、RelaxKonOS とコンテンツの成果物を別の出力ディレクトリへ書き出し、公開サイトの配信には関与しません。詳しくは[ローカル公開 API](#ローカル公開-apirelaxkonpublisherserver)を参照してください。
+
 ## ローカルでの実行
 
 - **.NET 10 SDK** をインストールします。
-- このディレクトリで `dotnet restore`、続いて `dotnet watch run` を実行します。
+- このディレクトリで `dotnet restore` を実行します。ソリューションには 2 つのプロジェクトがあるため、起動時に指定が必要です。`dotnet watch run --project RelaxKonServer`（サイト API）または `dotnet watch run --project RelaxKonPublisherServer`（ループバック 5112 のみのローカル公開 API）。リポジトリ直下の `dotnet run` は「実行するプロジェクトが見つかりません」で失敗します。
 - 起動プロファイルは `RelaxKonServer/Properties/launchSettings.json` にあります。`https` プロファイルは `https://localhost:7252` と `http://localhost:5062` の両方を、`http` プロファイルは `5062` のみを待ち受けます。
 - 初回は `dotnet dev-certs https --trust` で開発用証明書を信頼させます（Windows/macOS）。Linux ではブラウザーの信頼ストアへ証明書をインポートしてください。
 
@@ -51,14 +53,14 @@ order: 14
 - **言語の追加**：`Content/Docs/<code>/latest` を作成します。言語は `en-US`、`zh-CN`、`ja-JP` の固定順で返り、`zh-CN` と `ja-JP` の表示名は組み込み（简体中文 / 日本語）、その他のコードはコード自体が使われます。
 - **バージョンの追加**：`latest` の隣に別のディレクトリを作成します。`latest` が先頭になります。
 - **翻訳フォールバック**：要求された言語に slug が無い場合は `en-US` の版が返り、レスポンスの `isFallback` が `true` になります。フォールバック項目のカテゴリ名は要求言語のままに保たれ、ナビゲーションのグループ見出しが揃います。
-- **現状**：`en-US`、`zh-CN`、`ja-JP` はいずれも 46 件（はじめに 9 + 概念 9 + アプリケーション 28）で完全に揃っています。**ファイルを増減するときは 3 言語の件数を揃えてください。** 揃っていないとナビゲーションにフォールバック項目が現れます。変更後は `node tools/verify-doc-order.mjs`（件数・`order` の一意性・3 言語の一致）と `node tools/verify-doc-links.mjs`（内部リンクと front matter）で確認してください。
+- **現状**：`en-US`、`zh-CN`、`ja-JP` はいずれも 52 件（はじめに 12 + 概念 10 + アプリケーション 30）で完全に揃っています。**ファイルを増減するときは 3 言語の件数を揃えてください。** 揃っていないとナビゲーションにフォールバック項目が現れます。変更後は `node tools/verify-doc-order.mjs`（件数・`order` の一意性・3 言語の一致）と `node tools/verify-doc-links.mjs`（内部リンクと front matter）で確認してください。
 - 言語とバージョンのセグメントは `[A-Za-z0-9-]` のみ、slug はさらに `/` と `_` を許容し最大 256 文字です。それ以外は 404 を返します。
 
 ### リリースノート、FAQ、ダウンロード
 
 - リリースノートは `Releases/{version}.md`（共通の `version`・`date`・`prerelease` とパッケージ一覧）と `Releases/{language}/{version}.md`（翻訳した `title`・`summary`・本文）で構成します。共通本文の `{artifactsTitle}`・`{packageLabel}`・`{downloadsLabel}` は言語ファイルのフロントマターから取得します。版、日付、URL、サイズ、SHA-256 は共通ファイルだけで管理します。両 API は `?language=zh-CN|en-US|ja-JP` に対応し、既定は英語です。翻訳がない場合は英語に戻り、実際の `language` と `isFallback` を返します。各版の英語ファイルは必須です。一覧は日付降順で、`highlights` は翻訳本文の先頭 6 個のリスト項目を使用し、共通パッケージ一覧は含めません。ビルド後に `node tools/verify-release-localization.mjs` で三言語、共通データ、フォールバックを検証します。
 - `Faq/<language>.json` は `{ question, answer, category, order }` の配列です。該当言語のファイルが無い、または言語コードが不正な場合は `en-US` へフォールバックし、`category` が空なら `General` になります。
-- `Downloads/downloads.json` は `{ platform, architecture, version, url, size, checksum, releaseDate, isAvailable, fileName }` の配列です。
+- `Downloads/downloads.json` は `{ platform, architecture, version, url, size, checksum, releaseDate, isAvailable, fileName, packageKind, runtime }` の配列です。`packageKind` は `client` か `server` で、クライアントは展開してそのまま実行、サーバーは対象ホストへのインストールに使います。同じ版・同じアーキテクチャでも 2 件のレコードがあり、この項目で区別します。API のレスポンスにも含まれます。`runtime` は配布ツリーのランタイム ディレクトリ名（`win-x64`、`linux-arm64`、`android-universal` など）で、`deployment/Publish-RelaxKonOSRelease.ps1` とローカル公開 API が一覧を書き出すときに使い、**API では返しません**。
 
 ### オプション
 
@@ -126,6 +128,17 @@ ZIP の SHA-256 を検証し、`stable/{version}/{runtime}/` に置き、`latest
 
 ZIP の展開先がアプリケーションの作業ディレクトリです。そこで `./RelaxKonServer`（Windows では `RelaxKonServer.exe`）を起動してください。自包含パッケージのため対象ホストに .NET をあらかじめ入れる必要はありません。本番では systemd、Windows Service、またはリバースプロキシで HTTPS を構成し、開発証明書や `appsettings.Development.json` を本番の機密情報として扱わないでください。
 
+## ローカル公開 API（RelaxKonPublisherServer）
+
+`RelaxKonPublisherServer/` は同じソリューションの 2 つ目のプロジェクトで、ローカルでのみ動作します。`Program.cs` が `http://127.0.0.1:5112` と `http://[::1]:5112` に直接バインドし、Web UI もコマンドライン引数もありません。RelaxKonOS のクライアント／サーバーパッケージとコンテンツ一覧を**独立した出力ディレクトリ**（`Downloads/`、`ReleaseDelivery/`、`publisher-manifest.json`）に生成し、公開中の `RelaxKonServer/Content/` には書き込みません。
+
+- **設定**：`appsettings.Local.example.json` を git 管理外の `appsettings.Local.json` にコピーし、ローカルの絶対パスを記入します。`PublisherPaths`（`RelaxKonOSPath`、`RelaxKonServerPath`、`ContentOutputPath`）と `AndroidImport`（取り込みディレクトリ、期待パッケージ名、証明書フィンガープリント、検証ツールのパス）がここに入ります。keystore・alias・パスワードは署名機だけのもので、この設定に**書いてはいけません**。
+- **エンドポイント**（接頭辞 `api/publisher`）：`GET settings` は既定パスを返し、`POST preview` は事前検査・既存パッケージ・変更一覧を返し、`POST generate` はジョブを開始して 202 を返し、`GET jobs/{id}` は状態、`POST jobs/{id}/cancel` はキャンセル要求です。
+- **進捗の配信**：SignalR ハブは `/hubs/publisher` にあり、`Subscribe(jobId)` で `jobUpdated` を受け取れます。`StartPreview` を使えば接続上で事前検査の結果を取得できます。CORS は `localhost:4200` と `:4201`（サイトとローカル作業台）のみ許可します。
+- **出力の置き換え**では、旧内容をまず丸ごと `artifacts/recovery/<タイムスタンプ>-<ジョブ ID>/` へリネームし（直近 5 件を保持）、検証済みのステージング結果を移します。リネームがロックで妨げられた場合は約 14 秒バックオフで再試行し、それでも失敗すれば元の名前へ戻します。新旧どちらも再帰削除しません。
+- **サーバーパッケージ**は Server、Guardian.Agent、PrivilegedHelper、ServerModuleHost を自己完結で順に公開し、payload のキーは `server`、`guardian`、`privilegedHelper`、`moduleHost` です。`RelaxKonOS.ServerModuleHost` が欠けると、パーソナルモードとシステムモードが Helper のインストール段階で失敗するため、他の 3 つと同じく必須です。
+- **モジュールホスト**：`ServerModuleHost` は RelaxKonOS のサーバーモジュール用の独立ホストプロセスで、モジュール単位の認可、制限付きストレージ、stderr ログの境界はこの中にあります。サーバー ZIP はその配布物にすぎません。モジュール対応は 2026-10-28 にソースへ入り、公開済み 0.2.0-v1a より後です。一覧、駐留ポリシー、`.rkmodule` の契約は製品リポジトリの `docs/architecture/RelaxKonOS.ServerModule*.md`、利用者向けはサイトの `concepts/server-modules` を参照してください。
+
 ## キャッシュとセキュリティ
 
 - `IMemoryCache` が言語、バージョン、ナビゲーション索引、ドキュメント、リリースノート、FAQ、ダウンロードをキャッシュします。開発は短い TTL、本番は長い TTL を使います。キャッシュ無効化は後から重ねて実装できます。
@@ -137,7 +150,7 @@ ZIP の展開先がアプリケーションの作業ディレクトリです。�
 
 ## スモークテスト
 
-リポジトリ直下の `smoke-test.ps1` は `http` プロファイル（`http://localhost:5062`）で API を起動し、ヘルスチェック、ドキュメントのナビゲーション、3 言語の本文、リリースノート、ダウンロード、FAQ を順に要求して結果を `api-smoke.log` に書き出します。エンドポイントやコンテンツ構成を変更した後は実行してください。
+ワークスペース直下の `smoke-test.ps1`（`../smoke-test.ps1`、このリポジトリの外）は `http` プロファイル（`http://localhost:5062`）で API を起動し、ヘルスチェック、ドキュメントのナビゲーション、3 言語の本文、リリースノート、ダウンロード、FAQ を順に要求して結果を `api-smoke.log` に書き出します。冒頭の `$dir` と `$log` は特定のマシン向けの固定パスなので、別の環境では先に書き換えてください。エンドポイントやコンテンツ構成を変更した後は実行してください。
 
 ## プロジェクト境界
 
@@ -152,4 +165,5 @@ node tools/verify-doc-order.mjs
 node tools/verify-doc-links.mjs
 node tools/verify-release-inventory.mjs
 dotnet build RelaxKonServer/RelaxKonServer.csproj --no-restore
+dotnet run --project Tests/PublisherPackaging.Tests   # パッケージングの不変条件：ZIP・マニフェスト・LF スクリプト・検証器
 ```

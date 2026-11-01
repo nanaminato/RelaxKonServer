@@ -6,10 +6,12 @@
 
 `RelaxKonServer/RelaxKonServer` 使用 **ASP.NET Core 10** 提供官网 REST API，是文档与站点内容的唯一来源。前端页面和静态资源由独立官网项目提供；服务端不托管 Razor、MVC 或 Angular 页面。RelaxKonOS 发布包通过受控下载 API 流式返回。
 
+同一解决方案里还有 `RelaxKonPublisherServer`：绑定回环地址的本机发布 API，把 RelaxKonOS 与内容产物生成到独立输出目录，不参与官网线上服务，详见[本机发布 API](#本机发布-apirelaxkonpublisherserver)。
+
 ## 本地运行
 
 - 安装 **.NET 10 SDK**。
-- 在本目录执行 `dotnet restore`，然后 `dotnet watch run`。
+- 在本目录执行 `dotnet restore`。解决方案里有两个项目，启动时要指明：`dotnet watch run --project RelaxKonServer`（官网 API）或 `dotnet watch run --project RelaxKonPublisherServer`（本机发布 API，只监听回环 5112）。在仓库根直接 `dotnet run` 会报「找不到要运行的项目」。
 - 启动配置见 `RelaxKonServer/Properties/launchSettings.json`：`https` 配置文件同时监听 `https://localhost:7252` 与 `http://localhost:5062`，`http` 配置文件只监听 `5062`。
 - 首次使用执行 `dotnet dev-certs https --trust`（Windows/macOS）。Linux 上请改为把证书导入浏览器信任库。
 
@@ -51,14 +53,14 @@ order: 14
 - **新增语言**：创建 `Content/Docs/<code>/latest`。语言目录按 `en-US`、`zh-CN`、`ja-JP` 的固定顺序返回，`zh-CN` 与 `ja-JP` 的显示名称为内置（简体中文 / 日本語），其他代码回退为代码本身。
 - **新增版本**：在 `latest` 同级再建一个目录；`latest` 排在最前。
 - **翻译回退**：目标语言缺少某个 slug 时改用 `en-US` 的版本，并在响应中把 `isFallback` 置为 `true`；回退项的分类名仍按目标语言本地化，以保证导航分组标题统一。
-- **当前状态**：`en-US`、`zh-CN`、`ja-JP` 各 46 篇（入门 9 + 概念 9 + 应用 28）且完全对齐。**增删内容文件时必须让三种语言的篇数保持一致**，否则导航会出现回退项。改完跑 `node tools/verify-doc-order.mjs`（篇数 / `order` 唯一性 / 三语对齐）与 `node tools/verify-doc-links.mjs`（内链与 front matter）复核。
+- **当前状态**：`en-US`、`zh-CN`、`ja-JP` 各 52 篇（入门 12 + 概念 10 + 应用 30）且完全对齐。**增删内容文件时必须让三种语言的篇数保持一致**，否则导航会出现回退项。改完跑 `node tools/verify-doc-order.mjs`（篇数 / `order` 唯一性 / 三语对齐）与 `node tools/verify-doc-links.mjs`（内链与 front matter）复核。
 - slug 与语言/版本段只允许 `[A-Za-z0-9-]`，slug 额外允许 `/` 与 `_`，最长 256 字符；不符合规则的请求返回 404。
 
 ### 发布说明、FAQ 与下载
 
 - 发行说明分为 `Releases/{version}.md`（共享 `version`、`date`、`prerelease` 与包清单）和 `Releases/{language}/{version}.md`（翻译后的 `title`、`summary` 与正文）。共享正文可使用 `{artifactsTitle}`、`{packageLabel}`、`{downloadsLabel}`，对应文字由语言文件 front matter 提供。版本、日期、下载地址、大小与 SHA-256 只维护在共享文件中。两条发行 API 均接受 `?language=zh-CN|en-US|ja-JP`，默认英文；缺少翻译回退英文并返回实际 `language` 与 `isFallback`，每个版本必须有英文文件。列表按日期倒序，`highlights` 取语言正文的前 6 个列表项，不包含共享下载清单。构建后运行 `node tools/verify-release-localization.mjs` 验证三语、共享数据与回退行为。
 - `Faq/<language>.json` 是 `{ question, answer, category, order }` 数组；该语言文件缺失或语言代码非法时回退 `en-US`，`category` 为空时补 `General`。
-- `Downloads/downloads.json` 是 `{ platform, architecture, version, url, size, checksum, releaseDate, isAvailable, fileName }` 数组。
+- `Downloads/downloads.json` 是 `{ platform, architecture, version, url, size, checksum, releaseDate, isAvailable, fileName, packageKind, runtime }` 数组。`packageKind` 为 `client` 或 `server`：客户端包解压即可运行，服务端包用于在目标主机安装；同一版本、同一架构会有两条记录，靠它区分。该字段会出现在 API 响应里。`runtime` 是发布目录里的运行时目录名（`win-x64`、`linux-arm64`、`android-universal` 等），由 `deployment/Publish-RelaxKonOSRelease.ps1` 与本机发布 API 写入清单时使用，**不随 API 返回**。
 
 ### 配置项
 
@@ -126,6 +128,17 @@ order: 14
 
 生成的 ZIP 解压后即为应用工作目录；以该目录作为工作目录启动 `./RelaxKonServer`（Windows 为 `RelaxKonServer.exe`）。自包含包不要求目标机预装 .NET。生产环境请通过 systemd、Windows Service 或反向代理配置 HTTPS；不要把开发证书或 `appsettings.Development.json` 当作生产机密配置。
 
+## 本机发布 API（RelaxKonPublisherServer）
+
+`RelaxKonPublisherServer/` 是同一解决方案里的第二个项目，只在本机运行：`Program.cs` 直接绑定 `http://127.0.0.1:5112` 与 `http://[::1]:5112`，没有网页界面，也不接收命令行参数。它把 RelaxKonOS 的客户端/服务端包与内容清单生成到**独立输出目录**（`Downloads/`、`ReleaseDelivery/`、`publisher-manifest.json`），从不写入正在对外服务的 `RelaxKonServer/Content/`。
+
+- **配置**：把 `appsettings.Local.example.json` 复制为已被 git 忽略的 `appsettings.Local.json`，填本机绝对路径。`PublisherPaths`（`RelaxKonOSPath`、`RelaxKonServerPath`、`ContentOutputPath`）与 `AndroidImport`（导入目录、期望包名、证书指纹、验签工具路径）都在这里。keystore、alias 与口令只属于签名发布机，**不得**写进本机配置。
+- **端点**（前缀 `api/publisher`）：`GET settings` 读取默认路径；`POST preview` 返回预检结果、既有包与变更清单；`POST generate` 启动任务并返回 202；`GET jobs/{id}` 查询状态；`POST jobs/{id}/cancel` 请求取消。
+- **实时进度**：SignalR Hub 在 `/hubs/publisher`，`Subscribe(jobId)` 后接收 `jobUpdated`；也可用 `StartPreview` 直接在连接上取预检结果。CORS 只放行 `localhost:4200` 与 `:4201`（官网与本机工作台）。
+- **替换输出目录**时，旧内容先整目录改名到 `artifacts/recovery/<时间戳>-<任务号>/`（成功后保留最近 5 份），再移入已校验的暂存结果；整目录改名遇到占用会退避重试约 14 秒，仍失败就按原路回滚，不递归删除新旧任一侧。
+- **服务端包**依次自包含发布 Server、Guardian.Agent、PrivilegedHelper 与 ServerModuleHost，payload 键分别是 `server`、`guardian`、`privilegedHelper`、`moduleHost`。漏掉 `RelaxKonOS.ServerModuleHost` 会让个人模式与系统模式在安装 Helper 阶段失败，所以它和另外三个组件一样是必选。
+- **模块宿主**：`ServerModuleHost` 是 RelaxKonOS 服务端模块的独立宿主进程，按模块授权、受限存储与 stderr 日志边界都在其中，服务端 ZIP 只是它的分发载体。模块化能力自 2026-10-28 进入源码，晚于已发布的 0.2.0-v1a。模块清单、驻留策略与 `.rkmodule` 包的契约以产品仓库 `docs/architecture/RelaxKonOS.ServerModule*.md` 为准，用户向说明见官网文档 `concepts/server-modules`。
+
 ## 缓存与安全
 
 - `IMemoryCache` 缓存语言、版本、导航索引、文档、发布说明、FAQ 与下载。开发用短 TTL，生产用长 TTL。后续可以再叠加缓存失效机制。
@@ -137,7 +150,7 @@ order: 14
 
 ## 冒烟测试
 
-仓库根目录的 `smoke-test.ps1` 会用 `http` 配置（`http://localhost:5062`）把 API 拉起来，逐个请求健康检查、文档导航、三语正文、发布说明、下载与 FAQ，结果写入 `api-smoke.log`。改动端点或内容结构后建议跑一遍。
+工作区根目录的 `smoke-test.ps1`（`../smoke-test.ps1`，不在本仓库内）会用 `http` 配置（`http://localhost:5062`）把 API 拉起来，逐个请求健康检查、文档导航、三语正文、发布说明、下载与 FAQ，结果写入 `api-smoke.log`。脚本开头的 `$dir` 与 `$log` 是写死的本机路径，换机器要先改。改动端点或内容结构后建议跑一遍。
 
 ## 项目边界
 
@@ -152,4 +165,5 @@ node tools/verify-doc-order.mjs
 node tools/verify-doc-links.mjs
 node tools/verify-release-inventory.mjs
 dotnet build RelaxKonServer/RelaxKonServer.csproj --no-restore
+dotnet run --project Tests/PublisherPackaging.Tests   # 发布打包不变量：ZIP、清单、LF 脚本、校验器
 ```

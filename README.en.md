@@ -6,10 +6,12 @@ Website <https://relaxkon.com> · Product source repository <https://github.com/
 
 `RelaxKonServer/RelaxKonServer` provides the website REST API using **ASP.NET Core 10** and is the sole source of documentation and site content. The separate website project serves frontend pages and static assets; this server does not host Razor, MVC or Angular pages. Controlled download endpoints stream RelaxKonOS release packages.
 
+The same solution also contains `RelaxKonPublisherServer`, a loopback-only local publishing API that writes RelaxKonOS and content artifacts into a separate output directory and takes no part in serving the public site. See [the local publishing API](#local-publishing-api-relaxkonpublisherserver).
+
 ## Run locally
 
 - Install the **.NET 10 SDK**.
-- From this directory run `dotnet restore` and then `dotnet watch run`.
+- Run `dotnet restore` here. The solution holds two projects, so name the one you want: `dotnet watch run --project RelaxKonServer` for the website API, or `dotnet watch run --project RelaxKonPublisherServer` for the loopback-only publishing API on port 5112. A bare `dotnet run` at the repository root reports that it cannot find a project.
 - Launch profiles live in `RelaxKonServer/Properties/launchSettings.json`: the `https` profile listens on both `https://localhost:7252` and `http://localhost:5062`, the `http` profile only on `5062`.
 - Trust the development certificate once with `dotnet dev-certs https --trust` (Windows/macOS). On Linux, import the certificate into the browser trust store instead.
 
@@ -51,14 +53,14 @@ order: 14
 - **Add a language**: create `Content/Docs/<code>/latest`. Languages are returned in the fixed order `en-US`, `zh-CN`, `ja-JP`; display names for `zh-CN` and `ja-JP` are built in (简体中文 / 日本語) and any other code falls back to the code itself.
 - **Add a version**: create another directory next to `latest`. `latest` sorts first.
 - **Translation fallback**: if a slug is missing in the requested language it is served from `en-US`, and the response sets `isFallback` so the UI can say so. Fallback entries keep the requested language's category labels so the navigation tree stays uniformly grouped.
-- **Current state**: `en-US`, `zh-CN` and `ja-JP` each hold 46 documents (9 getting-started + 9 concepts + 28 applications) and are fully aligned. **Keep the three languages at the same document count when you add or remove files**, otherwise fallback entries appear in the navigation. Afterwards run `node tools/verify-doc-order.mjs` (counts, `order` uniqueness, language parity) and `node tools/verify-doc-links.mjs` (internal links and front matter).
+- **Current state**: `en-US`, `zh-CN` and `ja-JP` each hold 52 documents (12 getting-started + 10 concepts + 30 applications) and are fully aligned. **Keep the three languages at the same document count when you add or remove files**, otherwise fallback entries appear in the navigation. Afterwards run `node tools/verify-doc-order.mjs` (counts, `order` uniqueness, language parity) and `node tools/verify-doc-links.mjs` (internal links and front matter).
 - Language and version segments accept only `[A-Za-z0-9-]`; slugs additionally accept `/` and `_` up to 256 characters. Anything else returns 404.
 
 ### Releases, FAQ and downloads
 
 - Release notes use `Releases/{version}.md` for shared `version`, `date`, `prerelease` and artifact inventory, plus `Releases/{language}/{version}.md` for translated `title`, `summary` and body. Shared Markdown can use `{artifactsTitle}`, `{packageLabel}` and `{downloadsLabel}`, supplied by translation front matter. Version, date, download URLs, sizes and SHA-256 values are maintained only in the shared file. Both release endpoints accept `?language=zh-CN|en-US|ja-JP`, defaulting to English. Missing translations fall back to English and return the actual `language` and `isFallback`; every release requires an English file. Lists sort by date descending; `highlights` uses the first six list items of the translated body, excluding shared artifacts. After building, run `node tools/verify-release-localization.mjs` to verify localization, shared data and fallback.
 - `Faq/<language>.json` is an array of `{ question, answer, category, order }`. A missing or malformed language falls back to `en-US`, and an empty `category` becomes `General`.
-- `Downloads/downloads.json` is an array of `{ platform, architecture, version, url, size, checksum, releaseDate, isAvailable, fileName }`.
+- `Downloads/downloads.json` is an array of `{ platform, architecture, version, url, size, checksum, releaseDate, isAvailable, fileName, packageKind, runtime }`. `packageKind` is `client` or `server`: a client package runs straight from the extracted folder, a server package installs onto a target host, and one version/architecture has two records distinguished by this field. It is part of the API response. `runtime` is the runtime directory name in the delivery tree (`win-x64`, `linux-arm64`, `android-universal`, …); `deployment/Publish-RelaxKonOSRelease.ps1` and the local publisher API use it when writing the list, and it is **not returned by the API**.
 
 ### Options
 
@@ -126,6 +128,17 @@ The repository previously contained `Publish-RelaxKonOSRelease.ps1`, which impor
 
 The ZIP extracts to the application working directory; start `./RelaxKonServer` there (`RelaxKonServer.exe` on Windows). A self-contained package does not require .NET on the target host. Configure HTTPS through systemd, a Windows Service, or a reverse proxy in production, and do not treat development certificates or `appsettings.Development.json` as production secrets.
 
+## Local publishing API (RelaxKonPublisherServer)
+
+`RelaxKonPublisherServer/` is the second project in the same solution and only runs locally: `Program.cs` binds `http://127.0.0.1:5112` and `http://[::1]:5112` directly, with no web UI and no command-line arguments. It builds RelaxKonOS client/server packages and content lists into a **separate output directory** (`Downloads/`, `ReleaseDelivery/`, `publisher-manifest.json`) and never writes into the `RelaxKonServer/Content/` that is serving traffic.
+
+- **Configuration**: copy `appsettings.Local.example.json` to the git-ignored `appsettings.Local.json` and fill in local absolute paths. `PublisherPaths` (`RelaxKonOSPath`, `RelaxKonServerPath`, `ContentOutputPath`) and `AndroidImport` (import directory, expected package name, certificate fingerprint, verification tool paths) live there. A keystore, alias or password belongs only on the signing machine and **must not** appear in this configuration.
+- **Endpoints** (prefix `api/publisher`): `GET settings` returns the default paths; `POST preview` returns preflight results, existing packages and the planned changes; `POST generate` starts a job and returns 202; `GET jobs/{id}` reports status; `POST jobs/{id}/cancel` requests cancellation.
+- **Live progress**: the SignalR hub is at `/hubs/publisher`; `Subscribe(jobId)` starts `jobUpdated` messages, and `StartPreview` returns preflight results on the connection. CORS allows only `localhost:4200` and `:4201` (website and local workbench).
+- **Replacing the output** renames the old tree to `artifacts/recovery/<timestamp>-<job id>/` first (the last five are kept), then moves the verified staging result in. A rename blocked by a lock retries with backoff for about 14 seconds and then rolls back to the original name; neither side is ever deleted recursively.
+- **Server packages** publish Server, Guardian.Agent, PrivilegedHelper and ServerModuleHost as self-contained components with payload keys `server`, `guardian`, `privilegedHelper` and `moduleHost`. Omitting `RelaxKonOS.ServerModuleHost` makes personal and system mode fail while installing the Helper, so it is as mandatory as the other three.
+- **Module host**: `ServerModuleHost` is the separate host process for RelaxKonOS server modules; per-module authorization, restricted storage and the stderr log boundary live inside it, and the server ZIP only distributes it. Module support entered the source tree on 2026-10-28, later than the published 0.2.0-v1a packages. The inventory, residency policy and `.rkmodule` contracts belong to the product repository's `docs/architecture/RelaxKonOS.ServerModule*.md`; the user-facing version is the website's `concepts/server-modules` page.
+
 ## Caching and security
 
 - `IMemoryCache` caches languages, versions, navigation indexes, documents, releases, FAQ and downloads. Development uses a short TTL, production a longer one. Cache invalidation can be layered on later.
@@ -137,7 +150,7 @@ The ZIP extracts to the application working directory; start `./RelaxKonServer` 
 
 ## Smoke test
 
-`smoke-test.ps1` in the repository root starts the API on the `http` profile (`http://localhost:5062`), requests the health probe, documentation navigation, documents in all three languages, releases, downloads and FAQ, and writes the results to `api-smoke.log`. Run it after changing endpoints or the content layout.
+`smoke-test.ps1` in the workspace root (`../smoke-test.ps1`, outside this repository) starts the API on the `http` profile (`http://localhost:5062`), requests the health probe, documentation navigation, documents in all three languages, releases, downloads and FAQ, and writes the results to `api-smoke.log`. Its `$dir` and `$log` paths are hard-coded for one machine, so adjust them before running it elsewhere. Run it after changing endpoints or the content layout.
 
 ## Project boundary
 
@@ -152,4 +165,5 @@ node tools/verify-doc-order.mjs
 node tools/verify-doc-links.mjs
 node tools/verify-release-inventory.mjs
 dotnet build RelaxKonServer/RelaxKonServer.csproj --no-restore
+dotnet run --project Tests/PublisherPackaging.Tests   # packaging invariants: ZIP, manifest, LF scripts, verifier
 ```

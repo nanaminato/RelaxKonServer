@@ -51,3 +51,4 @@ RelaxKonOS 同步状态、数据和操作，界面由客户端本地渲染，不
 
 - [协议与通信](/docs/zh-CN/latest/concepts/protocol)
 - [窗口管理器](/docs/zh-CN/latest/concepts/window-manager)
+- [服务端模块](/docs/zh-CN/latest/concepts/server-modules)
