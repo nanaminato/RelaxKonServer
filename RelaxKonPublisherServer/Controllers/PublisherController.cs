@@ -11,6 +11,10 @@ public sealed class PublisherController(PublisherService publisher) : Controller
     [HttpGet("settings")]
     public ActionResult<PublisherPaths> GetSettings() => publisher.GetDefaultPaths();
 
+    [HttpPost("modules")]
+    public ActionResult<IReadOnlyList<PublisherModule>> DiscoverModules(PublisherModuleDiscovery request) =>
+        Ok(publisher.DiscoverModules(request.RelaxKonOSPath));
+
     [HttpPost("preview")]
     public async Task<ActionResult<PublisherPreview>> Preview(PublisherPlanRequest request, CancellationToken cancellationToken)
     {

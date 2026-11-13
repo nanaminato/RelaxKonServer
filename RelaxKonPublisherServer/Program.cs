@@ -10,6 +10,7 @@ builder.WebHost.UseUrls("http://127.0.0.1:5112", "http://[::1]:5112");
 builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
 builder.Services.Configure<PublisherPathsOptions>(builder.Configuration.GetSection("PublisherPaths"));
 builder.Services.Configure<AndroidImportOptions>(builder.Configuration.GetSection("AndroidImport"));
+builder.Services.Configure<ModulePublishingOptions>(builder.Configuration.GetSection("ModulePublishing"));
 builder.Services.AddSingleton<PublisherService>();
 builder.Services.AddControllers();
 builder.Services.AddSignalR();

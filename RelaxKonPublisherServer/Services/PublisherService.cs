@@ -38,14 +38,16 @@ public sealed class PublisherService
     private readonly ConcurrentDictionary<Guid, CancellationTokenSource> jobCancellation = new();
     private readonly PublisherPathsOptions configuredPaths;
     private readonly AndroidImportOptions androidImport;
+    private readonly ModulePublishing modulePublishing;
     private readonly string toolRoot;
     private readonly IHubContext<PublisherHub> publisherHub;
     private readonly ILogger<PublisherService> logger;
 
-    public PublisherService(IOptions<PublisherPathsOptions> configuredPaths, IOptions<AndroidImportOptions> androidImport, IWebHostEnvironment environment, IHubContext<PublisherHub> publisherHub, ILogger<PublisherService> logger)
+    public PublisherService(IOptions<PublisherPathsOptions> configuredPaths, IOptions<AndroidImportOptions> androidImport, IOptions<ModulePublishingOptions> moduleOptions, IWebHostEnvironment environment, IHubContext<PublisherHub> publisherHub, ILogger<PublisherService> logger)
     {
         this.configuredPaths = configuredPaths.Value;
         this.androidImport = androidImport.Value;
+        modulePublishing = new ModulePublishing(moduleOptions.Value);
         toolRoot = environment.ContentRootPath;
         this.publisherHub = publisherHub;
         this.logger = logger;
@@ -60,17 +62,24 @@ public sealed class PublisherService
 
     public PublisherJob? GetJob(Guid id) => jobs.GetValueOrDefault(id);
 
+    public IReadOnlyList<PublisherModule> DiscoverModules(string path) =>
+        ModulePublishing.Discover(NormalizeExistingDirectory(path, "RelaxKonOS"))
+            .Select(module => new PublisherModule(module.ModuleId, module.Name, module.Rids)).ToArray();
+
+    private static bool HasWebsiteOutputs(PublisherPlanRequest request) =>
+        request.BuildClient || request.BuildServer || request.ImportAndroidApk || request.ImportAndroidAab;
+
     /// <summary>Validates request fields synchronously so invalid plans never become background jobs.</summary>
     public void ValidateRequest(PublisherPlanRequest request)
     {
         if (request.Paths is null) throw new InvalidOperationException("必须提供三个本机绝对路径。");
         if (string.IsNullOrWhiteSpace(request.Version) || !System.Text.RegularExpressions.Regex.IsMatch(request.Version, "^[0-9A-Za-z][0-9A-Za-z._-]{0,63}$"))
             throw new InvalidOperationException("版本号不能为空，且只能包含字母、数字、点、下划线和连字符。");
-        if (SelectedRuntimes(request).Any(runtime => !Runtimes.Contains(runtime))) throw new InvalidOperationException("运行时必须是预定义的发布预设。");
+        if (HasWebsiteOutputs(request) && SelectedRuntimes(request).Any(runtime => !Runtimes.Contains(runtime))) throw new InvalidOperationException("运行时必须是预定义的发布预设。");
         if (request.BuildClient && SelectedClientRuntimes(request).Count == 0) throw new InvalidOperationException("至少选择一个客户端运行时。");
         if (request.BuildServer && SelectedServerRuntimes(request).Count == 0) throw new InvalidOperationException("至少选择一个服务端运行时。");
         if (request.BuildServer && SelectedServerRuntimes(request).Any(runtime => runtime.StartsWith("osx-", StringComparison.OrdinalIgnoreCase))) throw new InvalidOperationException("macOS 目前仅支持客户端包，不能选择服务端目标运行时。");
-        if (!request.BuildClient && !request.BuildServer && !request.ImportAndroidApk && !request.ImportAndroidAab)
+        if (request.Modules is null || (!HasWebsiteOutputs(request) && request.Modules.Count == 0))
             throw new InvalidOperationException("至少选择一项要生成的发布内容。");
     }
 
@@ -99,15 +108,26 @@ public sealed class PublisherService
         await ReportAsync("success", "本机路径与发布计划格式校验通过。");
         var sourceContent = Path.Combine(paths.RelaxKonServerPath, "Content");
         await ReportAsync("info", "正在扫描旧发布包和 downloads.json。");
-        var existing = ReadExistingPackages(sourceContent);
-        var changes = PlannedChanges(request, paths, existing);
+        var existing = HasWebsiteOutputs(request) ? ReadExistingPackages(sourceContent) : [];
+        var targets = modulePublishing.Resolve(request, paths.RelaxKonOSPath);
+        var changes = HasWebsiteOutputs(request) ? PlannedChanges(request, paths, existing).ToList() : [];
         var checks = CreatePreflightChecks(request, paths);
+        if (targets.Count > 0)
+        {
+            await PreflightModulesAsync(request, paths, targets, cancellationToken);
+            checks.Add(new("模块发布", true, $"已找到 {targets.Count} 个模块构建目标及签名密钥"));
+            foreach (var target in targets)
+                changes.Add(new($"{ModulePublishing.OutputDirectory}/{target.ArchiveName(request.Version)}", "新增", "构建独立模块包"));
+            var catalog = $"{ModulePublishing.OutputDirectory}/{ModulePublishing.CatalogName}";
+            changes.Add(new(catalog, File.Exists(Path.Combine(paths.ContentOutputPath, catalog)) ? "替换" : "新增", "生成该来源的统一签名目录"));
+            var publicKey = $"{ModulePublishing.OutputDirectory}/public-key.spki";
+            changes.Add(new(publicKey, File.Exists(Path.Combine(paths.ContentOutputPath, publicKey)) ? "替换" : "新增", "导出来源验签公钥"));
+        }
         if (checks.Any(check => !check.Passed)) throw new InvalidOperationException(string.Join("；", checks.Where(check => !check.Passed).Select(check => check.Detail)));
         await ReportAsync("success", $"发现 {existing.Count} 个现有发布包，计划产生 {changes.Count} 项输出变化。");
         await ReportAsync("info", "正在读取来源仓库 Git 状态。");
-        var git = await ReadGitAsync(paths.RelaxKonServerPath, cancellationToken);
+        var git = await ReadGitAsync(HasWebsiteOutputs(request) ? paths.RelaxKonServerPath : paths.RelaxKonOSPath, cancellationToken);
         var warnings = new List<string>();
-        if (!request.BuildClient && !request.BuildServer) warnings.Add("尚未选择要构建的客户端或服务端包；只会生成选中的辅助文件。" );
         if (changes.Any(change => change.Action == "替换")) warnings.Add("存在同名输出，显式生成时将先备份后替换。" );
         var preview = new PublisherPreview(paths, git.Root, git.Head, git.Status,
             ["客户端：win-x64、win-arm64、linux-x64、linux-arm64、osx-arm64 / Release", "服务端：win-x64、win-arm64、linux-x64、linux-arm64 / Release"], existing, changes, warnings, checks);
@@ -156,28 +176,32 @@ public sealed class PublisherService
             job.State = "running";
             SetStep(job, "验证本机路径和发布计划");
             var paths = await ValidateAsync(request, cancellationToken);
+            var targets = modulePublishing.Resolve(request, paths.RelaxKonOSPath);
+            var sourceCommit = targets.Count > 0 ? await PreflightModulesAsync(request, paths, targets, cancellationToken) : null;
             var checks = CreatePreflightChecks(request, paths);
             if (checks.Any(check => !check.Passed)) throw new InvalidOperationException(string.Join("；", checks.Where(check => !check.Passed).Select(check => check.Detail)));
             var clientRuntimes = request.BuildClient ? SelectedClientRuntimes(request) : [];
             var serverRuntimes = request.BuildServer ? SelectedServerRuntimes(request) : [];
             var runtimes = clientRuntimes.Concat(serverRuntimes).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             Log(job, "info", $"构建前检查通过；客户端：{string.Join("、", clientRuntimes.DefaultIfEmpty("未选择"))}；服务端：{string.Join("、", serverRuntimes.DefaultIfEmpty("未选择"))}。");
-            job.ProgressTotal = 3 + clientRuntimes.Count + serverRuntimes.Count + (request.ImportAndroidApk ? 1 : 0) + (request.ImportAndroidAab ? 1 : 0);
+            job.ProgressTotal = 3 + targets.Count + clientRuntimes.Count + serverRuntimes.Count + (request.ImportAndroidApk ? 1 : 0) + (request.ImportAndroidAab ? 1 : 0);
             job.ProgressCurrent = 1;
             var sourceContent = Path.Combine(paths.RelaxKonServerPath, "Content");
             var stagingBase = Path.Combine(toolRoot, "artifacts", "staging", job.Id.ToString("N"));
             stagingRoot = Path.Combine(stagingBase, "Content");
             var stageDownloads = Path.Combine(stagingRoot, "Downloads");
             var stageDelivery = Path.Combine(stagingRoot, "ReleaseDelivery");
-            Directory.CreateDirectory(stageDownloads);
-            Directory.CreateDirectory(stageDelivery);
-
-            SetStep(job, "复制当前独立输出到暂存区");
-            CopyManagedOutput(paths.ContentOutputPath, stagingRoot);
-            CopySelectedHistory(request, sourceContent, stageDelivery);
-
-            var entries = ReadDownloadEntries(paths.ContentOutputPath);
-            if (entries.Count == 0) entries = ReadDownloadEntries(sourceContent);
+            var entries = new List<DownloadEntry>();
+            if (HasWebsiteOutputs(request))
+            {
+                Directory.CreateDirectory(stageDownloads);
+                Directory.CreateDirectory(stageDelivery);
+                SetStep(job, "复制当前独立输出到暂存区");
+                CopyManagedOutput(paths.ContentOutputPath, stagingRoot);
+                CopySelectedHistory(request, sourceContent, stageDelivery);
+                entries = ReadDownloadEntries(paths.ContentOutputPath);
+                if (entries.Count == 0) entries = ReadDownloadEntries(sourceContent);
+            }
             var entriesBefore = entries.ToList();
             entries.RemoveAll(entry => !File.Exists(DeliveryPathForUrl(stageDelivery, entry.Url)));
             foreach (var decision in request.HistoricalPackages)
@@ -246,13 +270,31 @@ public sealed class PublisherService
                 }
             }
 
-            SetStep(job, "生成下载清单并校验");
-            var downloadsPath = Path.Combine(stageDownloads, "downloads.json");
-            await File.WriteAllTextAsync(downloadsPath, JsonSerializer.Serialize(entries.OrderBy(entry => entry.Version).ThenBy(entry => entry.Runtime).ThenBy(entry => entry.PackageKind), Json));
-            affected.Add("Downloads/downloads.json");
-            await VerifyAsync(stagingRoot, entries, cancellationToken);
+            var managedEntries = new List<string>();
+            if (HasWebsiteOutputs(request))
+            {
+                SetStep(job, "生成下载清单并校验");
+                var downloadsPath = Path.Combine(stageDownloads, "downloads.json");
+                await File.WriteAllTextAsync(downloadsPath, JsonSerializer.Serialize(entries.OrderBy(entry => entry.Version).ThenBy(entry => entry.Runtime).ThenBy(entry => entry.PackageKind), Json));
+                affected.Add("Downloads/downloads.json");
+                await VerifyAsync(stagingRoot, entries, cancellationToken);
+                job.DownloadChanges = CompareDownloadEntries(entriesBefore, entries);
+                managedEntries.AddRange(ManagedOutputEntries);
+            }
+            if (targets.Count > 0)
+            {
+                affected.AddRange(await modulePublishing.BuildAsync(targets, request.Version, sourceCommit!,
+                    Path.Combine(stagingRoot, ModulePublishing.OutputDirectory),
+                    Path.Combine(paths.ContentOutputPath, ModulePublishing.OutputDirectory), Path.Combine(stagingBase, "module-builds"),
+                    (target, output) =>
+                    {
+                        SetStep(job, $"构建模块 {target.Module.ModuleId}（{target.Rid}）");
+                        return DotnetPublishAsync(job, target.Module.Project, output, target.Rid, cancellationToken, selfContained: false);
+                    },
+                    _ => { job.ProgressCurrent++; PushUpdate(job); }, cancellationToken));
+                managedEntries.Add(ModulePublishing.OutputDirectory);
+            }
             job.ProgressCurrent++;
-            job.DownloadChanges = CompareDownloadEntries(entriesBefore, entries);
             var manifest = new
             {
                 generatedAt = DateTimeOffset.UtcNow,
@@ -264,18 +306,22 @@ public sealed class PublisherService
                 serverRuntimes,
                 request.BuildClient,
                 request.BuildServer,
+                request.Modules,
                 affectedFiles = affected,
-                validation = "ZIP, SHA-256, relative paths and downloads.json verified"
+                validation = HasWebsiteOutputs(request)
+                    ? "ZIP, SHA-256, relative paths and downloads.json verified"
+                    : "Signed module catalog and archives verified",
+                signedModuleCatalogVerified = targets.Count > 0
             };
             await File.WriteAllTextAsync(Path.Combine(stagingRoot, "publisher-manifest.json"), JsonSerializer.Serialize(manifest, Json));
             affected.Add("publisher-manifest.json");
 
             SetStep(job, "以可恢复方式替换独立输出");
-            await CommitManagedOutputAsync(job, stagingRoot, paths.ContentOutputPath, cancellationToken);
+            await CommitManagedOutputAsync(job, stagingRoot, paths.ContentOutputPath, cancellationToken, managedEntries);
             job.ProgressCurrent = job.ProgressTotal;
             job.AffectedFiles = affected;
             job.State = "succeeded";
-            job.Step = "已生成；请检查独立输出后手动复制到官网 Content";
+            job.Step = targets.Count > 0 ? "已生成；请检查独立输出中的模块包和签名目录" : "已生成；请检查独立输出后手动复制到官网 Content";
             Log(job, "success", "发布成功，已将经校验的暂存输出提交到独立输出目录。");
         }
         catch (OperationCanceledException)
@@ -305,6 +351,17 @@ public sealed class PublisherService
         }
     }
 
+    private async Task<string> PreflightModulesAsync(PublisherPlanRequest request, PublisherPaths paths,
+        IReadOnlyList<ModuleBuildTarget> targets, CancellationToken cancellationToken)
+    {
+        var commit = await RunGitAsync(paths.RelaxKonOSPath, ["rev-parse", "HEAD"], cancellationToken);
+        if (commit is not { Length: 40 or 64 } || !commit.All(char.IsAsciiHexDigitLower))
+            throw new InvalidOperationException("无法读取模块源码仓库的 Git 提交。");
+        await modulePublishing.PreflightAsync(targets, request.Version,
+            Path.Combine(paths.ContentOutputPath, ModulePublishing.OutputDirectory), cancellationToken);
+        return commit;
+    }
+
     private async Task<PublisherPaths> ValidateAsync(PublisherPlanRequest request, CancellationToken cancellationToken)
     {
         ValidateRequest(request);
@@ -312,10 +369,13 @@ public sealed class PublisherService
         var paths = new PublisherPaths(NormalizeExistingDirectory(request.Paths.RelaxKonOSPath, "RelaxKonOS"), NormalizeExistingDirectory(request.Paths.RelaxKonServerPath, "RelaxKonServer"), NormalizeOutputDirectory(request.Paths.ContentOutputPath));
         if (!File.Exists(Path.Combine(paths.RelaxKonOSPath, "RelaxKonOS.sln"))) throw new InvalidOperationException("RelaxKonOS 路径必须包含 RelaxKonOS.sln。");
         var content = Path.Combine(paths.RelaxKonServerPath, "Content");
-        if (!Directory.Exists(content)) throw new InvalidOperationException("RelaxKonServer 路径必须包含 Content 目录。");
+        if (HasWebsiteOutputs(request) && !Directory.Exists(content)) throw new InvalidOperationException("RelaxKonServer 路径必须包含 Content 目录。");
         if (IsSameOrChild(paths.ContentOutputPath, content)) throw new InvalidOperationException("输出目录必须独立于所选 RelaxKonServer 的 Content，不能写入其内部。");
-        var git = await ReadGitAsync(paths.RelaxKonServerPath, cancellationToken);
-        if (git.Root is null) throw new InvalidOperationException("RelaxKonServer 的父目录必须可识别为 Git 工作树。");
+        if (HasWebsiteOutputs(request))
+        {
+            var git = await ReadGitAsync(paths.RelaxKonServerPath, cancellationToken);
+            if (git.Root is null) throw new InvalidOperationException("RelaxKonServer 的父目录必须可识别为 Git 工作树。");
+        }
         return paths;
     }
 
@@ -349,7 +409,7 @@ public sealed class PublisherService
         return selected;
     }
 
-    private IReadOnlyList<PublisherPreflightCheck> CreatePreflightChecks(PublisherPlanRequest request, PublisherPaths paths)
+    private List<PublisherPreflightCheck> CreatePreflightChecks(PublisherPlanRequest request, PublisherPaths paths)
     {
         var checks = new List<PublisherPreflightCheck>
         {
@@ -440,8 +500,7 @@ public sealed class PublisherService
 
     private static async Task<(string? Root, string? Head, string? Status)> ReadGitAsync(string serverPath, CancellationToken cancellationToken)
     {
-        var directory = Directory.GetParent(serverPath)?.FullName ?? serverPath;
-        var root = await RunGitAsync(directory, ["rev-parse", "--show-toplevel"], cancellationToken);
+        var root = await RunGitAsync(serverPath, ["rev-parse", "--show-toplevel"], cancellationToken);
         if (root is null) return (null, null, null);
         return (root, await RunGitAsync(root, ["rev-parse", "--short", "HEAD"], cancellationToken), await RunGitAsync(root, ["status", "--short"], cancellationToken));
     }
@@ -803,7 +862,7 @@ public sealed class PublisherService
         return Path.GetRelativePath(deliveryRoot, descriptorPath).Replace('\\', '/');
     }
 
-    private async Task DotnetPublishAsync(PublisherJob job, string project, string output, string runtime, CancellationToken cancellationToken)
+    private async Task DotnetPublishAsync(PublisherJob job, string project, string output, string runtime, CancellationToken cancellationToken, bool selfContained = true)
     {
         var info = new ProcessStartInfo("dotnet")
         {
@@ -814,9 +873,10 @@ public sealed class PublisherService
             UseShellExecute = false,
             CreateNoWindow = true
         };
-        foreach (var argument in new[] { "publish", project, "--configuration", "Release", "--runtime", runtime, "--self-contained", "true", "--output", output }) info.ArgumentList.Add(argument);
+        foreach (var argument in new[] { "publish", project, "--configuration", "Release", "--runtime", runtime, "--self-contained", selfContained ? "true" : "false", "--output", output }) info.ArgumentList.Add(argument);
+        if (!selfContained) info.ArgumentList.Add("-maxcpucount:1");
         using var process = new Process { StartInfo = info };
-        Log(job, "info", $"执行：dotnet publish {Path.GetFileName(project)} · Release · {runtime} · self-contained");
+        Log(job, "info", $"执行：dotnet publish {Path.GetFileName(project)} · Release · {runtime} · {(selfContained ? "self-contained" : "framework-dependent")}");
         process.OutputDataReceived += (_, eventArgs) =>
         {
             if (!string.IsNullOrWhiteSpace(eventArgs.Data)) Log(job, "info", eventArgs.Data);
@@ -997,7 +1057,7 @@ public sealed class PublisherService
     /// Replaces the managed output subtrees with the verified staging copy. The previous content is moved into
     /// <c>artifacts/recovery</c> first so a failed replacement can be renamed back instead of deleted.
     /// </summary>
-    private async Task CommitManagedOutputAsync(PublisherJob job, string stagingRoot, string output, CancellationToken cancellationToken)
+    private async Task CommitManagedOutputAsync(PublisherJob job, string stagingRoot, string output, CancellationToken cancellationToken, IReadOnlyList<string> managedEntries)
     {
         var backup = Path.Combine(toolRoot, "artifacts", "recovery", $"{DateTimeOffset.UtcNow:yyyyMMddHHmmss}-{job.Id:N}");
         Directory.CreateDirectory(output);
@@ -1008,7 +1068,7 @@ public sealed class PublisherService
         var committed = new List<string>();
         try
         {
-            foreach (var name in ManagedOutputEntries)
+            foreach (var name in managedEntries)
             {
                 var destination = Path.Combine(output, name);
                 if (Directory.Exists(destination))
@@ -1086,7 +1146,7 @@ public sealed class PublisherService
     private async Task<IReadOnlyList<string>> RollbackManagedOutputAsync(PublisherJob job, string output, string backup, IReadOnlyList<string> committed, IReadOnlyList<string> moved)
     {
         var failures = new List<string>();
-        foreach (var name in ManagedOutputEntries.Append(OutputManifestName).Reverse())
+        foreach (var name in committed.Concat(moved).Distinct(StringComparer.Ordinal).Reverse())
         {
             var destination = Path.Combine(output, name);
             var rejected = Path.Combine(output, $"{name}.__failed-{job.Id:N}");

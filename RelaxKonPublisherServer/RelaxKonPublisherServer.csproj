@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="../../RelaxKonOS/Shared/RelaxKonOS.ServerModules.Packaging/RelaxKonOS.ServerModules.Packaging.csproj" />
       <_ContentIncludedByDefault Remove="wwwroot\css\site.css" />
       <_ContentIncludedByDefault Remove="wwwroot\favicon.ico" />
       <_ContentIncludedByDefault Remove="wwwroot\js\site.js" />

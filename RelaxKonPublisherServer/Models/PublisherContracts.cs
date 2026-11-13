@@ -23,7 +23,12 @@ public sealed class PublisherPlanRequest
     public bool ImportAndroidAab { get; init; }
     public bool OnlyLatestDownloadable { get; init; }
     public List<HistoricalPackageDecision> HistoricalPackages { get; init; } = [];
+    public List<PublisherModuleSelection> Modules { get; init; } = [];
 }
+
+public sealed record PublisherModuleSelection(string ModuleId, IReadOnlyList<string> Rids);
+public sealed record PublisherModule(string ModuleId, string Name, IReadOnlyList<string> Rids);
+public sealed record PublisherModuleDiscovery(string RelaxKonOSPath);
 
 /// <summary>
 /// Local-only Android import settings. This deliberately contains verification paths and public
