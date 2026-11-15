@@ -33,6 +33,12 @@ Applications only show current host component state plus a jump link under their
 
 The catalog only lists components that **declare support for the current host platform**: a Windows host does not show sing-box, Squid, Samba or Docker Engine. Search, installed and updates share the same rule; no component gets a special case by name.
 
+## Desktop server module store
+
+Connect to the target server, open Server Modules in Component Center, and select Module Store. The store shows the sources and catalog revision accepted by that server. Submit a search, select a release, and check its compatibility and declared capabilities. Start the install and review the installation plan in the confirmation window.
+
+If you already have a `.rkmodule` file, upload it from Install & Updates and review the resulting plan. See [Server modules](/docs/en-US/latest/concepts/server-modules) for source authorization, signatures, and lifecycle operations.
+
 ## Catalog
 
 | Component | Category | Platforms | Wired install sources |
