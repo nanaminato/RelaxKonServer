@@ -37,6 +37,14 @@ SignalR Hub 在 `/hubs/publisher`：`Subscribe(jobId)` 后接收 `jobUpdated`，
 
 在工作台勾选多个模块及各自的 RID，填入三段数字版本号后预检并生成。每个模块与 RID 组合生成一个框架依赖的 `.rkmodule`。暂存区通过服务端同一套验包逻辑后，工作台提交 `ModuleDelivery/`，其中包含归档、统一签名的 `catalog.json` 和 `public-key.spki`。已发布的模块、版本和 RID 组合不可覆盖，既有发布条目和撤销记录会保留，序号递增。对外分发时将归档放到签名目录声明的 URL，全部可用后再更新线上目录。
 
+### 官方静态来源
+
+官方来源使用示例配置中的 `official-modules`、`relaxkonos` 和 `https://modules.relaxkon.com/`。将 `modules.relaxkon.com` 的 DNS 指向分发服务器，安装覆盖该域名的 TLS 证书，在 Nginx 中启用 [独立虚拟主机](../deployment/nginx/modules.relaxkon.com.conf)，运行 `nginx -t` 后重载。
+
+1. 将 `ModuleDelivery/` 内的 `.rkmodule` 文件发布到 `/srv/relaxkon/modules/` 根目录。确认签名目录中声明的包 URL 均可下载，既有版本文件须保留原内容。
+2. 将签名目录原子替换到 `/srv/relaxkon/modules/stable/catalog.json`。在当前目录过期前发布有效的新目录，并递增序号。
+3. 通过独立可信渠道交付 `public-key.spki`，由 RelaxKonOS 管理员配置到 `ModulePackages:Sources:official-modules:PublicKeysSpki` 并启用该来源。私钥留在签名发布机。
+
 ## 验证
 
 `Tests/PublisherPackaging.Tests` 是引用本服务的控制台测试工程，覆盖打包不变量：Linux 脚本必须是 LF、`verify-release-inventory.py` 只进 Linux 包、`manifest.json.files` 重复生成时不含自身、macOS 说明文件在清单生成前写入。
